@@ -16,6 +16,7 @@
     "@tailwindcss/vite": "^4.2.4",
     "@vue/apollo-composable": "^4.2.2",
     "leaflet": "^1.9.4",
+    "pusher-js": "^8.5.0",
     "tailwindcss": "^4.2.4",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
