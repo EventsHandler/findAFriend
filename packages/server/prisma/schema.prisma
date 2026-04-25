@@ -24,3 +24,10 @@ model User {
   name String @unique
   password String
 }
+
+model Location {
+  id   String @id @default(cuid(2))
+  name String
+  posx Float
+  posy Float
+}
