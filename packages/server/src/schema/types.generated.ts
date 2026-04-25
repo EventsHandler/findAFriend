@@ -18,6 +18,12 @@ export type Scalars = {
   Float: { input: number; output: number }
 }
 
+export type AuthPayload = {
+  __typename?: 'AuthPayload'
+  token: Scalars['String']['output']
+  user: User
+}
+
 export type Event = {
   __typename?: 'Event'
   derived: Scalars['String']['output']
@@ -36,16 +42,29 @@ export type Location = {
 export type Mutation = {
   __typename?: 'Mutation'
   createEvent: Event
+  login: AuthPayload
+  register: AuthPayload
 }
 
 export type MutationcreateEventArgs = {
   name: Scalars['String']['input']
 }
 
+export type MutationloginArgs = {
+  name: Scalars['String']['input']
+  password: Scalars['String']['input']
+}
+
+export type MutationregisterArgs = {
+  name: Scalars['String']['input']
+  password: Scalars['String']['input']
+}
+
 export type Query = {
   __typename?: 'Query'
   events: Array<Event>
   locations: Array<Location>
+  me?: Maybe<User>
 }
 
 export type QueryeventsArgs = {
@@ -130,8 +149,9 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
-  Event: ResolverTypeWrapper<EventMapper>
+  AuthPayload: ResolverTypeWrapper<AuthPayload>
   String: ResolverTypeWrapper<Scalars['String']['output']>
+  Event: ResolverTypeWrapper<EventMapper>
   ID: ResolverTypeWrapper<Scalars['ID']['output']>
   Location: ResolverTypeWrapper<Location>
   Float: ResolverTypeWrapper<Scalars['Float']['output']>
@@ -143,8 +163,9 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  Event: EventMapper
+  AuthPayload: AuthPayload
   String: Scalars['String']['output']
+  Event: EventMapper
   ID: Scalars['ID']['output']
   Location: Location
   Float: Scalars['Float']['output']
@@ -152,6 +173,15 @@ export type ResolversParentTypes = {
   Query: {}
   User: User
   Boolean: Scalars['Boolean']['output']
+}
+
+export type AuthPayloadResolvers<
+  ContextType = UserContext,
+  ParentType extends ResolversParentTypes['AuthPayload'] = ResolversParentTypes['AuthPayload'],
+> = {
+  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>
+  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
 
 export type EventResolvers<
@@ -185,6 +215,18 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationcreateEventArgs, 'name'>
   >
+  login?: Resolver<
+    ResolversTypes['AuthPayload'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationloginArgs, 'name' | 'password'>
+  >
+  register?: Resolver<
+    ResolversTypes['AuthPayload'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationregisterArgs, 'name' | 'password'>
+  >
 }
 
 export type QueryResolvers<
@@ -193,6 +235,7 @@ export type QueryResolvers<
 > = {
   events?: Resolver<Array<ResolversTypes['Event']>, ParentType, ContextType, Partial<QueryeventsArgs>>
   locations?: Resolver<Array<ResolversTypes['Location']>, ParentType, ContextType>
+  me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>
 }
 
 export type UserResolvers<
@@ -205,6 +248,7 @@ export type UserResolvers<
 }
 
 export type Resolvers<ContextType = UserContext> = {
+  AuthPayload?: AuthPayloadResolvers<ContextType>
   Event?: EventResolvers<ContextType>
   Location?: LocationResolvers<ContextType>
   Mutation?: MutationResolvers<ContextType>

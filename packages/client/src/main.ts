@@ -15,9 +15,20 @@ const router = createRouter({
     ...routes,
     {
       path: '/:pathMatch(.*)*',
-      redirect: '/teacher/list',
+      redirect: '/login',
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+  if (to.path === '/me' && !token) {
+    next('/login')
+  } else if (to.path === '/login' && token) {
+    next('/me')
+  } else {
+    next()
+  }
 })
 
 app.use(router)

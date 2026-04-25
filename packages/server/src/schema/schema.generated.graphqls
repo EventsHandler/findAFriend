@@ -1,3 +1,8 @@
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
 type Event {
   derived: String!
   id: ID!
@@ -13,11 +18,14 @@ type Location {
 
 type Mutation {
   createEvent(name: String!): Event!
+  login(name: String!, password: String!): AuthPayload!
+  register(name: String!, password: String!): AuthPayload!
 }
 
 type Query {
   events(filter: String): [Event!]!
   locations: [Location!]!
+  me: User
 }
 
 type User {

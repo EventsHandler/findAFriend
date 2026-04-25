@@ -14,14 +14,14 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
-  'mutation CreateEvent($name: String!) {\n  createEvent(name: $name) {\n    derived\n    id\n    name\n  }\n}': typeof types.CreateEventDocument
-  'query EventsList($filter: String) {\n  events(filter: $filter) {\n    derived\n    id\n    name\n  }\n}': typeof types.EventsListDocument
+  'mutation CreateEvent($name: String!) {\n  createEvent(name: $name) {\n    id\n    name\n  }\n}\n\nmutation Login($name: String!, $password: String!) {\n  login(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}\n\nmutation Register($name: String!, $password: String!) {\n  register(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}': typeof types.CreateEventDocument
+  'query Events {\n  events {\n    id\n    name\n    derived\n  }\n}\n\nquery Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n  }\n}': typeof types.EventsDocument
 }
 const documents: Documents = {
-  'mutation CreateEvent($name: String!) {\n  createEvent(name: $name) {\n    derived\n    id\n    name\n  }\n}':
+  'mutation CreateEvent($name: String!) {\n  createEvent(name: $name) {\n    id\n    name\n  }\n}\n\nmutation Login($name: String!, $password: String!) {\n  login(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}\n\nmutation Register($name: String!, $password: String!) {\n  register(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}':
     types.CreateEventDocument,
-  'query EventsList($filter: String) {\n  events(filter: $filter) {\n    derived\n    id\n    name\n  }\n}':
-    types.EventsListDocument,
+  'query Events {\n  events {\n    id\n    name\n    derived\n  }\n}\n\nquery Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n  }\n}':
+    types.EventsDocument,
 }
 
 /**
@@ -42,14 +42,14 @@ export function graphql(source: string): unknown
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: 'mutation CreateEvent($name: String!) {\n  createEvent(name: $name) {\n    derived\n    id\n    name\n  }\n}',
-): (typeof documents)['mutation CreateEvent($name: String!) {\n  createEvent(name: $name) {\n    derived\n    id\n    name\n  }\n}']
+  source: 'mutation CreateEvent($name: String!) {\n  createEvent(name: $name) {\n    id\n    name\n  }\n}\n\nmutation Login($name: String!, $password: String!) {\n  login(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}\n\nmutation Register($name: String!, $password: String!) {\n  register(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}',
+): (typeof documents)['mutation CreateEvent($name: String!) {\n  createEvent(name: $name) {\n    id\n    name\n  }\n}\n\nmutation Login($name: String!, $password: String!) {\n  login(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}\n\nmutation Register($name: String!, $password: String!) {\n  register(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}']
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: 'query EventsList($filter: String) {\n  events(filter: $filter) {\n    derived\n    id\n    name\n  }\n}',
-): (typeof documents)['query EventsList($filter: String) {\n  events(filter: $filter) {\n    derived\n    id\n    name\n  }\n}']
+  source: 'query Events {\n  events {\n    id\n    name\n    derived\n  }\n}\n\nquery Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n  }\n}',
+): (typeof documents)['query Events {\n  events {\n    id\n    name\n    derived\n  }\n}\n\nquery Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n  }\n}']
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {}

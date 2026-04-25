@@ -30,3 +30,4 @@
     ```
 
 The application should now be running.
+gemini --resume 35f7ecba-133c-4b67-b2a6-d89e040af322 

@@ -201,13 +201,13 @@ onUnmounted(() => {
 
     <!-- BOTTOM NAV -->
     <footer class="bg-[#0b0f0c] border-t border-lime-500/10 flex justify-around py-4 z-10">
-      <button class="flex flex-col items-center text-lime-300 text-[10px] gap-1">
+      <router-link to="/MapPage" class="flex flex-col items-center text-lime-300 text-[10px] gap-1">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
           <circle cx="12" cy="10" r="3" />
         </svg>
         TRACKER
-      </button>
+      </router-link>
 
       <button class="flex flex-col items-center text-gray-500 text-[10px] gap-1">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -216,12 +216,13 @@ onUnmounted(() => {
         SIGNAL
       </button>
 
-      <button class="flex flex-col items-center text-gray-500 text-[10px] gap-1">
+      <router-link to="/me" class="flex flex-col items-center text-gray-500 text-[10px] gap-1">
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
         </svg>
-        TOOLS
-      </button>
+        PROFILE
+      </router-link>
     </footer>
   </div>
 <div 

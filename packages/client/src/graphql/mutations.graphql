@@ -1,7 +1,26 @@
 mutation CreateEvent($name: String!) {
   createEvent(name: $name) {
-    derived
     id
     name
+  }
+}
+
+mutation Login($name: String!, $password: String!) {
+  login(name: $name, password: $password) {
+    token
+    user {
+      id
+      name
+    }
+  }
+}
+
+mutation Register($name: String!, $password: String!) {
+  register(name: $name, password: $password) {
+    token
+    user {
+      id
+      name
+    }
   }
 }

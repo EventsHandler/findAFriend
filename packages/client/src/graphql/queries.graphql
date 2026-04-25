@@ -1,6 +1,22 @@
-query EventsList($filter: String) {
-  events(filter: $filter) {
+query Events {
+  events {
+    id
+    name
     derived
+  }
+}
+
+query Locations {
+  locations {
+    id
+    name
+    posx
+    posy
+  }
+}
+
+query Me {
+  me {
     id
     name
   }
