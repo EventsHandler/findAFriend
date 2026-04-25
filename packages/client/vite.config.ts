@@ -26,6 +26,10 @@ export default defineConfig({
       '/graphql': {
         target: 'http://localhost:3000',
       },
+      // Only proxy the API endpoint, not the SPA route `/chat/:name`
+      '/chat/send': {
+        target: 'http://localhost:3000',
+      },
     },
   },
 })
