@@ -4,10 +4,23 @@ type Event {
   name: String!
 }
 
+type Location {
+  id: ID!
+  name: String!
+  posx: Float!
+  posy: Float!
+}
+
 type Mutation {
   createEvent(name: String!): Event!
 }
 
 type Query {
   events(filter: String): [Event!]!
+  locations: [Location!]!
+}
+
+type User {
+  id: ID!
+  name: String!
 }

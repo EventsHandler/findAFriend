@@ -25,6 +25,14 @@ export type Event = {
   name: Scalars['String']['output']
 }
 
+export type Location = {
+  __typename?: 'Location'
+  id: Scalars['ID']['output']
+  name: Scalars['String']['output']
+  posx: Scalars['Float']['output']
+  posy: Scalars['Float']['output']
+}
+
 export type Mutation = {
   __typename?: 'Mutation'
   createEvent: Event
@@ -37,10 +45,17 @@ export type MutationcreateEventArgs = {
 export type Query = {
   __typename?: 'Query'
   events: Array<Event>
+  locations: Array<Location>
 }
 
 export type QueryeventsArgs = {
   filter?: InputMaybe<Scalars['String']['input']>
+}
+
+export type User = {
+  __typename?: 'User'
+  id: Scalars['ID']['output']
+  name: Scalars['String']['output']
 }
 
 export type ResolverTypeWrapper<T> = Promise<T> | T
@@ -118,8 +133,11 @@ export type ResolversTypes = {
   Event: ResolverTypeWrapper<EventMapper>
   String: ResolverTypeWrapper<Scalars['String']['output']>
   ID: ResolverTypeWrapper<Scalars['ID']['output']>
+  Location: ResolverTypeWrapper<Location>
+  Float: ResolverTypeWrapper<Scalars['Float']['output']>
   Mutation: ResolverTypeWrapper<{}>
   Query: ResolverTypeWrapper<{}>
+  User: ResolverTypeWrapper<User>
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>
 }
 
@@ -128,8 +146,11 @@ export type ResolversParentTypes = {
   Event: EventMapper
   String: Scalars['String']['output']
   ID: Scalars['ID']['output']
+  Location: Location
+  Float: Scalars['Float']['output']
   Mutation: {}
   Query: {}
+  User: User
   Boolean: Scalars['Boolean']['output']
 }
 
@@ -140,6 +161,17 @@ export type EventResolvers<
   derived?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
+}
+
+export type LocationResolvers<
+  ContextType = UserContext,
+  ParentType extends ResolversParentTypes['Location'] = ResolversParentTypes['Location'],
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>
+  posx?: Resolver<ResolversTypes['Float'], ParentType, ContextType>
+  posy?: Resolver<ResolversTypes['Float'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
 
@@ -160,10 +192,22 @@ export type QueryResolvers<
   ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query'],
 > = {
   events?: Resolver<Array<ResolversTypes['Event']>, ParentType, ContextType, Partial<QueryeventsArgs>>
+  locations?: Resolver<Array<ResolversTypes['Location']>, ParentType, ContextType>
+}
+
+export type UserResolvers<
+  ContextType = UserContext,
+  ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User'],
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
 
 export type Resolvers<ContextType = UserContext> = {
   Event?: EventResolvers<ContextType>
+  Location?: LocationResolvers<ContextType>
   Mutation?: MutationResolvers<ContextType>
   Query?: QueryResolvers<ContextType>
+  User?: UserResolvers<ContextType>
 }

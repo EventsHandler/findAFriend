@@ -30,6 +30,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/MapPage': RouteRecordInfo<
+      '/MapPage',
+      '/MapPage',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
   }
 
   /**
@@ -46,6 +53,12 @@ declare module 'vue-router/auto-routes' {
     'src/views/HelloWorld.vue': {
       routes:
         | '/HelloWorld'
+      views:
+        | never
+    }
+    'src/views/MapPage.vue': {
+      routes:
+        | '/MapPage'
       views:
         | never
     }

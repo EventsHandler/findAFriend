@@ -4,8 +4,21 @@ type Event {
   derived: String!
 }
 
+type User {
+  id: ID!
+  name: String!
+}
+
+type Location {
+  id: ID!
+  name: String!
+  posx: Float!
+  posy: Float!
+}
+
 extend type Query {
   events(filter: String): [Event!]!
+  locations: [Location!]!
 }
 
 extend type Mutation {

@@ -23,6 +23,14 @@ export type Event = {
   name: Scalars['String']['output']
 }
 
+export type Location = {
+  __typename?: 'Location'
+  id: Scalars['ID']['output']
+  name: Scalars['String']['output']
+  posx: Scalars['Float']['output']
+  posy: Scalars['Float']['output']
+}
+
 export type Mutation = {
   __typename?: 'Mutation'
   createEvent: Event
@@ -35,10 +43,17 @@ export type MutationCreateEventArgs = {
 export type Query = {
   __typename?: 'Query'
   events: Array<Event>
+  locations: Array<Location>
 }
 
 export type QueryEventsArgs = {
   filter?: InputMaybe<Scalars['String']['input']>
+}
+
+export type User = {
+  __typename?: 'User'
+  id: Scalars['ID']['output']
+  name: Scalars['String']['output']
 }
 
 export type CreateEventMutationVariables = Exact<{
