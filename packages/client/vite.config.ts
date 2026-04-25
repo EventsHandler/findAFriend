@@ -26,6 +26,13 @@ export default defineConfig({
       '/graphql': {
         target: 'http://localhost:3000',
       },
+      '/pusher': {
+        target: 'http://localhost:3000',
+      },
+      // Only proxy the API endpoint, not the client route `/chat`.
+      '/chat/message': {
+        target: 'http://localhost:3000',
+      },
     },
   },
 })
