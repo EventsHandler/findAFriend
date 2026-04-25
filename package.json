@@ -1,0 +1,27 @@
+{
+  "name": "events-handler",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "dev:server": "pnpm --filter server dev",
+    "dev:client": "pnpm --filter client dev",
+    "dev:codegen": "pnpm graphql-codegen --watch",
+    "dev": "run-p -l dev:*",
+    "codegen": "pnpm graphql-codegen"
+  },
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39",
+  "devDependencies": {
+    "@eddeee888/gcg-typescript-resolver-files": "^0.12.0",
+    "@graphql-codegen/cli": "^5.0.5",
+    "@graphql-codegen/client-preset": "^4.8.0",
+    "@parcel/watcher": "^2.5.1",
+    "@tsconfig/node23": "^23.0.1",
+    "@types/node": "^22.15.3",
+    "cross-env": "^7.0.3",
+    "npm-run-all2": "^8.0.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
+}

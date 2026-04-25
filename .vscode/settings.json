@@ -1,0 +1,9 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "tsconfig.json": "tsconfig.*.json, environment.d.ts, env.d.ts, node-env.d.ts, typed-router.d.ts, codegen.ts, codegen.*.ts",
+    "vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*, postcss.config.*, tailwind.config.*",
+    "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .prettier*, prettier*, .editorconfig, docker-compose.yaml, config.stmux, apollo.config.js, Dockerfile, Dockerfile-fe, docker-compose.dev.yaml"
+  },
+  "editor.formatOnSave": true
+}

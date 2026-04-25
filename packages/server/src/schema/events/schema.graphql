@@ -1,0 +1,13 @@
+type Event {
+  id: ID!
+  name: String!
+  derived: String!
+}
+
+extend type Query {
+  events(filter: String): [Event!]!
+}
+
+extend type Mutation {
+  createEvent(name: String!): Event!
+}

@@ -1,0 +1,7 @@
+mutation CreateEvent($name: String!) {
+  createEvent(name: $name) {
+    derived
+    id
+    name
+  }
+}

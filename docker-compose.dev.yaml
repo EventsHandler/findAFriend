@@ -1,0 +1,9 @@
+services:
+  db:
+    image: postgres:17
+    restart: on-failure
+    environment:
+      POSTGRES_USER: events
+      POSTGRES_PASSWORD: eventspwd
+    ports:
+      - "5432:5432"
