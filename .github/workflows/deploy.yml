@@ -56,7 +56,7 @@ jobs:
       - name: Build client
         run: pnpm build:client
         env:
-          BASE_PATH: /findafriend/
+          BASE_PATH: /findAFriend/
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_PUSHER_KEY: ${{ secrets.VITE_PUSHER_KEY }}
           VITE_PUSHER_CLUSTER: ${{ secrets.VITE_PUSHER_CLUSTER }}
