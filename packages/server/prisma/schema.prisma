@@ -30,6 +30,7 @@ model User {
   location   Location? @relation(fields: [locationId], references: [id])
   posx       Float?
   posy       Float?
+  points Int @default(0)
 }
 
 model Location {
@@ -42,10 +43,11 @@ model Location {
 }
 
 model Crate {
-  id          String            @id @default(cuid(2))
-  name        String
-  rarity      RarityType
-  chance      Float
+  id     String @id @default(cuid(2))
+  name   String @unique
+  rarity RarityType
+  chance Float
+  price Int @default(0)
   rarityDrops CrateRarityDrop[]
 
   inventories CrateInventory[]
@@ -65,8 +67,8 @@ model CrateRarityDrop {
 }
 
 model Item {
-  id     String     @id @default(cuid(2))
-  name   String
+  id     String @id @default(cuid(2))
+  name   String @unique   
   rarity RarityType
 
   inventories ItemInventory[]
