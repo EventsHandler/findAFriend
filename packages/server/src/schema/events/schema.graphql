@@ -7,6 +7,9 @@ enum RarityType {
 type User {
   id: ID!
   name: String!
+  posx: Float
+  posy: Float
+  locationId: ID
 
   inventories: [ItemInventory!]
   crateInventories: [CrateInventory!]
@@ -66,6 +69,7 @@ type AuthPayload {
 extend type Query {
   locations: [Location!]!
   me: User
+  locationUsers(locationId: ID!): [User!]!
 
   crates: [Crate!]!
   crate(id: ID!): Crate
@@ -84,4 +88,8 @@ extend type Mutation {
   buyCrate(userId: ID!, crateId: ID!, quantity: Int!): Boolean!
 
   openCrate(userId: ID!, crateId: ID!): Item!
+  joinRoom(locationId: ID!): User!
+  leaveRoom: User!
+  updatePosition(locationId: ID!, lat: Float!, lng: Float!): User!
+  locations: [Location!]
 }

@@ -76,15 +76,23 @@ export type Location = {
 export type Mutation = {
   __typename?: 'Mutation'
   buyCrate: Scalars['Boolean']['output']
+  joinRoom: User
+  leaveRoom: User
+  locations?: Maybe<Array<Location>>
   login: AuthPayload
   openCrate: Item
   register: AuthPayload
+  updatePosition: User
 }
 
 export type MutationbuyCrateArgs = {
   crateId: Scalars['ID']['input']
   quantity: Scalars['Int']['input']
   userId: Scalars['ID']['input']
+}
+
+export type MutationjoinRoomArgs = {
+  locationId: Scalars['ID']['input']
 }
 
 export type MutationloginArgs = {
@@ -102,12 +110,19 @@ export type MutationregisterArgs = {
   password: Scalars['String']['input']
 }
 
+export type MutationupdatePositionArgs = {
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+  locationId: Scalars['ID']['input']
+}
+
 export type Query = {
   __typename?: 'Query'
   crate?: Maybe<Crate>
   crates: Array<Crate>
   item?: Maybe<Item>
   items: Array<Item>
+  locationUsers: Array<User>
   locations: Array<Location>
   me?: Maybe<User>
   userCrates: Array<CrateInventory>
@@ -120,6 +135,10 @@ export type QuerycrateArgs = {
 
 export type QueryitemArgs = {
   id: Scalars['ID']['input']
+}
+
+export type QuerylocationUsersArgs = {
+  locationId: Scalars['ID']['input']
 }
 
 export type QueryuserCratesArgs = {
@@ -137,7 +156,10 @@ export type User = {
   crateInventories?: Maybe<Array<CrateInventory>>
   id: Scalars['ID']['output']
   inventories?: Maybe<Array<ItemInventory>>
+  locationId?: Maybe<Scalars['ID']['output']>
   name: Scalars['String']['output']
+  posx?: Maybe<Scalars['Float']['output']>
+  posy?: Maybe<Scalars['Float']['output']>
 }
 
 export type ResolverTypeWrapper<T> = Promise<T> | T
@@ -368,6 +390,14 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationbuyCrateArgs, 'crateId' | 'quantity' | 'userId'>
   >
+  joinRoom?: Resolver<
+    ResolversTypes['User'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationjoinRoomArgs, 'locationId'>
+  >
+  leaveRoom?: Resolver<ResolversTypes['User'], ParentType, ContextType>
+  locations?: Resolver<Maybe<Array<ResolversTypes['Location']>>, ParentType, ContextType>
   login?: Resolver<
     ResolversTypes['AuthPayload'],
     ParentType,
@@ -386,6 +416,12 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationregisterArgs, 'name' | 'password'>
   >
+  updatePosition?: Resolver<
+    ResolversTypes['User'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationupdatePositionArgs, 'lat' | 'lng' | 'locationId'>
+  >
 }
 
 export type QueryResolvers<
@@ -396,6 +432,12 @@ export type QueryResolvers<
   crates?: Resolver<Array<ResolversTypes['Crate']>, ParentType, ContextType>
   item?: Resolver<Maybe<ResolversTypes['Item']>, ParentType, ContextType, RequireFields<QueryitemArgs, 'id'>>
   items?: Resolver<Array<ResolversTypes['Item']>, ParentType, ContextType>
+  locationUsers?: Resolver<
+    Array<ResolversTypes['User']>,
+    ParentType,
+    ContextType,
+    RequireFields<QuerylocationUsersArgs, 'locationId'>
+  >
   locations?: Resolver<Array<ResolversTypes['Location']>, ParentType, ContextType>
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>
   userCrates?: Resolver<
@@ -424,7 +466,10 @@ export type UserResolvers<
   crateInventories?: Resolver<Maybe<Array<ResolversTypes['CrateInventory']>>, ParentType, ContextType>
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   inventories?: Resolver<Maybe<Array<ResolversTypes['ItemInventory']>>, ParentType, ContextType>
+  locationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>
+  posx?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>
+  posy?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
 

@@ -1,7 +1,8 @@
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloLink, concat } from '@apollo/client/core'
 
 const httpLink = createHttpLink({
-  uri: '/graphql',
+  uri: (import.meta.env.VITE_API_URL ?? '') + '/graphql',
+  credentials: 'include',
 })
 
 const authMiddleware = new ApolloLink((operation, forward) => {

@@ -1,0 +1,86 @@
+name: Deploy Vue client to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies (monorepo)
+        run: pnpm install --frozen-lockfile
+        env:
+          DATABASE_URL: 'postgresql://user:pass@localhost:5432/db'
+
+      - name: Run codegen
+        run: pnpm codegen
+
+      - name: Build client
+        run: pnpm build:client
+        env:
+          BASE_PATH: /findafriend/
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_PUSHER_KEY: ${{ secrets.VITE_PUSHER_KEY }}
+          VITE_PUSHER_CLUSTER: ${{ secrets.VITE_PUSHER_CLUSTER }}
+
+      - name: fix SPA routing
+        run: cp packages/client/dist/index.html packages/client/dist/404.html
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload build artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/client/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -20,11 +20,16 @@ model Event {
 }
 
 model User {
-  id   String @id @default(cuid(2))
-  name String @unique
-  password String
-  inventories ItemInventory[]
+  id               String           @id @default(cuid(2))
+  name             String           @unique
+  password         String
+  inventories      ItemInventory[]
   crateInventories CrateInventory[]
+
+  locationId String? // current joined location
+  location   Location? @relation(fields: [locationId], references: [id])
+  posx       Float?
+  posy       Float?
 }
 
 model Location {
@@ -32,34 +37,35 @@ model Location {
   name String
   posx Float
   posy Float
+
+  users User[]
 }
 
 model Crate {
-  id     String @id @default(cuid(2))
-  name   String
-  rarity RarityType
-  chance Float
+  id          String            @id @default(cuid(2))
+  name        String
+  rarity      RarityType
+  chance      Float
   rarityDrops CrateRarityDrop[]
 
   inventories CrateInventory[]
 }
 
 model CrateRarityDrop {
-  id      String @id @default(cuid(2))
+  id String @id @default(cuid(2))
 
   crateId String
   rarity  RarityType
 
-  chance  Float // ex: 0.7, 0.25, 0.05
+  chance Float // ex: 0.7, 0.25, 0.05
 
   crate Crate @relation(fields: [crateId], references: [id])
 
   @@unique([crateId, rarity])
 }
 
-
 model Item {
-  id     String @id @default(cuid(2))
+  id     String     @id @default(cuid(2))
   name   String
   rarity RarityType
 
@@ -67,7 +73,7 @@ model Item {
 }
 
 model CrateInventory {
-  id      String @id @default(cuid(2))
+  id String @id @default(cuid(2))
 
   userId  String
   crateId String
@@ -77,12 +83,12 @@ model CrateInventory {
   user  User  @relation(fields: [userId], references: [id])
   crate Crate @relation(fields: [crateId], references: [id])
 
-  @@index([userId])
   @@unique([userId, crateId])
+  @@index([userId])
 }
 
 model ItemInventory {
-  id     String @id @default(cuid(2))
+  id String @id @default(cuid(2))
 
   userId String
   itemId String
@@ -92,8 +98,8 @@ model ItemInventory {
   user User @relation(fields: [userId], references: [id])
   item Item @relation(fields: [itemId], references: [id])
 
-  @@index([userId])
   @@unique([userId, itemId])
+  @@index([userId])
 }
 
 enum RarityType {

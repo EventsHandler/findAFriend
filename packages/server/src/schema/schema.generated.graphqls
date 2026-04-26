@@ -47,9 +47,13 @@ type Location {
 
 type Mutation {
   buyCrate(crateId: ID!, quantity: Int!, userId: ID!): Boolean!
+  joinRoom(locationId: ID!): User!
+  leaveRoom: User!
+  locations: [Location!]
   login(name: String!, password: String!): AuthPayload!
   openCrate(crateId: ID!, userId: ID!): Item!
   register(name: String!, password: String!): AuthPayload!
+  updatePosition(lat: Float!, lng: Float!, locationId: ID!): User!
 }
 
 type Query {
@@ -57,6 +61,7 @@ type Query {
   crates: [Crate!]!
   item(id: ID!): Item
   items: [Item!]!
+  locationUsers(locationId: ID!): [User!]!
   locations: [Location!]!
   me: User
   userCrates(userId: ID!): [CrateInventory!]!
@@ -73,5 +78,8 @@ type User {
   crateInventories: [CrateInventory!]
   id: ID!
   inventories: [ItemInventory!]
+  locationId: ID
   name: String!
+  posx: Float
+  posy: Float
 }

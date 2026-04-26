@@ -28,6 +28,26 @@ export const typeDefs = {
         },
         {
           kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'locationUsers' },
+          arguments: [
+            {
+              kind: 'InputValueDefinition',
+              name: { kind: 'Name', value: 'locationId' },
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+              directives: [],
+            },
+          ],
+          type: {
+            kind: 'NonNullType',
+            type: {
+              kind: 'ListType',
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } } },
+            },
+          },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
           name: { kind: 'Name', value: 'crates' },
           arguments: [],
           type: {
@@ -220,6 +240,63 @@ export const typeDefs = {
           type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Item' } } },
           directives: [],
         },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'joinRoom' },
+          arguments: [
+            {
+              kind: 'InputValueDefinition',
+              name: { kind: 'Name', value: 'locationId' },
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+              directives: [],
+            },
+          ],
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'leaveRoom' },
+          arguments: [],
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'updatePosition' },
+          arguments: [
+            {
+              kind: 'InputValueDefinition',
+              name: { kind: 'Name', value: 'locationId' },
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+              directives: [],
+            },
+            {
+              kind: 'InputValueDefinition',
+              name: { kind: 'Name', value: 'lat' },
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+              directives: [],
+            },
+            {
+              kind: 'InputValueDefinition',
+              name: { kind: 'Name', value: 'lng' },
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+              directives: [],
+            },
+          ],
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'locations' },
+          arguments: [],
+          type: {
+            kind: 'ListType',
+            type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Location' } } },
+          },
+          directives: [],
+        },
       ],
       directives: [],
       interfaces: [],
@@ -252,6 +329,27 @@ export const typeDefs = {
           name: { kind: 'Name', value: 'name' },
           arguments: [],
           type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'posx' },
+          arguments: [],
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'posy' },
+          arguments: [],
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'locationId' },
+          arguments: [],
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
           directives: [],
         },
         {

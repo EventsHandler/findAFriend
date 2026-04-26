@@ -2,11 +2,18 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "private": true,
   "scripts": {
     "dev": "tsx --env-file .env --watch src/index.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "migrate": "pnpm prisma migrate deploy",
+    "build": "pkgroll build",
+    "start": "prisma migrate deploy && node dist/index.js",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +34,7 @@
     "graphql": "^16.11.0",
     "graphql-yoga": "^5.13.4",
     "jsonwebtoken": "^9.0.3",
+    "pkgroll": "^2.27.0",
     "pusher": "^5.3.3"
   }
 }

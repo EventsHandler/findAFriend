@@ -15,12 +15,12 @@ import type { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-
  */
 type Documents = {
   'mutation Login($name: String!, $password: String!) {\n  login(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}\n\nmutation Register($name: String!, $password: String!) {\n  register(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}': typeof types.LoginDocument
-  'query Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n  }\n}': typeof types.LocationsDocument
+  'query Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nquery LocationUsers($locationId: ID!) {\n  locationUsers(locationId: $locationId) {\n    id\n    name\n    posx\n    posy\n    locationId\n  }\n}\n\nmutation JoinRoom($locationId: ID!) {\n  joinRoom(locationId: $locationId) {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nmutation LeaveRoom {\n  leaveRoom {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nmutation UpdatePosition($locationId: ID!, $lat: Float!, $lng: Float!) {\n  updatePosition(locationId: $locationId, lat: $lat, lng: $lng) {\n    id\n    locationId\n    posx\n    posy\n  }\n}': typeof types.LocationsDocument
 }
 const documents: Documents = {
   'mutation Login($name: String!, $password: String!) {\n  login(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}\n\nmutation Register($name: String!, $password: String!) {\n  register(name: $name, password: $password) {\n    token\n    user {\n      id\n      name\n    }\n  }\n}':
     types.LoginDocument,
-  'query Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n  }\n}':
+  'query Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nquery LocationUsers($locationId: ID!) {\n  locationUsers(locationId: $locationId) {\n    id\n    name\n    posx\n    posy\n    locationId\n  }\n}\n\nmutation JoinRoom($locationId: ID!) {\n  joinRoom(locationId: $locationId) {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nmutation LeaveRoom {\n  leaveRoom {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nmutation UpdatePosition($locationId: ID!, $lat: Float!, $lng: Float!) {\n  updatePosition(locationId: $locationId, lat: $lat, lng: $lng) {\n    id\n    locationId\n    posx\n    posy\n  }\n}':
     types.LocationsDocument,
 }
 
@@ -48,8 +48,8 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: 'query Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n  }\n}',
-): (typeof documents)['query Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n  }\n}']
+  source: 'query Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nquery LocationUsers($locationId: ID!) {\n  locationUsers(locationId: $locationId) {\n    id\n    name\n    posx\n    posy\n    locationId\n  }\n}\n\nmutation JoinRoom($locationId: ID!) {\n  joinRoom(locationId: $locationId) {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nmutation LeaveRoom {\n  leaveRoom {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nmutation UpdatePosition($locationId: ID!, $lat: Float!, $lng: Float!) {\n  updatePosition(locationId: $locationId, lat: $lat, lng: $lng) {\n    id\n    locationId\n    posx\n    posy\n  }\n}',
+): (typeof documents)['query Locations {\n  locations {\n    id\n    name\n    posx\n    posy\n  }\n}\n\nquery Me {\n  me {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nquery LocationUsers($locationId: ID!) {\n  locationUsers(locationId: $locationId) {\n    id\n    name\n    posx\n    posy\n    locationId\n  }\n}\n\nmutation JoinRoom($locationId: ID!) {\n  joinRoom(locationId: $locationId) {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nmutation LeaveRoom {\n  leaveRoom {\n    id\n    name\n    locationId\n    posx\n    posy\n  }\n}\n\nmutation UpdatePosition($locationId: ID!, $lat: Float!, $lng: Float!) {\n  updatePosition(locationId: $locationId, lat: $lat, lng: $lng) {\n    id\n    locationId\n    posx\n    posy\n  }\n}']
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {}
