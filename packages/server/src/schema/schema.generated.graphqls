@@ -3,10 +3,39 @@ type AuthPayload {
   user: User!
 }
 
-type Event {
-  derived: String!
+type Crate {
+  chance: Float!
   id: ID!
   name: String!
+  rarity: RarityType!
+  rarityDrops: [CrateRarityDrop!]
+}
+
+type CrateInventory {
+  crate: Crate
+  id: ID!
+  quantity: Int!
+  user: User
+}
+
+type CrateRarityDrop {
+  chance: Float!
+  crate: Crate
+  id: ID!
+  rarity: RarityType!
+}
+
+type Item {
+  id: ID!
+  name: String!
+  rarity: RarityType!
+}
+
+type ItemInventory {
+  id: ID!
+  item: Item
+  quantity: Int!
+  user: User
 }
 
 type Location {
@@ -17,18 +46,32 @@ type Location {
 }
 
 type Mutation {
-  createEvent(name: String!): Event!
+  buyCrate(crateId: ID!, quantity: Int!, userId: ID!): Boolean!
   login(name: String!, password: String!): AuthPayload!
+  openCrate(crateId: ID!, userId: ID!): Item!
   register(name: String!, password: String!): AuthPayload!
 }
 
 type Query {
-  events(filter: String): [Event!]!
+  crate(id: ID!): Crate
+  crates: [Crate!]!
+  item(id: ID!): Item
+  items: [Item!]!
   locations: [Location!]!
   me: User
+  userCrates(userId: ID!): [CrateInventory!]!
+  userItems(userId: ID!): [ItemInventory!]!
+}
+
+enum RarityType {
+  COMMON
+  EPIC
+  LEGENDARY
 }
 
 type User {
+  crateInventories: [CrateInventory!]
   id: ID!
+  inventories: [ItemInventory!]
   name: String!
 }

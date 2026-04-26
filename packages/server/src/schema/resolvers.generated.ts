@@ -1,21 +1,49 @@
 /* This file was automatically generated. DO NOT UPDATE MANUALLY. */
 import type { Resolvers } from './types.generated.js'
-import { events as Query_events } from './events/resolvers/Query/events.js'
+import { crate as Query_crate } from './events/resolvers/Query/crate.js'
+import { crates as Query_crates } from './events/resolvers/Query/crates.js'
+import { item as Query_item } from './events/resolvers/Query/item.js'
+import { items as Query_items } from './events/resolvers/Query/items.js'
 import { locations as Query_locations } from './events/resolvers/Query/locations.js'
 import { me as Query_me } from './events/resolvers/Query/me.js'
-import { createEvent as Mutation_createEvent } from './events/resolvers/Mutation/createEvent.js'
+import { userCrates as Query_userCrates } from './events/resolvers/Query/userCrates.js'
+import { userItems as Query_userItems } from './events/resolvers/Query/userItems.js'
+import { buyCrate as Mutation_buyCrate } from './events/resolvers/Mutation/buyCrate.js'
 import { login as Mutation_login } from './events/resolvers/Mutation/login.js'
+import { openCrate as Mutation_openCrate } from './events/resolvers/Mutation/openCrate.js'
 import { register as Mutation_register } from './events/resolvers/Mutation/register.js'
 import { AuthPayload } from './events/resolvers/AuthPayload.js'
-import { Event } from './events/resolvers/Event.js'
+import { Crate } from './events/resolvers/Crate.js'
+import { CrateInventory } from './events/resolvers/CrateInventory.js'
+import { CrateRarityDrop } from './events/resolvers/CrateRarityDrop.js'
+import { Item } from './events/resolvers/Item.js'
+import { ItemInventory } from './events/resolvers/ItemInventory.js'
 import { Location } from './events/resolvers/Location.js'
 import { User } from './events/resolvers/User.js'
 export const resolvers: Resolvers = {
-  Query: { events: Query_events, locations: Query_locations, me: Query_me },
-  Mutation: { createEvent: Mutation_createEvent, login: Mutation_login, register: Mutation_register },
+  Query: {
+    crate: Query_crate,
+    crates: Query_crates,
+    item: Query_item,
+    items: Query_items,
+    locations: Query_locations,
+    me: Query_me,
+    userCrates: Query_userCrates,
+    userItems: Query_userItems,
+  },
+  Mutation: {
+    buyCrate: Mutation_buyCrate,
+    login: Mutation_login,
+    openCrate: Mutation_openCrate,
+    register: Mutation_register,
+  },
 
   AuthPayload: AuthPayload,
-  Event: Event,
+  Crate: Crate,
+  CrateInventory: CrateInventory,
+  CrateRarityDrop: CrateRarityDrop,
+  Item: Item,
+  ItemInventory: ItemInventory,
   Location: Location,
   User: User,
 }

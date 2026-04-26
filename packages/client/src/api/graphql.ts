@@ -22,11 +22,44 @@ export type AuthPayload = {
   user: User
 }
 
-export type Event = {
-  __typename?: 'Event'
-  derived: Scalars['String']['output']
+export type Crate = {
+  __typename?: 'Crate'
+  chance: Scalars['Float']['output']
   id: Scalars['ID']['output']
   name: Scalars['String']['output']
+  rarity: RarityType
+  rarityDrops?: Maybe<Array<CrateRarityDrop>>
+}
+
+export type CrateInventory = {
+  __typename?: 'CrateInventory'
+  crate?: Maybe<Crate>
+  id: Scalars['ID']['output']
+  quantity: Scalars['Int']['output']
+  user?: Maybe<User>
+}
+
+export type CrateRarityDrop = {
+  __typename?: 'CrateRarityDrop'
+  chance: Scalars['Float']['output']
+  crate?: Maybe<Crate>
+  id: Scalars['ID']['output']
+  rarity: RarityType
+}
+
+export type Item = {
+  __typename?: 'Item'
+  id: Scalars['ID']['output']
+  name: Scalars['String']['output']
+  rarity: RarityType
+}
+
+export type ItemInventory = {
+  __typename?: 'ItemInventory'
+  id: Scalars['ID']['output']
+  item?: Maybe<Item>
+  quantity: Scalars['Int']['output']
+  user?: Maybe<User>
 }
 
 export type Location = {
@@ -39,18 +72,26 @@ export type Location = {
 
 export type Mutation = {
   __typename?: 'Mutation'
-  createEvent: Event
+  buyCrate: Scalars['Boolean']['output']
   login: AuthPayload
+  openCrate: Item
   register: AuthPayload
 }
 
-export type MutationCreateEventArgs = {
-  name: Scalars['String']['input']
+export type MutationBuyCrateArgs = {
+  crateId: Scalars['ID']['input']
+  quantity: Scalars['Int']['input']
+  userId: Scalars['ID']['input']
 }
 
 export type MutationLoginArgs = {
   name: Scalars['String']['input']
   password: Scalars['String']['input']
+}
+
+export type MutationOpenCrateArgs = {
+  crateId: Scalars['ID']['input']
+  userId: Scalars['ID']['input']
 }
 
 export type MutationRegisterArgs = {
@@ -60,28 +101,45 @@ export type MutationRegisterArgs = {
 
 export type Query = {
   __typename?: 'Query'
-  events: Array<Event>
+  crate?: Maybe<Crate>
+  crates: Array<Crate>
+  item?: Maybe<Item>
+  items: Array<Item>
   locations: Array<Location>
   me?: Maybe<User>
+  userCrates: Array<CrateInventory>
+  userItems: Array<ItemInventory>
 }
 
-export type QueryEventsArgs = {
-  filter?: InputMaybe<Scalars['String']['input']>
+export type QueryCrateArgs = {
+  id: Scalars['ID']['input']
 }
 
+export type QueryItemArgs = {
+  id: Scalars['ID']['input']
+}
+
+export type QueryUserCratesArgs = {
+  userId: Scalars['ID']['input']
+}
+
+export type QueryUserItemsArgs = {
+  userId: Scalars['ID']['input']
+}
+
+export const RarityType = {
+  Common: 'COMMON',
+  Epic: 'EPIC',
+  Legendary: 'LEGENDARY',
+} as const
+
+export type RarityType = (typeof RarityType)[keyof typeof RarityType]
 export type User = {
   __typename?: 'User'
+  crateInventories?: Maybe<Array<CrateInventory>>
   id: Scalars['ID']['output']
+  inventories?: Maybe<Array<ItemInventory>>
   name: Scalars['String']['output']
-}
-
-export type CreateEventMutationVariables = Exact<{
-  name: Scalars['String']['input']
-}>
-
-export type CreateEventMutation = {
-  __typename?: 'Mutation'
-  createEvent: { __typename?: 'Event'; id: string; name: string }
 }
 
 export type LoginMutationVariables = Exact<{
@@ -104,13 +162,6 @@ export type RegisterMutation = {
   register: { __typename?: 'AuthPayload'; token: string; user: { __typename?: 'User'; id: string; name: string } }
 }
 
-export type EventsQueryVariables = Exact<{ [key: string]: never }>
-
-export type EventsQuery = {
-  __typename?: 'Query'
-  events: Array<{ __typename?: 'Event'; id: string; name: string; derived: string }>
-}
-
 export type LocationsQueryVariables = Exact<{ [key: string]: never }>
 
 export type LocationsQuery = {
@@ -122,46 +173,6 @@ export type MeQueryVariables = Exact<{ [key: string]: never }>
 
 export type MeQuery = { __typename?: 'Query'; me?: { __typename?: 'User'; id: string; name: string } | null }
 
-export const CreateEventDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'CreateEvent' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'name' } },
-          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } } },
-        },
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'createEvent' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'name' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'name' } },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<CreateEventMutation, CreateEventMutationVariables>
 export const LoginDocument = {
   kind: 'Document',
   definitions: [
@@ -282,33 +293,6 @@ export const RegisterDocument = {
     },
   ],
 } as unknown as DocumentNode<RegisterMutation, RegisterMutationVariables>
-export const EventsDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'query',
-      name: { kind: 'Name', value: 'Events' },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'events' },
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'derived' } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<EventsQuery, EventsQueryVariables>
 export const LocationsDocument = {
   kind: 'Document',
   definitions: [

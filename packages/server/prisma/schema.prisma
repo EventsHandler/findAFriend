@@ -23,6 +23,8 @@ model User {
   id   String @id @default(cuid(2))
   name String @unique
   password String
+  inventories ItemInventory[]
+  crateInventories CrateInventory[]
 }
 
 model Location {
@@ -30,4 +32,72 @@ model Location {
   name String
   posx Float
   posy Float
+}
+
+model Crate {
+  id     String @id @default(cuid(2))
+  name   String
+  rarity RarityType
+  chance Float
+  rarityDrops CrateRarityDrop[]
+
+  inventories CrateInventory[]
+}
+
+model CrateRarityDrop {
+  id      String @id @default(cuid(2))
+
+  crateId String
+  rarity  RarityType
+
+  chance  Float // ex: 0.7, 0.25, 0.05
+
+  crate Crate @relation(fields: [crateId], references: [id])
+
+  @@unique([crateId, rarity])
+}
+
+
+model Item {
+  id     String @id @default(cuid(2))
+  name   String
+  rarity RarityType
+
+  inventories ItemInventory[]
+}
+
+model CrateInventory {
+  id      String @id @default(cuid(2))
+
+  userId  String
+  crateId String
+
+  quantity Int @default(1)
+
+  user  User  @relation(fields: [userId], references: [id])
+  crate Crate @relation(fields: [crateId], references: [id])
+
+  @@index([userId])
+  @@unique([userId, crateId])
+}
+
+model ItemInventory {
+  id     String @id @default(cuid(2))
+
+  userId String
+  itemId String
+
+  quantity Int @default(1)
+
+  user User @relation(fields: [userId], references: [id])
+  item Item @relation(fields: [itemId], references: [id])
+
+  @@index([userId])
+  @@unique([userId, itemId])
+}
+
+enum RarityType {
+  COMMON
+  EPIC
+  LEGENDARY
 }
