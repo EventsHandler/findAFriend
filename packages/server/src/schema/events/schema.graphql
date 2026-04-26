@@ -35,6 +35,7 @@ type CrateRarityDrop {
   id: ID!
   rarity: RarityType!
   chance: Float!
+  crateId: String!
 
   crate: Crate
 }
@@ -48,6 +49,8 @@ type Item {
 type CrateInventory {
   id: ID!
   quantity: Int!
+  userId: String!
+  crateId: String!
 
   user: User
   crate: Crate
@@ -56,6 +59,8 @@ type CrateInventory {
 type ItemInventory {
   id: ID!
   quantity: Int!
+  userId: String!
+  itemId: String!
 
   user: User
   item: Item

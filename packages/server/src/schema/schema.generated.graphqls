@@ -13,14 +13,17 @@ type Crate {
 
 type CrateInventory {
   crate: Crate
+  crateId: String!
   id: ID!
   quantity: Int!
   user: User
+  userId: String!
 }
 
 type CrateRarityDrop {
   chance: Float!
   crate: Crate
+  crateId: String!
   id: ID!
   rarity: RarityType!
 }
@@ -34,8 +37,10 @@ type Item {
 type ItemInventory {
   id: ID!
   item: Item
+  itemId: String!
   quantity: Int!
   user: User
+  userId: String!
 }
 
 type Location {
