@@ -14,6 +14,7 @@ query Me {
     locationId
     posx
     posy
+    points
   }
 }
 

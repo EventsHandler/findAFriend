@@ -29,3 +29,7 @@ mutation OpenCrate($userId: ID!, $crateId: ID!){
     rarity
   }
 }
+
+mutation BuyCrate($userId: ID!, $crateId: ID!, $quantity: Int!){
+  buyCrate(userId: $userId, crateId: $crateId, quantity: $quantity)
+}

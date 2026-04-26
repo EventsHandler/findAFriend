@@ -88,10 +88,7 @@ type User {
   inventories: [ItemInventory!]
   locationId: ID
   name: String!
-<<<<<<< HEAD
+  points: Int!
   posx: Float
   posy: Float
-=======
-  points: Int!
->>>>>>> d860fc1 (shop implementation in progress)
 }

@@ -150,14 +150,13 @@ export type QueryitemArgs = {
   id: Scalars['ID']['input']
 }
 
-<<<<<<< HEAD
 export type QuerylocationUsersArgs = {
   locationId: Scalars['ID']['input']
-=======
+}
+
 export type QueryuserCrateArgs = {
   crateId: Scalars['ID']['input']
   userId: Scalars['ID']['input']
->>>>>>> d860fc1 (shop implementation in progress)
 }
 
 export type QueryuserCratesArgs = {
@@ -177,12 +176,9 @@ export type User = {
   inventories?: Maybe<Array<ItemInventory>>
   locationId?: Maybe<Scalars['ID']['output']>
   name: Scalars['String']['output']
-<<<<<<< HEAD
+  points: Scalars['Int']['output']
   posx?: Maybe<Scalars['Float']['output']>
   posy?: Maybe<Scalars['Float']['output']>
-=======
-  points: Scalars['Int']['output']
->>>>>>> d860fc1 (shop implementation in progress)
 }
 
 export type ResolverTypeWrapper<T> = Promise<T> | T
@@ -509,12 +505,9 @@ export type UserResolvers<
   inventories?: Resolver<Maybe<Array<ResolversTypes['ItemInventory']>>, ParentType, ContextType>
   locationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>
-<<<<<<< HEAD
+  points?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
   posx?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>
   posy?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>
-=======
-  points?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
->>>>>>> d860fc1 (shop implementation in progress)
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
 
