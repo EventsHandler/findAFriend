@@ -7,6 +7,7 @@ type Crate {
   chance: Float!
   id: ID!
   name: String!
+  price: Int!
   rarity: RarityType!
   rarityDrops: [CrateRarityDrop!]
 }
@@ -51,6 +52,7 @@ type Location {
 }
 
 type Mutation {
+  addPoints(amount: Int!, userId: ID!): Boolean!
   buyCrate(crateId: ID!, quantity: Int!, userId: ID!): Boolean!
   joinRoom(locationId: ID!): User!
   leaveRoom: User!
@@ -69,6 +71,7 @@ type Query {
   locationUsers(locationId: ID!): [User!]!
   locations: [Location!]!
   me: User
+  userCrate(crateId: ID!, userId: ID!): CrateInventory!
   userCrates(userId: ID!): [CrateInventory!]!
   userItems(userId: ID!): [ItemInventory!]!
 }
@@ -85,6 +88,10 @@ type User {
   inventories: [ItemInventory!]
   locationId: ID
   name: String!
+<<<<<<< HEAD
   posx: Float
   posy: Float
+=======
+  points: Int!
+>>>>>>> d860fc1 (shop implementation in progress)
 }

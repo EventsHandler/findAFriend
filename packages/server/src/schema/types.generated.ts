@@ -30,6 +30,7 @@ export type Crate = {
   chance: Scalars['Float']['output']
   id: Scalars['ID']['output']
   name: Scalars['String']['output']
+  price: Scalars['Int']['output']
   rarity: RarityType
   rarityDrops?: Maybe<Array<CrateRarityDrop>>
 }
@@ -80,6 +81,7 @@ export type Location = {
 
 export type Mutation = {
   __typename?: 'Mutation'
+  addPoints: Scalars['Boolean']['output']
   buyCrate: Scalars['Boolean']['output']
   joinRoom: User
   leaveRoom: User
@@ -88,6 +90,11 @@ export type Mutation = {
   openCrate: Item
   register: AuthPayload
   updatePosition: User
+}
+
+export type MutationaddPointsArgs = {
+  amount: Scalars['Int']['input']
+  userId: Scalars['ID']['input']
 }
 
 export type MutationbuyCrateArgs = {
@@ -130,6 +137,7 @@ export type Query = {
   locationUsers: Array<User>
   locations: Array<Location>
   me?: Maybe<User>
+  userCrate: CrateInventory
   userCrates: Array<CrateInventory>
   userItems: Array<ItemInventory>
 }
@@ -142,8 +150,14 @@ export type QueryitemArgs = {
   id: Scalars['ID']['input']
 }
 
+<<<<<<< HEAD
 export type QuerylocationUsersArgs = {
   locationId: Scalars['ID']['input']
+=======
+export type QueryuserCrateArgs = {
+  crateId: Scalars['ID']['input']
+  userId: Scalars['ID']['input']
+>>>>>>> d860fc1 (shop implementation in progress)
 }
 
 export type QueryuserCratesArgs = {
@@ -163,8 +177,12 @@ export type User = {
   inventories?: Maybe<Array<ItemInventory>>
   locationId?: Maybe<Scalars['ID']['output']>
   name: Scalars['String']['output']
+<<<<<<< HEAD
   posx?: Maybe<Scalars['Float']['output']>
   posy?: Maybe<Scalars['Float']['output']>
+=======
+  points: Scalars['Int']['output']
+>>>>>>> d860fc1 (shop implementation in progress)
 }
 
 export type ResolverTypeWrapper<T> = Promise<T> | T
@@ -249,13 +267,13 @@ export type ResolversTypes = {
   >
   Float: ResolverTypeWrapper<Scalars['Float']['output']>
   ID: ResolverTypeWrapper<Scalars['ID']['output']>
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>
   CrateInventory: ResolverTypeWrapper<
     Omit<CrateInventory, 'crate' | 'user'> & {
       crate?: Maybe<ResolversTypes['Crate']>
       user?: Maybe<ResolversTypes['User']>
     }
   >
-  Int: ResolverTypeWrapper<Scalars['Int']['output']>
   CrateRarityDrop: ResolverTypeWrapper<
     Omit<CrateRarityDrop, 'crate' | 'rarity'> & {
       crate?: Maybe<ResolversTypes['Crate']>
@@ -289,11 +307,11 @@ export type ResolversParentTypes = {
   Crate: Omit<Crate, 'rarityDrops'> & { rarityDrops?: Maybe<Array<ResolversParentTypes['CrateRarityDrop']>> }
   Float: Scalars['Float']['output']
   ID: Scalars['ID']['output']
+  Int: Scalars['Int']['output']
   CrateInventory: Omit<CrateInventory, 'crate' | 'user'> & {
     crate?: Maybe<ResolversParentTypes['Crate']>
     user?: Maybe<ResolversParentTypes['User']>
   }
-  Int: Scalars['Int']['output']
   CrateRarityDrop: Omit<CrateRarityDrop, 'crate'> & { crate?: Maybe<ResolversParentTypes['Crate']> }
   Item: Item
   ItemInventory: Omit<ItemInventory, 'item' | 'user'> & {
@@ -326,6 +344,7 @@ export type CrateResolvers<
   chance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>
+  price?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
   rarity?: Resolver<ResolversTypes['RarityType'], ParentType, ContextType>
   rarityDrops?: Resolver<Maybe<Array<ResolversTypes['CrateRarityDrop']>>, ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
@@ -394,6 +413,12 @@ export type MutationResolvers<
   ContextType = UserContext,
   ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation'],
 > = {
+  addPoints?: Resolver<
+    ResolversTypes['Boolean'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationaddPointsArgs, 'amount' | 'userId'>
+  >
   buyCrate?: Resolver<
     ResolversTypes['Boolean'],
     ParentType,
@@ -450,6 +475,12 @@ export type QueryResolvers<
   >
   locations?: Resolver<Array<ResolversTypes['Location']>, ParentType, ContextType>
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>
+  userCrate?: Resolver<
+    ResolversTypes['CrateInventory'],
+    ParentType,
+    ContextType,
+    RequireFields<QueryuserCrateArgs, 'crateId' | 'userId'>
+  >
   userCrates?: Resolver<
     Array<ResolversTypes['CrateInventory']>,
     ParentType,
@@ -478,8 +509,12 @@ export type UserResolvers<
   inventories?: Resolver<Maybe<Array<ResolversTypes['ItemInventory']>>, ParentType, ContextType>
   locationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>
+<<<<<<< HEAD
   posx?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>
   posy?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>
+=======
+  points?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
+>>>>>>> d860fc1 (shop implementation in progress)
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
 

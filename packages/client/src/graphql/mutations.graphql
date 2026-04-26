@@ -17,3 +17,15 @@ mutation Register($name: String!, $password: String!) {
     }
   }
 }
+
+mutation AddPoints($userId: ID!, $amount: Int!) {
+  addPoints(userId: $userId, amount: $amount) 
+}
+
+mutation OpenCrate($userId: ID!, $crateId: ID!){
+  openCrate(userId: $userId, crateId: $crateId){
+    id
+    name
+    rarity
+  }
+}

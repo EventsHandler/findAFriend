@@ -53,5 +53,15 @@ mutation UpdatePosition($locationId: ID!, $lat: Float!, $lng: Float!) {
     locationId
     posx
     posy
+    points
+  }
+}
+
+query Crates {
+  crates{
+    id
+    name
+    price
+    rarity
   }
 }

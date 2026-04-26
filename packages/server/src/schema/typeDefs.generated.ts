@@ -125,6 +125,26 @@ export const typeDefs = {
         },
         {
           kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'userCrate' },
+          arguments: [
+            {
+              kind: 'InputValueDefinition',
+              name: { kind: 'Name', value: 'userId' },
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+              directives: [],
+            },
+            {
+              kind: 'InputValueDefinition',
+              name: { kind: 'Name', value: 'crateId' },
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+              directives: [],
+            },
+          ],
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'CrateInventory' } } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
           name: { kind: 'Name', value: 'userCrates' },
           arguments: [
             {
@@ -242,6 +262,7 @@ export const typeDefs = {
         },
         {
           kind: 'FieldDefinition',
+<<<<<<< HEAD
           name: { kind: 'Name', value: 'joinRoom' },
           arguments: [
             {
@@ -268,11 +289,19 @@ export const typeDefs = {
             {
               kind: 'InputValueDefinition',
               name: { kind: 'Name', value: 'locationId' },
+=======
+          name: { kind: 'Name', value: 'addPoints' },
+          arguments: [
+            {
+              kind: 'InputValueDefinition',
+              name: { kind: 'Name', value: 'userId' },
+>>>>>>> d860fc1 (shop implementation in progress)
               type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
               directives: [],
             },
             {
               kind: 'InputValueDefinition',
+<<<<<<< HEAD
               name: { kind: 'Name', value: 'lat' },
               type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
               directives: [],
@@ -295,6 +324,14 @@ export const typeDefs = {
             kind: 'ListType',
             type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Location' } } },
           },
+=======
+              name: { kind: 'Name', value: 'amount' },
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } } },
+              directives: [],
+            },
+          ],
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Boolean' } } },
+>>>>>>> d860fc1 (shop implementation in progress)
           directives: [],
         },
       ],
@@ -333,6 +370,7 @@ export const typeDefs = {
         },
         {
           kind: 'FieldDefinition',
+<<<<<<< HEAD
           name: { kind: 'Name', value: 'posx' },
           arguments: [],
           type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } },
@@ -350,6 +388,11 @@ export const typeDefs = {
           name: { kind: 'Name', value: 'locationId' },
           arguments: [],
           type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+=======
+          name: { kind: 'Name', value: 'points' },
+          arguments: [],
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } } },
+>>>>>>> d860fc1 (shop implementation in progress)
           directives: [],
         },
         {
@@ -442,6 +485,13 @@ export const typeDefs = {
           name: { kind: 'Name', value: 'chance' },
           arguments: [],
           type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'price' },
+          arguments: [],
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } } },
           directives: [],
         },
         {
