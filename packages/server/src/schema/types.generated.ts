@@ -37,15 +37,18 @@ export type Crate = {
 export type CrateInventory = {
   __typename?: 'CrateInventory'
   crate?: Maybe<Crate>
+  crateId: Scalars['String']['output']
   id: Scalars['ID']['output']
   quantity: Scalars['Int']['output']
   user?: Maybe<User>
+  userId: Scalars['String']['output']
 }
 
 export type CrateRarityDrop = {
   __typename?: 'CrateRarityDrop'
   chance: Scalars['Float']['output']
   crate?: Maybe<Crate>
+  crateId: Scalars['String']['output']
   id: Scalars['ID']['output']
   rarity: RarityType
 }
@@ -61,8 +64,10 @@ export type ItemInventory = {
   __typename?: 'ItemInventory'
   id: Scalars['ID']['output']
   item?: Maybe<Item>
+  itemId: Scalars['String']['output']
   quantity: Scalars['Int']['output']
   user?: Maybe<User>
+  userId: Scalars['String']['output']
 }
 
 export type Location = {
@@ -331,9 +336,11 @@ export type CrateInventoryResolvers<
   ParentType extends ResolversParentTypes['CrateInventory'] = ResolversParentTypes['CrateInventory'],
 > = {
   crate?: Resolver<Maybe<ResolversTypes['Crate']>, ParentType, ContextType>
+  crateId?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   quantity?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>
+  userId?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
 
@@ -343,6 +350,7 @@ export type CrateRarityDropResolvers<
 > = {
   chance?: Resolver<ResolversTypes['Float'], ParentType, ContextType>
   crate?: Resolver<Maybe<ResolversTypes['Crate']>, ParentType, ContextType>
+  crateId?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   rarity?: Resolver<ResolversTypes['RarityType'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
@@ -364,8 +372,10 @@ export type ItemInventoryResolvers<
 > = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   item?: Resolver<Maybe<ResolversTypes['Item']>, ParentType, ContextType>
+  itemId?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   quantity?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>
+  userId?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
 

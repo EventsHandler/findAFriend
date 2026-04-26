@@ -34,15 +34,18 @@ export type Crate = {
 export type CrateInventory = {
   __typename?: 'CrateInventory'
   crate?: Maybe<Crate>
+  crateId: Scalars['String']['output']
   id: Scalars['ID']['output']
   quantity: Scalars['Int']['output']
   user?: Maybe<User>
+  userId: Scalars['String']['output']
 }
 
 export type CrateRarityDrop = {
   __typename?: 'CrateRarityDrop'
   chance: Scalars['Float']['output']
   crate?: Maybe<Crate>
+  crateId: Scalars['String']['output']
   id: Scalars['ID']['output']
   rarity: RarityType
 }
@@ -58,8 +61,10 @@ export type ItemInventory = {
   __typename?: 'ItemInventory'
   id: Scalars['ID']['output']
   item?: Maybe<Item>
+  itemId: Scalars['String']['output']
   quantity: Scalars['Int']['output']
   user?: Maybe<User>
+  userId: Scalars['String']['output']
 }
 
 export type Location = {
