@@ -30,6 +30,13 @@ declare module 'vue-router/auto-routes' {
       { name: ParamValue<false> },
       | never
     >,
+    '/crate/open/[userId]/[crateId]': RouteRecordInfo<
+      '/crate/open/[userId]/[crateId]',
+      '/crate/open/:userId/:crateId',
+      { userId: ParamValue<true>, crateId: ParamValue<true> },
+      { userId: ParamValue<false>, crateId: ParamValue<false> },
+      | never
+    >,
     '/HelloWorld': RouteRecordInfo<
       '/HelloWorld',
       '/HelloWorld',
@@ -74,6 +81,12 @@ declare module 'vue-router/auto-routes' {
     'src/views/chat/[name].vue': {
       routes:
         | '/chat/[name]'
+      views:
+        | never
+    }
+    'src/views/crate/open/[userId]/[crateId].vue': {
+      routes:
+        | '/crate/open/[userId]/[crateId]'
       views:
         | never
     }
