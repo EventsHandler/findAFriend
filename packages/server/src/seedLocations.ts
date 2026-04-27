@@ -2,43 +2,20 @@ import { prisma } from "./prisma";
 
 async function main() {
   await prisma.location.deleteMany();
-
   console.log("🗑 Locations cleared");
 
-  await prisma.location.createMany({
-    data: [
-      {
-        name: "Parcul Valea Morilor",
-        posx: 47.018313,
-        posy: 28.822356
-      },
-      {
-        name: "Parcul Valea Trandafirilor",
-        posx: 47.004205,
-        posy: 28.853141
-      },
-      {
-        name: "Parcul la izvor",
-        posx: 47.045507,
-        posy: 28.789853
-      },
-      {
-        name: "Centru",
-        posx: 47.023637,
-        posy: 28.833994
-      },
-      {
-        name: "Parcul Afgan",
-        posx: 47.050175,
-        posy: 28.863678
-      },
-      {
-        name: "Parcul Dendrariu",
-        posx: 47.033654,
-        posy: 28.807309
-      }
-    ]
-  });
+  // Use raw SQL insert so seeds keep working even if Prisma Client can't regenerate (Windows EPERM).
+  await prisma.$executeRawUnsafe(`
+    INSERT INTO "Location" ("id", "name", "posx", "posy", "tag") VALUES
+      (gen_random_uuid()::text, 'Parcul Valea Morilor', 47.018313, 28.822356, 'PARK'),
+      (gen_random_uuid()::text, 'Parcul Ștefan cel Mare și Sfânt', 47.024672, 28.830882, 'PARK'),
+      (gen_random_uuid()::text, 'Catedrala Nașterii Domnului', 47.026378, 28.828738, 'LANDMARK'),
+      (gen_random_uuid()::text, 'Parcul Valea Trandafirilor', 47.004205, 28.853141, 'PARK'),
+      (gen_random_uuid()::text, 'Parcul la izvor', 47.045507, 28.789853, 'PARK'),
+      (gen_random_uuid()::text, 'Centru', 47.023637, 28.833994, 'LANDMARK'),
+      (gen_random_uuid()::text, 'Parcul Afgan', 47.050175, 28.863678, 'PARK'),
+      (gen_random_uuid()::text, 'Parcul Dendrariu', 47.033654, 28.807309, 'PARK');
+  `);
 
   console.log("✅ Locations reseeded with accurate coordinates");
 }

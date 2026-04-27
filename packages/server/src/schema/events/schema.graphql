@@ -4,9 +4,47 @@ enum RarityType {
   LEGENDARY
 }
 
+enum UserMissionStatus {
+  ACTIVE
+  COMPLETED
+}
+
+type Mission {
+  id: ID!
+  title: String!
+  description: String
+  rewardXp: Int!
+  targetProgress: Int!
+  repeatable: Boolean!
+  cooldownHours: Int!
+  locationId: ID
+  location: Location
+}
+
+type UserMission {
+  id: ID!
+  userId: ID!
+  missionId: ID!
+  progress: Int!
+  status: UserMissionStatus!
+  lockedUntil: String
+  mission: Mission!
+}
+
+type QuestCompletion {
+  id: ID!
+  userId: ID!
+  missionId: ID!
+  title: String!
+  rewardXp: Int!
+  completedAt: String!
+  mission: Mission
+}
+
 type User {
   id: ID!
   name: String!
+  xp: Int!
   posx: Float
   posy: Float
   locationId: ID
@@ -14,6 +52,8 @@ type User {
   points: Int!
   inventories: [ItemInventory!]
   crateInventories: [CrateInventory!]
+  userMissions: [UserMission!]!
+  questHistory(limit: Int = 40): [QuestCompletion!]!
 }
 
 type Location {
@@ -21,6 +61,13 @@ type Location {
   name: String!
   posx: Float!
   posy: Float!
+  tag: LocationTag!
+}
+
+enum LocationTag {
+  PARK
+  RESTAURANT
+  LANDMARK
 }
 
 type Crate {
@@ -74,6 +121,7 @@ type AuthPayload {
 
 extend type Query {
   locations: [Location!]!
+  missions(locationId: ID): [Mission!]!
   me: User
   locationUsers(locationId: ID!): [User!]!
 
@@ -101,4 +149,9 @@ extend type Mutation {
   locations: [Location!]
 
   addPoints(userId: ID!, amount: Int!): Boolean!
+  claimMission(missionId: ID!): UserMission!
+  updateMissionProgress(userMissionId: ID!, progress: Int!): UserMission!
+  completePhotoMission(missionId: ID!, lat: Float!, lng: Float!): UserMission!
+  completeMission(missionId: ID!, lat: Float!, lng: Float!): UserMission!
+  startTimedMission(missionId: ID!, lat: Float!, lng: Float!): UserMission!
 }

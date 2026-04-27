@@ -11,10 +11,46 @@ query Me {
   me {
     id
     name
+    xp
     locationId
     posx
     posy
     points
+    userMissions {
+      id
+      progress
+      status
+      lockedUntil
+      mission {
+        id
+        title
+        description
+        rewardXp
+        targetProgress
+        repeatable
+        cooldownHours
+      }
+    }
+    questHistory(limit: 40) {
+      id
+      missionId
+      title
+      rewardXp
+      completedAt
+    }
+  }
+}
+
+query Missions($locationId: ID) {
+  missions(locationId: $locationId) {
+    id
+    title
+    description
+    rewardXp
+    targetProgress
+    repeatable
+    cooldownHours
+    locationId
   }
 }
 

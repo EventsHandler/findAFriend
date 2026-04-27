@@ -49,17 +49,41 @@ type Location {
   name: String!
   posx: Float!
   posy: Float!
+  tag: LocationTag!
+}
+
+enum LocationTag {
+  LANDMARK
+  PARK
+  RESTAURANT
+}
+
+type Mission {
+  cooldownHours: Int!
+  description: String
+  id: ID!
+  location: Location
+  locationId: ID
+  repeatable: Boolean!
+  rewardXp: Int!
+  targetProgress: Int!
+  title: String!
 }
 
 type Mutation {
   addPoints(amount: Int!, userId: ID!): Boolean!
   buyCrate(crateId: ID!, quantity: Int!, userId: ID!): Boolean!
+  claimMission(missionId: ID!): UserMission!
+  completeMission(lat: Float!, lng: Float!, missionId: ID!): UserMission!
+  completePhotoMission(lat: Float!, lng: Float!, missionId: ID!): UserMission!
   joinRoom(locationId: ID!): User!
   leaveRoom: User!
   locations: [Location!]
   login(name: String!, password: String!): AuthPayload!
   openCrate(crateId: ID!, userId: ID!): Item!
   register(name: String!, password: String!): AuthPayload!
+  startTimedMission(lat: Float!, lng: Float!, missionId: ID!): UserMission!
+  updateMissionProgress(progress: Int!, userMissionId: ID!): UserMission!
   updatePosition(lat: Float!, lng: Float!, locationId: ID!): User!
 }
 
@@ -71,9 +95,20 @@ type Query {
   locationUsers(locationId: ID!): [User!]!
   locations: [Location!]!
   me: User
+  missions(locationId: ID): [Mission!]!
   userCrate(crateId: ID!, userId: ID!): CrateInventory!
   userCrates(userId: ID!): [CrateInventory!]!
   userItems(userId: ID!): [ItemInventory!]!
+}
+
+type QuestCompletion {
+  completedAt: String!
+  id: ID!
+  mission: Mission
+  missionId: ID!
+  rewardXp: Int!
+  title: String!
+  userId: ID!
 }
 
 enum RarityType {
@@ -91,4 +126,22 @@ type User {
   points: Int!
   posx: Float
   posy: Float
+  questHistory(limit: Int = 40): [QuestCompletion!]!
+  userMissions: [UserMission!]!
+  xp: Int!
+}
+
+type UserMission {
+  id: ID!
+  lockedUntil: String
+  mission: Mission!
+  missionId: ID!
+  progress: Int!
+  status: UserMissionStatus!
+  userId: ID!
+}
+
+enum UserMissionStatus {
+  ACTIVE
+  COMPLETED
 }

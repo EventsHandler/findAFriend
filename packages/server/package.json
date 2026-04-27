@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "tsx --env-file .env --watch src/index.ts",
     "postinstall": "prisma generate",
+    "seed:locations": "tsx --env-file .env src/seedLocations.ts",
+    "seed:missions": "tsx --env-file .env src/seedMissions.ts",
     "migrate": "pnpm prisma migrate deploy",
     "build": "pkgroll build",
     "start": "prisma migrate deploy && node dist/index.js",

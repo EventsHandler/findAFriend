@@ -19,18 +19,18 @@ mutation Register($name: String!, $password: String!) {
 }
 
 mutation AddPoints($userId: ID!, $amount: Int!) {
-  addPoints(userId: $userId, amount: $amount) 
+  addPoints(userId: $userId, amount: $amount)
 }
 
-mutation OpenCrate($userId: ID!, $crateId: ID!){
-  openCrate(userId: $userId, crateId: $crateId){
+mutation OpenCrate($userId: ID!, $crateId: ID!) {
+  openCrate(userId: $userId, crateId: $crateId) {
     id
     name
     rarity
   }
 }
 
-mutation BuyCrate($userId: ID!, $crateId: ID!, $quantity: Int!){
+mutation BuyCrate($userId: ID!, $crateId: ID!, $quantity: Int!) {
   buyCrate(userId: $userId, crateId: $crateId, quantity: $quantity)
 }
 
@@ -63,5 +63,89 @@ mutation UpdatePosition($locationId: ID!, $lat: Float!, $lng: Float!) {
     posx
     posy
     points
+  }
+}
+
+mutation ClaimMission($missionId: ID!) {
+  claimMission(missionId: $missionId) {
+    id
+    progress
+    status
+    lockedUntil
+    mission {
+      id
+      title
+      rewardXp
+      targetProgress
+      repeatable
+      cooldownHours
+    }
+  }
+}
+
+mutation UpdateMissionProgress($userMissionId: ID!, $progress: Int!) {
+  updateMissionProgress(userMissionId: $userMissionId, progress: $progress) {
+    id
+    progress
+    status
+    lockedUntil
+    mission {
+      id
+      rewardXp
+      targetProgress
+      repeatable
+      cooldownHours
+    }
+  }
+}
+
+mutation CompletePhotoMission($missionId: ID!, $lat: Float!, $lng: Float!) {
+  completePhotoMission(missionId: $missionId, lat: $lat, lng: $lng) {
+    id
+    progress
+    status
+    lockedUntil
+    mission {
+      id
+      title
+      rewardXp
+      targetProgress
+      repeatable
+      cooldownHours
+    }
+  }
+}
+
+mutation CompleteMission($missionId: ID!, $lat: Float!, $lng: Float!) {
+  completeMission(missionId: $missionId, lat: $lat, lng: $lng) {
+    id
+    progress
+    status
+    lockedUntil
+    mission {
+      id
+      title
+      rewardXp
+      targetProgress
+      repeatable
+      cooldownHours
+    }
+  }
+}
+
+mutation StartTimedMission($missionId: ID!, $lat: Float!, $lng: Float!) {
+  startTimedMission(missionId: $missionId, lat: $lat, lng: $lng) {
+    id
+    progress
+    status
+    lockedUntil
+    mission {
+      id
+      title
+      rewardXp
+      targetProgress
+      repeatable
+      cooldownHours
+    }
   }
 }

@@ -1,15 +1,41 @@
 <script setup lang="ts">
-import { useQuery } from '@vue/apollo-composable'
+import { useApolloClient, useQuery } from '@vue/apollo-composable'
 import { useRouter } from 'vue-router'
-import { MeDocument } from '../api/graphql'
-import { computed } from 'vue'
+import {
+  MeDocument,
+  UserMissionStatus,
+} from '../api/graphql'
+import { computed, ref } from 'vue'
 
-const { result, loading, error } = useQuery(MeDocument)
-const user = computed(() => result.value?.me)
+const XP_PER_LEVEL = 600
+
 const router = useRouter()
+const actionError = ref('')
+const { client: apollo } = useApolloClient()
+
+const { result, loading, error, refetch: refetchMe } = useQuery(MeDocument)
+
+const user = computed(() => result.value?.me)
+
+const ongoingMissions = computed(() => {
+  const u = user.value
+  return (u?.userMissions ?? []).filter((um) => um.status === UserMissionStatus.Active)
+})
+
+const levelInfo = computed(() => {
+  const xp = user.value?.xp ?? 0
+  const level = Math.floor(xp / XP_PER_LEVEL) + 1
+  const xpInLevel = xp % XP_PER_LEVEL
+  const pct = Math.min(100, (xpInLevel / XP_PER_LEVEL) * 100)
+  return { xp, level, xpInLevel, pct, span: XP_PER_LEVEL }
+})
+
+const pageLoading = computed(() => loading.value)
 
 const logout = () => {
   localStorage.removeItem('token')
+  // Drop authenticated data from cache immediately.
+  void apollo.clearStore()
   router.push('/login')
 }
 
@@ -19,11 +45,29 @@ const users = [
   { id: 3, name: "Ion", distance: "80m", status: "arriving" },
 ]
 
-const missions = [
-  { title: "Walk 1km together", xp: 120 },
-  { title: "Meet 2 new players", xp: 200 },
-  { title: "Stay in zone 10 min", xp: 80 },
-]
+function isOnCooldown(lockedUntil: string | null | undefined) {
+  if (!lockedUntil) return false
+  return new Date(lockedUntil).getTime() > Date.now()
+}
+
+function cooldownRemaining(lockedUntil: string | null | undefined) {
+  if (!lockedUntil) return ''
+  const ms = new Date(lockedUntil).getTime() - Date.now()
+  if (ms <= 0) return ''
+  const h = Math.floor(ms / 3600000)
+  const m = Math.ceil((ms % 3600000) / 60000)
+  return h > 0 ? `${h}h ${m}m` : `${m}m`
+}
+
+function formatCompletedAt(iso: string) {
+  try {
+    return new Date(iso).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
+  } catch {
+    return iso
+  }
+}
+
+const questHistory = computed(() => user.value?.questHistory ?? [])
 </script>
 
 <template>
@@ -36,15 +80,15 @@ const missions = [
           <circle cx="12" cy="12" r="6" stroke="currentColor" opacity="0.6"/>
           <path d="M12 12 L20 6" stroke="currentColor"/>
         </svg>
-        <span class="text-sm tracking-widest text-lime-300">USER PROFILE</span>
+        <span class="text-sm tracking-widest text-lime-300">PROFIL</span>
       </div>
 
       <div class="flex items-center gap-3">
-        <div class="text-xs bg-orange-500/20 text-orange-300 px-2 py-1 rounded-full border border-orange-500/30">
-          LVL 7
+        <div v-if="user" class="text-xs bg-orange-500/20 text-orange-300 px-2 py-1 rounded-full border border-orange-500/30">
+          LVL {{ levelInfo.level }}
         </div>
         <button @click="logout" class="text-[10px] text-gray-400 border border-gray-700 px-2 py-1 rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-colors">
-          TERMINATE
+          DECONECTARE
         </button>
       </div>
     </header>
@@ -70,48 +114,92 @@ const missions = [
         </div>
       </section>
 
-      <div v-else-if="loading" class="text-center py-10 text-lime-300 animate-pulse tracking-widest">
-        FETCHING DATA...
+      <div v-else-if="pageLoading" class="text-center py-10 text-lime-300 animate-pulse tracking-widest">
+        SE ÎNCARCĂ...
       </div>
 
       <div v-else-if="error" class="text-center py-10 text-red-400 border border-red-400/20 bg-red-400/5 rounded-xl">
-        DATA LINK FAILED
+        CONEXIUNE EȘUATĂ
       </div>
 
       <!-- XP BAR -->
-      <div class="px-2">
+      <div v-if="user" class="px-2">
         <div class="flex justify-between text-[10px] text-gray-400 mb-2 uppercase tracking-widest">
-          <span>XP Progress</span>
-          <span class="text-lime-300">420 / 600</span>
+          <span>XP (level {{ levelInfo.level }})</span>
+          <span class="text-lime-300">{{ levelInfo.xpInLevel }} / {{ levelInfo.span }} · {{ levelInfo.xp }} total</span>
         </div>
         <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden border border-white/5">
-          <div class="h-full bg-gradient-to-r from-lime-400 to-orange-400 w-[70%] shadow-[0_0_10px_rgba(132,255,122,0.5)]"></div>
+          <div
+            class="h-full bg-gradient-to-r from-lime-400 to-orange-400 shadow-[0_0_10px_rgba(132,255,122,0.5)] transition-all duration-300"
+            :style="{ width: `${levelInfo.pct}%` }"
+          ></div>
         </div>
       </div>
 
+      <p v-if="actionError" class="text-[11px] text-red-400 px-2">{{ actionError }}</p>
+
       <!-- MISSIONS -->
-      <section>
-        <h2 class="text-[10px] text-gray-400 mb-3 tracking-[0.2em] uppercase px-2">Current Missions</h2>
+      <section v-if="user">
+        <h2 class="text-[10px] text-gray-400 mb-3 tracking-[0.2em] uppercase px-2">Misiuni în desfășurare</h2>
+        <div v-if="ongoingMissions.length === 0" class="text-xs text-gray-500 px-2">
+          Nu ai misiuni active. Pornește una de pe hartă.
+        </div>
         <div class="space-y-3">
           <div
-            v-for="(m, i) in missions"
-            :key="i"
-            class="flex items-center justify-between p-4 rounded-xl bg-[#0f1511] border border-lime-500/10 group hover:border-lime-500/30 transition-colors"
+            v-for="um in ongoingMissions"
+            :key="um.id"
+            class="p-4 rounded-xl bg-[#0f1511] border border-lime-500/10 group hover:border-lime-500/30 transition-colors space-y-3"
           >
-            <div>
-              <div class="text-sm font-medium">{{ m.title }}</div>
-              <div class="text-[10px] text-lime-300 mt-1 tracking-wider">+{{ m.xp }} XP</div>
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-sm font-medium">{{ um.mission.title }}</div>
+                <p v-if="um.mission.description" class="text-[11px] text-gray-500 mt-1 leading-snug">
+                  {{ um.mission.description }}
+                </p>
+                <div class="text-[10px] text-lime-300 mt-2 tracking-wider">
+                  Recompensă +{{ um.mission.rewardXp }} XP
+                </div>
+              </div>
             </div>
-            <button class="text-[10px] bg-lime-500/10 text-lime-300 px-4 py-1.5 rounded-full border border-lime-400/20 uppercase tracking-widest group-hover:bg-lime-500 group-hover:text-black transition-all">
-              Start
-            </button>
+            <div>
+              <div class="flex justify-between text-[10px] text-gray-500 mb-1">
+                <span>Progres</span>
+                <span>{{ um.progress }} / {{ um.mission.targetProgress }}</span>
+              </div>
+              <div class="h-1 bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-lime-400/80 transition-all"
+                  :style="{
+                    width: `${Math.min(100, (um.progress / um.mission.targetProgress) * 100)}%`,
+                  }"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUEST HISTORY -->
+      <section v-if="user && questHistory.length > 0">
+        <h2 class="text-[10px] text-gray-400 mb-3 tracking-[0.2em] uppercase px-2">Istoric misiuni</h2>
+        <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+          <div
+            v-for="q in questHistory"
+            :key="q.id"
+            class="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-[#0a0e0b] border border-white/5 text-[11px]"
+          >
+            <div class="min-w-0">
+              <div class="font-medium text-gray-200 truncate">{{ q.title }}</div>
+              <div class="text-[10px] text-gray-500 mt-0.5">{{ formatCompletedAt(q.completedAt) }}</div>
+            </div>
+            <div class="shrink-0 text-lime-300/90 tabular-nums">+{{ q.rewardXp }} XP</div>
           </div>
         </div>
       </section>
 
       <!-- NEARBY PLAYERS -->
       <section>
-        <h2 class="text-[10px] text-gray-400 mb-3 tracking-[0.2em] uppercase px-2">Players in Area</h2>
+        <h2 class="text-[10px] text-gray-400 mb-3 tracking-[0.2em] uppercase px-2">Jucători în zonă</h2>
         <div class="space-y-3">
           <div
             v-for="u in users"
@@ -131,7 +219,7 @@ const missions = [
               </div>
             </div>
             <button class="text-[10px] px-3 py-1.5 rounded-full bg-orange-500/10 text-orange-300 border border-orange-400/20 uppercase tracking-widest">
-              Invite
+              Invită
             </button>
           </div>
         </div>

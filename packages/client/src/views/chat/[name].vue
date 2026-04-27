@@ -32,6 +32,7 @@ const pusherCluster = import.meta.env.VITE_PUSHER_CLUSTER as string | undefined
 
 let pusher: Pusher | null = null
 let channel: ReturnType<Pusher['subscribe']> | null = null
+let isCleaningUp = false
 
 function scrollToBottom() {
   nextTick(() => bottomRef.value?.scrollIntoView({ block: 'end' }))
@@ -46,14 +47,7 @@ function resetConnection() {
     return
   }
 
-  if (pusher) {
-    try {
-      if (channel) pusher.unsubscribe(channel.name)
-    } catch {
-      // ignore
-    }
-    pusher.disconnect()
-  }
+  cleanupConnection()
 
   pusher = new Pusher(pusherKey, { cluster: pusherCluster })
   const channelName = `location-${encodeURIComponent(locationName.value)}`
@@ -69,6 +63,29 @@ function resetConnection() {
   channel.bind('pusher:subscription_error', () => {
     errorText.value = 'Failed to subscribe to chat channel.'
   })
+}
+
+function cleanupConnection() {
+  if (!pusher || isCleaningUp) return
+  isCleaningUp = true
+  try {
+    if (channel) {
+      try {
+        channel.unbind_all()
+      } catch {
+        // ignore
+      }
+    }
+  } finally {
+    try {
+      pusher.disconnect()
+    } catch {
+      // ignore
+    }
+    channel = null
+    pusher = null
+    isCleaningUp = false
+  }
 }
 
 async function sendMessage() {
@@ -113,14 +130,7 @@ watch(locationName, () => {
 })
 
 onBeforeUnmount(() => {
-  if (pusher) {
-    try {
-      if (channel) pusher.unsubscribe(channel.name)
-    } catch {
-      // ignore
-    }
-    pusher.disconnect()
-  }
+  cleanupConnection()
 })
 </script>
 
@@ -134,18 +144,18 @@ onBeforeUnmount(() => {
           class="text-[10px] text-gray-300 border border-gray-700 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors tracking-widest uppercase"
           @click="router.push('/MapPage')"
         >
-          Back
+          Înapoi
         </button>
         <div>
-          <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Location Chat</div>
+          <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Chat locație</div>
           <div class="text-lg font-bold text-lime-300">{{ locationName }}</div>
         </div>
       </div>
 
       <div class="text-[10px] text-gray-400 tracking-widest uppercase">
-        <span v-if="meLoading">Connecting…</span>
-        <span v-else-if="me">as {{ me.name }}</span>
-        <span v-else>not authenticated</span>
+        <span v-if="meLoading">Se conectează…</span>
+        <span v-else-if="me">ca {{ me.name }}</span>
+        <span v-else>neautentificat</span>
       </div>
     </header>
 
@@ -158,7 +168,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div v-if="messages.length === 0" class="text-center py-10 text-lime-300/70 text-xs tracking-widest">
-        NO MESSAGES YET
+        NICIUN MESAJ ÎNCĂ
       </div>
 
       <div class="space-y-3">
@@ -172,7 +182,7 @@ onBeforeUnmount(() => {
             <div class="text-xs text-lime-300 font-semibold tracking-wide">
               {{ m.user.name }}
               <span v-if="me?.id === m.user.id" class="text-[10px] text-gray-400 ml-2 tracking-widest uppercase"
-                >(you)</span
+                >(tu)</span
               >
             </div>
             <div class="text-[10px] text-gray-500 tracking-widest uppercase">
@@ -193,7 +203,7 @@ onBeforeUnmount(() => {
         <input
           v-model="draft"
           class="flex-1 bg-[#0b0f0c] border border-lime-500/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-lime-400 transition-colors"
-          :placeholder="me ? 'Type a message…' : 'Login to chat…'"
+          :placeholder="me ? 'Scrie un mesaj…' : 'Autentifică-te pentru chat…'"
           :disabled="!me || sending"
         />
         <button
@@ -201,11 +211,11 @@ onBeforeUnmount(() => {
           class="px-5 py-3 rounded-xl bg-lime-500 text-black font-bold text-xs tracking-widest uppercase disabled:opacity-50"
           :disabled="!me || sending || !draft.trim()"
         >
-          Send
+          Trimite
         </button>
       </form>
       <div class="max-w-3xl mx-auto mt-2 text-[10px] text-gray-500 tracking-widest uppercase">
-        Channel: location-{{ encodeURIComponent(locationName) }}
+        Canal: location-{{ encodeURIComponent(locationName) }}
       </div>
     </footer>
   </div>
