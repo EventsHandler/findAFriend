@@ -149,6 +149,30 @@ async function getCurrentGps() {
   })
 }
 
+function formatQuestApolloError(e: ApolloError) {
+  const gqlErr = e.graphQLErrors?.[0] as any
+  if (gqlErr) {
+    const code = gqlErr.extensions?.code as string | undefined
+    const details = gqlErr.extensions?.details as Record<string, unknown> | undefined
+
+    let msg = String(gqlErr.message ?? 'Request failed')
+    if (code) msg += ` (${code})`
+
+    const dist = (details as any)?.distanceMeters
+    const req = (details as any)?.requiredMeters
+    if (typeof dist === 'number' && typeof req === 'number') msg += ` — dist ${dist}m / ${req}m`
+
+    const lockedUntil = (details as any)?.lockedUntil
+    if (typeof lockedUntil === 'string') msg += ` — lockedUntil ${lockedUntil}`
+
+    return msg
+  }
+
+  const netMsg =
+    (e.networkError as any)?.result?.errors?.[0]?.message || (e.networkError as any)?.message
+  return netMsg ?? e.message
+}
+
 async function onCompleteMission(missionId: string) {
   questActionError.value = null
   if (!localStorage.getItem('token')) {
@@ -161,12 +185,9 @@ async function onCompleteMission(missionId: string) {
     await refetchMe()
   } catch (e) {
     if (e instanceof ApolloError) {
-      const graphMsg = e.graphQLErrors?.[0]?.message
-      const netMsg =
-        (e.networkError as any)?.result?.errors?.[0]?.message || (e.networkError as any)?.message
-      questActionError.value = graphMsg ?? netMsg ?? e.message
+      questActionError.value = formatQuestApolloError(e)
     } else {
-      questActionError.value = e instanceof Error ? e.message : 'Failed to complete mission'
+      questActionError.value = e instanceof Error ? e.message : 'Unexpected error'
     }
   }
 }
@@ -184,12 +205,9 @@ async function onStartTimedMission(missionId: string) {
     await refetchMe()
   } catch (e) {
     if (e instanceof ApolloError) {
-      const graphMsg = e.graphQLErrors?.[0]?.message
-      const netMsg =
-        (e.networkError as any)?.result?.errors?.[0]?.message || (e.networkError as any)?.message
-      questActionError.value = graphMsg ?? netMsg ?? e.message
+      questActionError.value = formatQuestApolloError(e)
     } else {
-      questActionError.value = e instanceof Error ? e.message : 'Failed to start mission timer'
+      questActionError.value = e instanceof Error ? e.message : 'Unexpected error'
     }
   }
 }
@@ -210,12 +228,9 @@ async function onCompletePhotoMission(missionId: string, _file?: File) {
     await refetchMe()
   } catch (e) {
     if (e instanceof ApolloError) {
-      const graphMsg = e.graphQLErrors?.[0]?.message
-      const netMsg =
-        (e.networkError as any)?.result?.errors?.[0]?.message || (e.networkError as any)?.message
-      questActionError.value = graphMsg ?? netMsg ?? e.message
+      questActionError.value = formatQuestApolloError(e)
     } else {
-      questActionError.value = e instanceof Error ? e.message : 'Failed to complete photo mission'
+      questActionError.value = e instanceof Error ? e.message : 'Unexpected error'
     }
   } finally {
     photoBusyByMissionId.value.delete(missionId)
@@ -399,6 +414,17 @@ async function onClaimLocationMission(missionId: string) {
     return
   }
   try {
+    // Claim validation is server-side and requires you're joined + have a recent GPS position saved.
+    if (!currentRoomId.value || me.value?.locationId !== selectedLocationId.value) {
+      questActionError.value = 'Intră în cameră (Join) înainte să pornești misiunea'
+      return
+    }
+    try {
+      const { lat, lng } = await getCurrentGps()
+      await updatePosition(currentRoomId.value, lat, lng)
+    } catch {
+      // If GPS is denied/unavailable we still attempt claim, but server may reject it.
+    }
     await claimMissionMutate({ missionId })
     await refetchMe()
   } catch (e) {
@@ -412,6 +438,7 @@ async function onClaimLocationMission(missionId: string) {
       questActionError.value = msg
       console.warn('Claim mission failed:', msg)
     } else {
+      questActionError.value = e instanceof Error ? e.message : 'Unexpected error'
       console.warn('Claim mission failed:', e)
     }
   }

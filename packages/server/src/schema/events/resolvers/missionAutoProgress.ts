@@ -1,5 +1,5 @@
 import { prisma } from '../../../prisma.js'
-import { canUpdateProgressNow } from './missionValidationState.ts'
+import { canUpdateProgressNow } from './missionValidationState'
 
 type Pos = { lat: number; lng: number }
 

@@ -1,6 +1,6 @@
 import { prisma } from '../../../../prisma.js'
 import type { MutationResolvers } from './../../../types.generated.js'
-import { autoProgressFromPositionEvent } from '../missionAutoProgress.ts'
+import { autoProgressFromPositionEvent } from '../missionAutoProgress'
 
 export const updatePosition: NonNullable<MutationResolvers['updatePosition']> = async (
   _parent,

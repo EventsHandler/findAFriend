@@ -6,7 +6,7 @@ import { prisma } from './prisma'
 import jwt from 'jsonwebtoken'
 import { UserContext } from './types/context'
 import Pusher from 'pusher'
-import { autoProgressFromChatEvent } from './schema/events/resolvers/missionAutoProgress.ts'
+import { autoProgressFromChatEvent } from './schema/events/resolvers/missionAutoProgress'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret'
 
