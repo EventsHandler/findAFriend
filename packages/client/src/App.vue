@@ -18,7 +18,10 @@ const goToChat = () => {
     <RouterView />
 
     <!-- BOTTOM NAV (GAME HUD) -->
-    <footer v-if="!$route.path.startsWith('/chat/')" class="fixed bottom-0 left-0 right-0 bg-[#0b0f0c]/90 backdrop-blur-md border-t border-lime-500/10 flex justify-around py-4 z-1000">
+    <footer
+      v-if="!$route.path.startsWith('/chat/')"
+      class="fixed bottom-0 left-0 right-0 bg-[#0b0f0c]/90 backdrop-blur-md border-t border-lime-500/10 flex justify-around py-4 z-[2000] pointer-events-auto"
+    >
       <router-link to="/MapPage" class="flex flex-col items-center text-gray-400 text-[10px] tracking-widest hover:text-lime-300 transition-colors"
                    :class="{ 'text-lime-300': $route.path === '/' || $route.path === '/MapPage' }">
         <svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -26,6 +29,18 @@ const goToChat = () => {
           <path d="M9 21V9h6v12" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         MAP
+      </router-link>
+
+      <router-link
+        to="/Quests"
+        class="flex flex-col items-center text-gray-400 text-[10px] tracking-widest hover:text-lime-300 transition-colors"
+        :class="{ 'text-lime-300': $route.path === '/Quests' }"
+      >
+        <svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="8" />
+          <path d="M12 8v8M8 12h8" />
+        </svg>
+        QUESTS
       </router-link>
 
       <router-link to="/shop" class="flex flex-col items-center text-gray-400 text-[10px] tracking-widest hover:text-lime-300 transition-colors"

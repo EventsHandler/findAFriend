@@ -79,9 +79,16 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/Shop': RouteRecordInfo<
-      '/Shop',
-      '/Shop',
+    '/Quests': RouteRecordInfo<
+      '/Quests',
+      '/Quests',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/shop': RouteRecordInfo<
+      '/shop',
+      '/shop',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -147,9 +154,15 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
-    'src/views/Shop.vue': {
+    'src/views/Quests.vue': {
       routes:
-        | '/Shop'
+        | '/Quests'
+      views:
+        | never
+    }
+    'src/views/shop.vue': {
+      routes:
+        | '/shop'
       views:
         | never
     }

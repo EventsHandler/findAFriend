@@ -74,18 +74,44 @@ export type Location = {
   name: Scalars['String']['output']
   posx: Scalars['Float']['output']
   posy: Scalars['Float']['output']
+  tag: LocationTag
+}
+
+export const LocationTag = {
+  Landmark: 'LANDMARK',
+  Park: 'PARK',
+  Restaurant: 'RESTAURANT',
+} as const
+
+export type LocationTag = (typeof LocationTag)[keyof typeof LocationTag]
+export type Mission = {
+  __typename?: 'Mission'
+  cooldownHours: Scalars['Int']['output']
+  description?: Maybe<Scalars['String']['output']>
+  id: Scalars['ID']['output']
+  location?: Maybe<Location>
+  locationId?: Maybe<Scalars['ID']['output']>
+  repeatable: Scalars['Boolean']['output']
+  rewardXp: Scalars['Int']['output']
+  targetProgress: Scalars['Int']['output']
+  title: Scalars['String']['output']
 }
 
 export type Mutation = {
   __typename?: 'Mutation'
   addPoints: Scalars['Boolean']['output']
   buyCrate: Scalars['Boolean']['output']
+  claimMission: UserMission
+  completeMission: UserMission
+  completePhotoMission: UserMission
   joinRoom: User
   leaveRoom: User
   locations?: Maybe<Array<Location>>
   login: AuthPayload
   openCrate: Item
   register: AuthPayload
+  startTimedMission: UserMission
+  updateMissionProgress: UserMission
   updatePosition: User
 }
 
@@ -98,6 +124,22 @@ export type MutationBuyCrateArgs = {
   crateId: Scalars['ID']['input']
   quantity: Scalars['Int']['input']
   userId: Scalars['ID']['input']
+}
+
+export type MutationClaimMissionArgs = {
+  missionId: Scalars['ID']['input']
+}
+
+export type MutationCompleteMissionArgs = {
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+  missionId: Scalars['ID']['input']
+}
+
+export type MutationCompletePhotoMissionArgs = {
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+  missionId: Scalars['ID']['input']
 }
 
 export type MutationJoinRoomArgs = {
@@ -119,6 +161,17 @@ export type MutationRegisterArgs = {
   password: Scalars['String']['input']
 }
 
+export type MutationStartTimedMissionArgs = {
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+  missionId: Scalars['ID']['input']
+}
+
+export type MutationUpdateMissionProgressArgs = {
+  progress: Scalars['Int']['input']
+  userMissionId: Scalars['ID']['input']
+}
+
 export type MutationUpdatePositionArgs = {
   lat: Scalars['Float']['input']
   lng: Scalars['Float']['input']
@@ -134,6 +187,7 @@ export type Query = {
   locationUsers: Array<User>
   locations: Array<Location>
   me?: Maybe<User>
+  missions: Array<Mission>
   userCrate: CrateInventory
   userCrates: Array<CrateInventory>
   userItems: Array<ItemInventory>
@@ -151,6 +205,10 @@ export type QueryLocationUsersArgs = {
   locationId: Scalars['ID']['input']
 }
 
+export type QueryMissionsArgs = {
+  locationId?: InputMaybe<Scalars['ID']['input']>
+}
+
 export type QueryUserCrateArgs = {
   crateId: Scalars['ID']['input']
   userId: Scalars['ID']['input']
@@ -162,6 +220,17 @@ export type QueryUserCratesArgs = {
 
 export type QueryUserItemsArgs = {
   userId: Scalars['ID']['input']
+}
+
+export type QuestCompletion = {
+  __typename?: 'QuestCompletion'
+  completedAt: Scalars['String']['output']
+  id: Scalars['ID']['output']
+  mission?: Maybe<Mission>
+  missionId: Scalars['ID']['output']
+  rewardXp: Scalars['Int']['output']
+  title: Scalars['String']['output']
+  userId: Scalars['ID']['output']
 }
 
 export const RarityType = {
@@ -181,8 +250,32 @@ export type User = {
   points: Scalars['Int']['output']
   posx?: Maybe<Scalars['Float']['output']>
   posy?: Maybe<Scalars['Float']['output']>
+  questHistory: Array<QuestCompletion>
+  userMissions: Array<UserMission>
+  xp: Scalars['Int']['output']
 }
 
+export type UserQuestHistoryArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>
+}
+
+export type UserMission = {
+  __typename?: 'UserMission'
+  id: Scalars['ID']['output']
+  lockedUntil?: Maybe<Scalars['String']['output']>
+  mission: Mission
+  missionId: Scalars['ID']['output']
+  progress: Scalars['Int']['output']
+  status: UserMissionStatus
+  userId: Scalars['ID']['output']
+}
+
+export const UserMissionStatus = {
+  Active: 'ACTIVE',
+  Completed: 'COMPLETED',
+} as const
+
+export type UserMissionStatus = (typeof UserMissionStatus)[keyof typeof UserMissionStatus]
 export type LoginMutationVariables = Exact<{
   name: Scalars['String']['input']
   password: Scalars['String']['input']
@@ -278,6 +371,132 @@ export type UpdatePositionMutation = {
   }
 }
 
+export type ClaimMissionMutationVariables = Exact<{
+  missionId: Scalars['ID']['input']
+}>
+
+export type ClaimMissionMutation = {
+  __typename?: 'Mutation'
+  claimMission: {
+    __typename?: 'UserMission'
+    id: string
+    progress: number
+    status: UserMissionStatus
+    lockedUntil?: string | null
+    mission: {
+      __typename?: 'Mission'
+      id: string
+      title: string
+      rewardXp: number
+      targetProgress: number
+      repeatable: boolean
+      cooldownHours: number
+    }
+  }
+}
+
+export type UpdateMissionProgressMutationVariables = Exact<{
+  userMissionId: Scalars['ID']['input']
+  progress: Scalars['Int']['input']
+}>
+
+export type UpdateMissionProgressMutation = {
+  __typename?: 'Mutation'
+  updateMissionProgress: {
+    __typename?: 'UserMission'
+    id: string
+    progress: number
+    status: UserMissionStatus
+    lockedUntil?: string | null
+    mission: {
+      __typename?: 'Mission'
+      id: string
+      rewardXp: number
+      targetProgress: number
+      repeatable: boolean
+      cooldownHours: number
+    }
+  }
+}
+
+export type CompletePhotoMissionMutationVariables = Exact<{
+  missionId: Scalars['ID']['input']
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+}>
+
+export type CompletePhotoMissionMutation = {
+  __typename?: 'Mutation'
+  completePhotoMission: {
+    __typename?: 'UserMission'
+    id: string
+    progress: number
+    status: UserMissionStatus
+    lockedUntil?: string | null
+    mission: {
+      __typename?: 'Mission'
+      id: string
+      title: string
+      rewardXp: number
+      targetProgress: number
+      repeatable: boolean
+      cooldownHours: number
+    }
+  }
+}
+
+export type CompleteMissionMutationVariables = Exact<{
+  missionId: Scalars['ID']['input']
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+}>
+
+export type CompleteMissionMutation = {
+  __typename?: 'Mutation'
+  completeMission: {
+    __typename?: 'UserMission'
+    id: string
+    progress: number
+    status: UserMissionStatus
+    lockedUntil?: string | null
+    mission: {
+      __typename?: 'Mission'
+      id: string
+      title: string
+      rewardXp: number
+      targetProgress: number
+      repeatable: boolean
+      cooldownHours: number
+    }
+  }
+}
+
+export type StartTimedMissionMutationVariables = Exact<{
+  missionId: Scalars['ID']['input']
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+}>
+
+export type StartTimedMissionMutation = {
+  __typename?: 'Mutation'
+  startTimedMission: {
+    __typename?: 'UserMission'
+    id: string
+    progress: number
+    status: UserMissionStatus
+    lockedUntil?: string | null
+    mission: {
+      __typename?: 'Mission'
+      id: string
+      title: string
+      rewardXp: number
+      targetProgress: number
+      repeatable: boolean
+      cooldownHours: number
+    }
+  }
+}
+
 export type LocationsQueryVariables = Exact<{ [key: string]: never }>
 
 export type LocationsQuery = {
@@ -293,11 +512,56 @@ export type MeQuery = {
     __typename?: 'User'
     id: string
     name: string
+    xp: number
     locationId?: string | null
     posx?: number | null
     posy?: number | null
     points: number
+    userMissions: Array<{
+      __typename?: 'UserMission'
+      id: string
+      progress: number
+      status: UserMissionStatus
+      lockedUntil?: string | null
+      mission: {
+        __typename?: 'Mission'
+        id: string
+        title: string
+        description?: string | null
+        rewardXp: number
+        targetProgress: number
+        repeatable: boolean
+        cooldownHours: number
+      }
+    }>
+    questHistory: Array<{
+      __typename?: 'QuestCompletion'
+      id: string
+      missionId: string
+      title: string
+      rewardXp: number
+      completedAt: string
+    }>
   } | null
+}
+
+export type MissionsQueryVariables = Exact<{
+  locationId?: InputMaybe<Scalars['ID']['input']>
+}>
+
+export type MissionsQuery = {
+  __typename?: 'Query'
+  missions: Array<{
+    __typename?: 'Mission'
+    id: string
+    title: string
+    description?: string | null
+    rewardXp: number
+    targetProgress: number
+    repeatable: boolean
+    cooldownHours: number
+    locationId?: string | null
+  }>
 }
 
 export type LocationUsersQueryVariables = Exact<{
@@ -728,6 +992,360 @@ export const UpdatePositionDocument = {
     },
   ],
 } as unknown as DocumentNode<UpdatePositionMutation, UpdatePositionMutationVariables>
+export const ClaimMissionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'ClaimMission' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'missionId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'claimMission' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'missionId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'missionId' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'progress' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lockedUntil' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'mission' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ClaimMissionMutation, ClaimMissionMutationVariables>
+export const UpdateMissionProgressDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdateMissionProgress' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'userMissionId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'progress' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updateMissionProgress' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'userMissionId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'userMissionId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'progress' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'progress' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'progress' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lockedUntil' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'mission' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateMissionProgressMutation, UpdateMissionProgressMutationVariables>
+export const CompletePhotoMissionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CompletePhotoMission' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'missionId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'lat' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'lng' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'completePhotoMission' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'missionId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'missionId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'lat' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'lat' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'lng' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'lng' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'progress' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lockedUntil' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'mission' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CompletePhotoMissionMutation, CompletePhotoMissionMutationVariables>
+export const CompleteMissionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'CompleteMission' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'missionId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'lat' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'lng' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'completeMission' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'missionId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'missionId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'lat' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'lat' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'lng' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'lng' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'progress' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lockedUntil' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'mission' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CompleteMissionMutation, CompleteMissionMutationVariables>
+export const StartTimedMissionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'StartTimedMission' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'missionId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'lat' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'lng' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'startTimedMission' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'missionId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'missionId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'lat' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'lat' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'lng' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'lng' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'progress' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'lockedUntil' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'mission' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<StartTimedMissionMutation, StartTimedMissionMutationVariables>
 export const LocationsDocument = {
   kind: 'Document',
   definitions: [
@@ -774,10 +1392,61 @@ export const MeDocument = {
               selections: [
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'xp' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'points' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'userMissions' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'progress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'lockedUntil' } },
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'mission' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'questHistory' },
+                  arguments: [
+                    {
+                      kind: 'Argument',
+                      name: { kind: 'Name', value: 'limit' },
+                      value: { kind: 'IntValue', value: '40' },
+                    },
+                  ],
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'missionId' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'completedAt' } },
+                    ],
+                  },
+                },
               ],
             },
           },
@@ -786,6 +1455,52 @@ export const MeDocument = {
     },
   ],
 } as unknown as DocumentNode<MeQuery, MeQueryVariables>
+export const MissionsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'Missions' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'locationId' } },
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'missions' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'locationId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'locationId' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'title' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'description' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<MissionsQuery, MissionsQueryVariables>
 export const LocationUsersDocument = {
   kind: 'Document',
   definitions: [

@@ -8,8 +8,8 @@ export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Mayb
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never }
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never }
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
-export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> }
 export type EnumResolverSignature<T, AllowedValues = any> = { [key in keyof T]?: AllowedValues }
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> }
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string | number }
@@ -77,18 +77,39 @@ export type Location = {
   name: Scalars['String']['output']
   posx: Scalars['Float']['output']
   posy: Scalars['Float']['output']
+  tag: LocationTag
+}
+
+export type LocationTag = 'LANDMARK' | 'PARK' | 'RESTAURANT'
+
+export type Mission = {
+  __typename?: 'Mission'
+  cooldownHours: Scalars['Int']['output']
+  description?: Maybe<Scalars['String']['output']>
+  id: Scalars['ID']['output']
+  location?: Maybe<Location>
+  locationId?: Maybe<Scalars['ID']['output']>
+  repeatable: Scalars['Boolean']['output']
+  rewardXp: Scalars['Int']['output']
+  targetProgress: Scalars['Int']['output']
+  title: Scalars['String']['output']
 }
 
 export type Mutation = {
   __typename?: 'Mutation'
   addPoints: Scalars['Boolean']['output']
   buyCrate: Scalars['Boolean']['output']
+  claimMission: UserMission
+  completeMission: UserMission
+  completePhotoMission: UserMission
   joinRoom: User
   leaveRoom: User
   locations?: Maybe<Array<Location>>
   login: AuthPayload
   openCrate: Item
   register: AuthPayload
+  startTimedMission: UserMission
+  updateMissionProgress: UserMission
   updatePosition: User
 }
 
@@ -101,6 +122,22 @@ export type MutationbuyCrateArgs = {
   crateId: Scalars['ID']['input']
   quantity: Scalars['Int']['input']
   userId: Scalars['ID']['input']
+}
+
+export type MutationclaimMissionArgs = {
+  missionId: Scalars['ID']['input']
+}
+
+export type MutationcompleteMissionArgs = {
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+  missionId: Scalars['ID']['input']
+}
+
+export type MutationcompletePhotoMissionArgs = {
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+  missionId: Scalars['ID']['input']
 }
 
 export type MutationjoinRoomArgs = {
@@ -122,6 +159,17 @@ export type MutationregisterArgs = {
   password: Scalars['String']['input']
 }
 
+export type MutationstartTimedMissionArgs = {
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+  missionId: Scalars['ID']['input']
+}
+
+export type MutationupdateMissionProgressArgs = {
+  progress: Scalars['Int']['input']
+  userMissionId: Scalars['ID']['input']
+}
+
 export type MutationupdatePositionArgs = {
   lat: Scalars['Float']['input']
   lng: Scalars['Float']['input']
@@ -137,6 +185,7 @@ export type Query = {
   locationUsers: Array<User>
   locations: Array<Location>
   me?: Maybe<User>
+  missions: Array<Mission>
   userCrate: CrateInventory
   userCrates: Array<CrateInventory>
   userItems: Array<ItemInventory>
@@ -154,6 +203,10 @@ export type QuerylocationUsersArgs = {
   locationId: Scalars['ID']['input']
 }
 
+export type QuerymissionsArgs = {
+  locationId?: InputMaybe<Scalars['ID']['input']>
+}
+
 export type QueryuserCrateArgs = {
   crateId: Scalars['ID']['input']
   userId: Scalars['ID']['input']
@@ -165,6 +218,17 @@ export type QueryuserCratesArgs = {
 
 export type QueryuserItemsArgs = {
   userId: Scalars['ID']['input']
+}
+
+export type QuestCompletion = {
+  __typename?: 'QuestCompletion'
+  completedAt: Scalars['String']['output']
+  id: Scalars['ID']['output']
+  mission?: Maybe<Mission>
+  missionId: Scalars['ID']['output']
+  rewardXp: Scalars['Int']['output']
+  title: Scalars['String']['output']
+  userId: Scalars['ID']['output']
 }
 
 export type RarityType = 'COMMON' | 'EPIC' | 'LEGENDARY'
@@ -179,7 +243,27 @@ export type User = {
   points: Scalars['Int']['output']
   posx?: Maybe<Scalars['Float']['output']>
   posy?: Maybe<Scalars['Float']['output']>
+  questHistory: Array<QuestCompletion>
+  userMissions: Array<UserMission>
+  xp: Scalars['Int']['output']
 }
+
+export type UserquestHistoryArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>
+}
+
+export type UserMission = {
+  __typename?: 'UserMission'
+  id: Scalars['ID']['output']
+  lockedUntil?: Maybe<Scalars['String']['output']>
+  mission: Mission
+  missionId: Scalars['ID']['output']
+  progress: Scalars['Int']['output']
+  status: UserMissionStatus
+  userId: Scalars['ID']['output']
+}
+
+export type UserMissionStatus = 'ACTIVE' | 'COMPLETED'
 
 export type ResolverTypeWrapper<T> = Promise<T> | T
 
@@ -283,17 +367,31 @@ export type ResolversTypes = {
       user?: Maybe<ResolversTypes['User']>
     }
   >
-  Location: ResolverTypeWrapper<Location>
-  Mutation: ResolverTypeWrapper<{}>
+  Location: ResolverTypeWrapper<Omit<Location, 'tag'> & { tag: ResolversTypes['LocationTag'] }>
+  LocationTag: ResolverTypeWrapper<'PARK' | 'RESTAURANT' | 'LANDMARK'>
+  Mission: ResolverTypeWrapper<Omit<Mission, 'location'> & { location?: Maybe<ResolversTypes['Location']> }>
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>
+  Mutation: ResolverTypeWrapper<{}>
   Query: ResolverTypeWrapper<{}>
+  QuestCompletion: ResolverTypeWrapper<
+    Omit<QuestCompletion, 'mission'> & { mission?: Maybe<ResolversTypes['Mission']> }
+  >
   RarityType: ResolverTypeWrapper<'COMMON' | 'EPIC' | 'LEGENDARY'>
   User: ResolverTypeWrapper<
-    Omit<User, 'crateInventories' | 'inventories'> & {
+    Omit<User, 'crateInventories' | 'inventories' | 'questHistory' | 'userMissions'> & {
       crateInventories?: Maybe<Array<ResolversTypes['CrateInventory']>>
       inventories?: Maybe<Array<ResolversTypes['ItemInventory']>>
+      questHistory: Array<ResolversTypes['QuestCompletion']>
+      userMissions: Array<ResolversTypes['UserMission']>
     }
   >
+  UserMission: ResolverTypeWrapper<
+    Omit<UserMission, 'mission' | 'status'> & {
+      mission: ResolversTypes['Mission']
+      status: ResolversTypes['UserMissionStatus']
+    }
+  >
+  UserMissionStatus: ResolverTypeWrapper<'ACTIVE' | 'COMPLETED'>
 }
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -315,13 +413,18 @@ export type ResolversParentTypes = {
     user?: Maybe<ResolversParentTypes['User']>
   }
   Location: Location
-  Mutation: {}
+  Mission: Omit<Mission, 'location'> & { location?: Maybe<ResolversParentTypes['Location']> }
   Boolean: Scalars['Boolean']['output']
+  Mutation: {}
   Query: {}
-  User: Omit<User, 'crateInventories' | 'inventories'> & {
+  QuestCompletion: Omit<QuestCompletion, 'mission'> & { mission?: Maybe<ResolversParentTypes['Mission']> }
+  User: Omit<User, 'crateInventories' | 'inventories' | 'questHistory' | 'userMissions'> & {
     crateInventories?: Maybe<Array<ResolversParentTypes['CrateInventory']>>
     inventories?: Maybe<Array<ResolversParentTypes['ItemInventory']>>
+    questHistory: Array<ResolversParentTypes['QuestCompletion']>
+    userMissions: Array<ResolversParentTypes['UserMission']>
   }
+  UserMission: Omit<UserMission, 'mission'> & { mission: ResolversParentTypes['Mission'] }
 }
 
 export type AuthPayloadResolvers<
@@ -402,6 +505,28 @@ export type LocationResolvers<
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   posx?: Resolver<ResolversTypes['Float'], ParentType, ContextType>
   posy?: Resolver<ResolversTypes['Float'], ParentType, ContextType>
+  tag?: Resolver<ResolversTypes['LocationTag'], ParentType, ContextType>
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
+}
+
+export type LocationTagResolvers = EnumResolverSignature<
+  { LANDMARK?: any; PARK?: any; RESTAURANT?: any },
+  ResolversTypes['LocationTag']
+>
+
+export type MissionResolvers<
+  ContextType = UserContext,
+  ParentType extends ResolversParentTypes['Mission'] = ResolversParentTypes['Mission'],
+> = {
+  cooldownHours?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
+  location?: Resolver<Maybe<ResolversTypes['Location']>, ParentType, ContextType>
+  locationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>
+  repeatable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>
+  rewardXp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
+  targetProgress?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
 
@@ -420,6 +545,24 @@ export type MutationResolvers<
     ParentType,
     ContextType,
     RequireFields<MutationbuyCrateArgs, 'crateId' | 'quantity' | 'userId'>
+  >
+  claimMission?: Resolver<
+    ResolversTypes['UserMission'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationclaimMissionArgs, 'missionId'>
+  >
+  completeMission?: Resolver<
+    ResolversTypes['UserMission'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationcompleteMissionArgs, 'lat' | 'lng' | 'missionId'>
+  >
+  completePhotoMission?: Resolver<
+    ResolversTypes['UserMission'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationcompletePhotoMissionArgs, 'lat' | 'lng' | 'missionId'>
   >
   joinRoom?: Resolver<
     ResolversTypes['User'],
@@ -447,6 +590,18 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationregisterArgs, 'name' | 'password'>
   >
+  startTimedMission?: Resolver<
+    ResolversTypes['UserMission'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationstartTimedMissionArgs, 'lat' | 'lng' | 'missionId'>
+  >
+  updateMissionProgress?: Resolver<
+    ResolversTypes['UserMission'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationupdateMissionProgressArgs, 'progress' | 'userMissionId'>
+  >
   updatePosition?: Resolver<
     ResolversTypes['User'],
     ParentType,
@@ -471,6 +626,7 @@ export type QueryResolvers<
   >
   locations?: Resolver<Array<ResolversTypes['Location']>, ParentType, ContextType>
   me?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>
+  missions?: Resolver<Array<ResolversTypes['Mission']>, ParentType, ContextType, Partial<QuerymissionsArgs>>
   userCrate?: Resolver<
     ResolversTypes['CrateInventory'],
     ParentType,
@@ -491,6 +647,20 @@ export type QueryResolvers<
   >
 }
 
+export type QuestCompletionResolvers<
+  ContextType = UserContext,
+  ParentType extends ResolversParentTypes['QuestCompletion'] = ResolversParentTypes['QuestCompletion'],
+> = {
+  completedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
+  mission?: Resolver<Maybe<ResolversTypes['Mission']>, ParentType, ContextType>
+  missionId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
+  rewardXp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>
+  userId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
+}
+
 export type RarityTypeResolvers = EnumResolverSignature<
   { COMMON?: any; EPIC?: any; LEGENDARY?: any },
   ResolversTypes['RarityType']
@@ -508,8 +678,35 @@ export type UserResolvers<
   points?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
   posx?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>
   posy?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>
+  questHistory?: Resolver<
+    Array<ResolversTypes['QuestCompletion']>,
+    ParentType,
+    ContextType,
+    RequireFields<UserquestHistoryArgs, 'limit'>
+  >
+  userMissions?: Resolver<Array<ResolversTypes['UserMission']>, ParentType, ContextType>
+  xp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
+
+export type UserMissionResolvers<
+  ContextType = UserContext,
+  ParentType extends ResolversParentTypes['UserMission'] = ResolversParentTypes['UserMission'],
+> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
+  lockedUntil?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>
+  mission?: Resolver<ResolversTypes['Mission'], ParentType, ContextType>
+  missionId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
+  progress?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
+  status?: Resolver<ResolversTypes['UserMissionStatus'], ParentType, ContextType>
+  userId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
+}
+
+export type UserMissionStatusResolvers = EnumResolverSignature<
+  { ACTIVE?: any; COMPLETED?: any },
+  ResolversTypes['UserMissionStatus']
+>
 
 export type Resolvers<ContextType = UserContext> = {
   AuthPayload?: AuthPayloadResolvers<ContextType>
@@ -519,8 +716,13 @@ export type Resolvers<ContextType = UserContext> = {
   Item?: ItemResolvers<ContextType>
   ItemInventory?: ItemInventoryResolvers<ContextType>
   Location?: LocationResolvers<ContextType>
+  LocationTag?: LocationTagResolvers
+  Mission?: MissionResolvers<ContextType>
   Mutation?: MutationResolvers<ContextType>
   Query?: QueryResolvers<ContextType>
+  QuestCompletion?: QuestCompletionResolvers<ContextType>
   RarityType?: RarityTypeResolvers
   User?: UserResolvers<ContextType>
+  UserMission?: UserMissionResolvers<ContextType>
+  UserMissionStatus?: UserMissionStatusResolvers
 }

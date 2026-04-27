@@ -6,6 +6,7 @@ import { prisma } from './prisma'
 import jwt from 'jsonwebtoken'
 import { UserContext } from './types/context'
 import Pusher from 'pusher'
+import { autoProgressFromChatEvent } from './schema/events/resolvers/missionAutoProgress.ts'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret'
 
@@ -45,6 +46,9 @@ async function getUserFromRequest(req: import('http').IncomingMessage) {
 
 const yoga = createYoga<UserContext>({
   schema: createSchema({ typeDefs, resolvers }),
+  // During development we want real error messages (e.g. "Unauthorized", cooldown, etc.)
+  // so the client can display them. In production keep them masked.
+  maskedErrors: process.env.NODE_ENV === 'production',
   context: async ({ request }) => {
     const auth = request.headers.get('authorization')
     if (auth && auth.startsWith('Bearer ')) {
@@ -107,6 +111,10 @@ const server = createServer(async (req, res) => {
       }
 
       await pusher.trigger(channel, 'message', payload)
+      if (user.locationId === location) {
+        // Best-effort server-side quest progress from chat events.
+        void autoProgressFromChatEvent({ userId: user.id, locationId: location, messageId: payload.id })
+      }
 
       res.writeHead(200, { 'content-type': 'application/json' })
       res.end(JSON.stringify({ ok: true }))

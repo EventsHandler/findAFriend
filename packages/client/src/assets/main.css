@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+/* Scrollbar styling (opt-in via .styled-scrollbar) */
+.styled-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(132, 255, 122, 0.35) rgba(255, 255, 255, 0.06);
+}
+
+.styled-scrollbar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(132, 255, 122, 0.25);
+  border: 2px solid rgba(11, 15, 12, 0.8);
+  border-radius: 999px;
+}
+
+.styled-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(132, 255, 122, 0.35);
+}

@@ -7,17 +7,23 @@ import { items as Query_items } from './events/resolvers/Query/items.js'
 import { locationUsers as Query_locationUsers } from './events/resolvers/Query/locationUsers.js'
 import { locations as Query_locations } from './events/resolvers/Query/locations.js'
 import { me as Query_me } from './events/resolvers/Query/me.js'
+import { missions as Query_missions } from './events/resolvers/Query/missions.js'
 import { userCrate as Query_userCrate } from './events/resolvers/Query/userCrate.js'
 import { userCrates as Query_userCrates } from './events/resolvers/Query/userCrates.js'
 import { userItems as Query_userItems } from './events/resolvers/Query/userItems.js'
 import { addPoints as Mutation_addPoints } from './events/resolvers/Mutation/addPoints.js'
 import { buyCrate as Mutation_buyCrate } from './events/resolvers/Mutation/buyCrate.js'
+import { claimMission as Mutation_claimMission } from './events/resolvers/Mutation/claimMission.js'
+import { completeMission as Mutation_completeMission } from './events/resolvers/Mutation/completeMission.js'
+import { completePhotoMission as Mutation_completePhotoMission } from './events/resolvers/Mutation/completePhotoMission.js'
 import { joinRoom as Mutation_joinRoom } from './events/resolvers/Mutation/joinRoom.js'
 import { leaveRoom as Mutation_leaveRoom } from './events/resolvers/Mutation/leaveRoom.js'
 import { locations as Mutation_locations } from './events/resolvers/Mutation/locations.js'
 import { login as Mutation_login } from './events/resolvers/Mutation/login.js'
 import { openCrate as Mutation_openCrate } from './events/resolvers/Mutation/openCrate.js'
 import { register as Mutation_register } from './events/resolvers/Mutation/register.js'
+import { startTimedMission as Mutation_startTimedMission } from './events/resolvers/Mutation/startTimedMission.js'
+import { updateMissionProgress as Mutation_updateMissionProgress } from './events/resolvers/Mutation/updateMissionProgress.js'
 import { updatePosition as Mutation_updatePosition } from './events/resolvers/Mutation/updatePosition.js'
 import { AuthPayload } from './events/resolvers/AuthPayload.js'
 import { Crate } from './events/resolvers/Crate.js'
@@ -26,7 +32,10 @@ import { CrateRarityDrop } from './events/resolvers/CrateRarityDrop.js'
 import { Item } from './events/resolvers/Item.js'
 import { ItemInventory } from './events/resolvers/ItemInventory.js'
 import { Location } from './events/resolvers/Location.js'
+import { Mission } from './events/resolvers/Mission.js'
+import { QuestCompletion } from './events/resolvers/QuestCompletion.js'
 import { User } from './events/resolvers/User.js'
+import { UserMission } from './events/resolvers/UserMission.js'
 export const resolvers: Resolvers = {
   Query: {
     crate: Query_crate,
@@ -36,6 +45,7 @@ export const resolvers: Resolvers = {
     locationUsers: Query_locationUsers,
     locations: Query_locations,
     me: Query_me,
+    missions: Query_missions,
     userCrate: Query_userCrate,
     userCrates: Query_userCrates,
     userItems: Query_userItems,
@@ -43,12 +53,17 @@ export const resolvers: Resolvers = {
   Mutation: {
     addPoints: Mutation_addPoints,
     buyCrate: Mutation_buyCrate,
+    claimMission: Mutation_claimMission,
+    completeMission: Mutation_completeMission,
+    completePhotoMission: Mutation_completePhotoMission,
     joinRoom: Mutation_joinRoom,
     leaveRoom: Mutation_leaveRoom,
     locations: Mutation_locations,
     login: Mutation_login,
     openCrate: Mutation_openCrate,
     register: Mutation_register,
+    startTimedMission: Mutation_startTimedMission,
+    updateMissionProgress: Mutation_updateMissionProgress,
     updatePosition: Mutation_updatePosition,
   },
 
@@ -59,5 +74,8 @@ export const resolvers: Resolvers = {
   Item: Item,
   ItemInventory: ItemInventory,
   Location: Location,
+  Mission: Mission,
+  QuestCompletion: QuestCompletion,
   User: User,
+  UserMission: UserMission,
 }

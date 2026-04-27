@@ -23,8 +23,11 @@ model User {
   id               String           @id @default(cuid(2))
   name             String           @unique
   password         String
+  xp               Int              @default(0)
   inventories      ItemInventory[]
   crateInventories CrateInventory[]
+  userMissions     UserMission[]
+  questCompletions QuestCompletion[]
 
   locationId String? // current joined location
   location   Location? @relation(fields: [locationId], references: [id])
@@ -38,8 +41,73 @@ model Location {
   name String
   posx Float
   posy Float
+  tag  LocationTag @default(LANDMARK)
 
-  users User[]
+  users    User[]
+  missions Mission[]
+}
+
+enum LocationTag {
+  PARK
+  RESTAURANT
+  LANDMARK
+}
+
+model Mission {
+  id             String @id @default(cuid(2))
+  title          String
+  description    String?
+  rewardXp       Int
+  targetProgress Int    @default(100)
+  /// If true, completing the quest records history and starts a cooldown before it can be claimed again.
+  repeatable     Boolean @default(false)
+  /// Hours after completion until a repeatable quest can be claimed again (e.g. 24 = daily refresh).
+  cooldownHours  Int     @default(24)
+
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
+
+  userMissions     UserMission[]
+  questCompletions QuestCompletion[]
+
+  @@unique([locationId, title])
+}
+
+model UserMission {
+  id          String            @id @default(cuid(2))
+  userId      String
+  missionId   String
+  progress    Int               @default(0)
+  status      UserMissionStatus @default(ACTIVE)
+  completedAt DateTime?
+  /// When set on a completed repeatable quest, claim is allowed again after this time.
+  lockedUntil DateTime?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, missionId])
+  @@index([userId])
+}
+
+model QuestCompletion {
+  id          String   @id @default(cuid(2))
+  userId      String
+  missionId   String
+  title       String
+  rewardXp    Int
+  completedAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completedAt(sort: Desc)])
+  @@index([userId, missionId])
+}
+
+enum UserMissionStatus {
+  ACTIVE
+  COMPLETED
 }
 
 model Crate {

@@ -1,6 +1,12 @@
 import { ref } from 'vue'
 import L from 'leaflet'
-import type { User } from '../api/graphql'
+
+type MapUser = {
+  id: string
+  name: string
+  posx?: number | null
+  posy?: number | null
+}
 
 export function useMapSync() {
   const roomUsersLayer = ref<L.LayerGroup | null>(null)
@@ -27,7 +33,7 @@ export function useMapSync() {
     roomUsersLayer.value?.clearLayers()
   }
 
-  function syncRoomUsers(users: User[], currentUserId: string | null) {
+  function syncRoomUsers(users: MapUser[], currentUserId: string | null) {
     if (!roomUsersLayer.value) return
 
     const remainingIds = new Set(users.filter((user) => user.id !== currentUserId).map((user) => user.id))
