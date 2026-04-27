@@ -1,36 +1,47 @@
 import { prisma } from '../../../../prisma.js'
 import type { MutationResolvers } from './../../../types.generated.js'
-import { CLAIM_RADIUS_METERS, haversineMeters } from '../missionArea.js'
+import { CLAIM_RADIUS_METERS, haversineMeters } from '../missionArea'
+import { missionError } from '../missionErrors'
 
 export const completePhotoMission: NonNullable<MutationResolvers['completePhotoMission']> = async (
   _parent,
   { missionId, lat, lng },
   { user },
 ) => {
-  if (!user) throw new Error('Unauthorized')
+  if (!user) missionError('UNAUTHORIZED', 'Unauthorized')
 
   const mission = await prisma.mission.findUnique({ where: { id: missionId } })
-  if (!mission) throw new Error('Mission not found')
+  if (!mission) missionError('NOT_FOUND', 'Mission not found', { missionId })
 
   // For now we validate region by GPS coordinates provided by the client at capture time.
   // (We are not parsing EXIF in this hackathon implementation.)
   if (mission.locationId) {
-    if (!user.locationId) throw new Error('You must join the location first')
-    if (user.locationId !== mission.locationId) throw new Error('You must be in the mission location')
+    if (!user.locationId) missionError('LOCATION_REQUIRED', 'You must join the location first')
+    if (user.locationId !== mission.locationId) {
+      missionError('LOCATION_MISMATCH', 'You must be in the mission location', {
+        userLocationId: user.locationId,
+        missionLocationId: mission.locationId,
+      })
+    }
 
     const loc = await prisma.location.findUnique({ where: { id: mission.locationId } })
-    if (!loc) throw new Error('Mission location not found')
+    if (!loc) missionError('NOT_FOUND', 'Mission location not found', { locationId: mission.locationId })
 
     const dist = haversineMeters({ lat, lng }, { lat: loc.posx, lng: loc.posy })
-    if (dist > CLAIM_RADIUS_METERS) throw new Error('You must be inside the mission area')
+    if (dist > CLAIM_RADIUS_METERS) {
+      missionError('OUTSIDE_AREA', 'You must be inside the mission area', {
+        distanceMeters: Math.round(dist),
+        requiredMeters: CLAIM_RADIUS_METERS,
+      })
+    }
   }
 
   const um = await prisma.userMission.findUnique({
     where: { userId_missionId: { userId: user.id, missionId } },
     include: { mission: true },
   })
-  if (!um) throw new Error('Claim the mission first')
-  if (um.status !== 'ACTIVE') throw new Error('Mission is not active')
+  if (!um) missionError('NOT_CLAIMED', 'Claim the mission first', { missionId })
+  if (um.status !== 'ACTIVE') missionError('NOT_ACTIVE', 'Mission is not active', { status: um.status })
 
   const target = um.mission.targetProgress
   const lockedUntil = um.mission.repeatable
