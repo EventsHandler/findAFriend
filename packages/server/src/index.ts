@@ -65,6 +65,16 @@ const yoga = createYoga<UserContext>({
 
 const server = createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/chat/send') {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'https://eventshandler.github.io'
+    ]
+
+    const origin = req.headers.origin
+
+    if (origin && allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin)
+    }
     const user = await getUserFromRequest(req)
     if (!user) {
       res.writeHead(401, { 'content-type': 'application/json' })
