@@ -228,6 +228,56 @@ export type BuyCrateMutationVariables = Exact<{
 
 export type BuyCrateMutation = { __typename?: 'Mutation'; buyCrate: boolean }
 
+export type JoinRoomMutationVariables = Exact<{
+  locationId: Scalars['ID']['input']
+}>
+
+export type JoinRoomMutation = {
+  __typename?: 'Mutation'
+  joinRoom: {
+    __typename?: 'User'
+    id: string
+    name: string
+    locationId?: string | null
+    posx?: number | null
+    posy?: number | null
+    points: number
+  }
+}
+
+export type LeaveRoomMutationVariables = Exact<{ [key: string]: never }>
+
+export type LeaveRoomMutation = {
+  __typename?: 'Mutation'
+  leaveRoom: {
+    __typename?: 'User'
+    id: string
+    name: string
+    locationId?: string | null
+    posx?: number | null
+    posy?: number | null
+    points: number
+  }
+}
+
+export type UpdatePositionMutationVariables = Exact<{
+  locationId: Scalars['ID']['input']
+  lat: Scalars['Float']['input']
+  lng: Scalars['Float']['input']
+}>
+
+export type UpdatePositionMutation = {
+  __typename?: 'Mutation'
+  updatePosition: {
+    __typename?: 'User'
+    id: string
+    locationId?: string | null
+    posx?: number | null
+    posy?: number | null
+    points: number
+  }
+}
+
 export type LocationsQueryVariables = Exact<{ [key: string]: never }>
 
 export type LocationsQuery = {
@@ -263,55 +313,8 @@ export type LocationUsersQuery = {
     posx?: number | null
     posy?: number | null
     locationId?: string | null
-  }>
-}
-
-export type JoinRoomMutationVariables = Exact<{
-  locationId: Scalars['ID']['input']
-}>
-
-export type JoinRoomMutation = {
-  __typename?: 'Mutation'
-  joinRoom: {
-    __typename?: 'User'
-    id: string
-    name: string
-    locationId?: string | null
-    posx?: number | null
-    posy?: number | null
-  }
-}
-
-export type LeaveRoomMutationVariables = Exact<{ [key: string]: never }>
-
-export type LeaveRoomMutation = {
-  __typename?: 'Mutation'
-  leaveRoom: {
-    __typename?: 'User'
-    id: string
-    name: string
-    locationId?: string | null
-    posx?: number | null
-    posy?: number | null
-  }
-}
-
-export type UpdatePositionMutationVariables = Exact<{
-  locationId: Scalars['ID']['input']
-  lat: Scalars['Float']['input']
-  lng: Scalars['Float']['input']
-}>
-
-export type UpdatePositionMutation = {
-  __typename?: 'Mutation'
-  updatePosition: {
-    __typename?: 'User'
-    id: string
-    locationId?: string | null
-    posx?: number | null
-    posy?: number | null
     points: number
-  }
+  }>
 }
 
 export type CratesQueryVariables = Exact<{ [key: string]: never }>
@@ -588,6 +591,143 @@ export const BuyCrateDocument = {
     },
   ],
 } as unknown as DocumentNode<BuyCrateMutation, BuyCrateMutationVariables>
+export const JoinRoomDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'JoinRoom' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'locationId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'joinRoom' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'locationId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'locationId' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'points' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<JoinRoomMutation, JoinRoomMutationVariables>
+export const LeaveRoomDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'LeaveRoom' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'leaveRoom' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'points' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<LeaveRoomMutation, LeaveRoomMutationVariables>
+export const UpdatePositionDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'UpdatePosition' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'locationId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'lat' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'lng' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'updatePosition' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'locationId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'locationId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'lat' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'lat' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'lng' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'lng' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'points' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdatePositionMutation, UpdatePositionMutationVariables>
 export const LocationsDocument = {
   kind: 'Document',
   definitions: [
@@ -681,140 +821,6 @@ export const LocationUsersDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<LocationUsersQuery, LocationUsersQueryVariables>
-export const JoinRoomDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'JoinRoom' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'locationId' } },
-          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
-        },
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'joinRoom' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'locationId' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'locationId' } },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<JoinRoomMutation, JoinRoomMutationVariables>
-export const LeaveRoomDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'LeaveRoom' },
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'leaveRoom' },
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  ],
-} as unknown as DocumentNode<LeaveRoomMutation, LeaveRoomMutationVariables>
-export const UpdatePositionDocument = {
-  kind: 'Document',
-  definitions: [
-    {
-      kind: 'OperationDefinition',
-      operation: 'mutation',
-      name: { kind: 'Name', value: 'UpdatePosition' },
-      variableDefinitions: [
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'locationId' } },
-          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'lat' } },
-          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
-        },
-        {
-          kind: 'VariableDefinition',
-          variable: { kind: 'Variable', name: { kind: 'Name', value: 'lng' } },
-          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Float' } } },
-        },
-      ],
-      selectionSet: {
-        kind: 'SelectionSet',
-        selections: [
-          {
-            kind: 'Field',
-            name: { kind: 'Name', value: 'updatePosition' },
-            arguments: [
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'locationId' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'locationId' } },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'lat' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'lat' } },
-              },
-              {
-                kind: 'Argument',
-                name: { kind: 'Name', value: 'lng' },
-                value: { kind: 'Variable', name: { kind: 'Name', value: 'lng' } },
-              },
-            ],
-            selectionSet: {
-              kind: 'SelectionSet',
-              selections: [
-                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
-                { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'points' } },
               ],
             },
@@ -823,7 +829,7 @@ export const UpdatePositionDocument = {
       },
     },
   ],
-} as unknown as DocumentNode<UpdatePositionMutation, UpdatePositionMutationVariables>
+} as unknown as DocumentNode<LocationUsersQuery, LocationUsersQueryVariables>
 export const CratesDocument = {
   kind: 'Document',
   definitions: [

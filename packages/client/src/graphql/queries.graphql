@@ -25,35 +25,6 @@ query LocationUsers($locationId: ID!) {
     posx
     posy
     locationId
-  }
-}
-
-mutation JoinRoom($locationId: ID!) {
-  joinRoom(locationId: $locationId) {
-    id
-    name
-    locationId
-    posx
-    posy
-  }
-}
-
-mutation LeaveRoom {
-  leaveRoom {
-    id
-    name
-    locationId
-    posx
-    posy
-  }
-}
-
-mutation UpdatePosition($locationId: ID!, $lat: Float!, $lng: Float!) {
-  updatePosition(locationId: $locationId, lat: $lat, lng: $lng) {
-    id
-    locationId
-    posx
-    posy
     points
   }
 }

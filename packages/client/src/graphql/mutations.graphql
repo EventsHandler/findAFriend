@@ -33,3 +33,35 @@ mutation OpenCrate($userId: ID!, $crateId: ID!){
 mutation BuyCrate($userId: ID!, $crateId: ID!, $quantity: Int!){
   buyCrate(userId: $userId, crateId: $crateId, quantity: $quantity)
 }
+
+mutation JoinRoom($locationId: ID!) {
+  joinRoom(locationId: $locationId) {
+    id
+    name
+    locationId
+    posx
+    posy
+    points
+  }
+}
+
+mutation LeaveRoom {
+  leaveRoom {
+    id
+    name
+    locationId
+    posx
+    posy
+    points
+  }
+}
+
+mutation UpdatePosition($locationId: ID!, $lat: Float!, $lng: Float!) {
+  updatePosition(locationId: $locationId, lat: $lat, lng: $lng) {
+    id
+    locationId
+    posx
+    posy
+    points
+  }
+}
