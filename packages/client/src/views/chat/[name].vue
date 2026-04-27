@@ -79,8 +79,9 @@ async function sendMessage() {
 
   sending.value = true
   errorText.value = null
+  const API_URL = import.meta.env.VITE_API_URL ?? ''
   try {
-    const res = await fetch('/chat/send', {
+    const res = await fetch(`${API_URL}/chat/send`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
