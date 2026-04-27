@@ -30,9 +30,30 @@ declare module 'vue-router/auto-routes' {
       { name: ParamValue<false> },
       | never
     >,
+    '/crate/open/[userId]/[crateId]': RouteRecordInfo<
+      '/crate/open/[userId]/[crateId]',
+      '/crate/open/:userId/:crateId',
+      { userId: ParamValue<true>, crateId: ParamValue<true> },
+      { userId: ParamValue<false>, crateId: ParamValue<false> },
+      | never
+    >,
     '/HelloWorld': RouteRecordInfo<
       '/HelloWorld',
       '/HelloWorld',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/inventoryBadge': RouteRecordInfo<
+      '/inventoryBadge',
+      '/inventoryBadge',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/inventoryChest': RouteRecordInfo<
+      '/inventoryChest',
+      '/inventoryChest',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -58,6 +79,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/shop': RouteRecordInfo<
+      '/shop',
+      '/shop',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
   }
 
   /**
@@ -77,9 +105,27 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
+    'src/views/crate/open/[userId]/[crateId].vue': {
+      routes:
+        | '/crate/open/[userId]/[crateId]'
+      views:
+        | never
+    }
     'src/views/HelloWorld.vue': {
       routes:
         | '/HelloWorld'
+      views:
+        | never
+    }
+    'src/views/inventoryBadge.vue': {
+      routes:
+        | '/inventoryBadge'
+      views:
+        | never
+    }
+    'src/views/inventoryChest.vue': {
+      routes:
+        | '/inventoryChest'
       views:
         | never
     }
@@ -98,6 +144,12 @@ declare module 'vue-router/auto-routes' {
     'src/views/me.vue': {
       routes:
         | '/me'
+      views:
+        | never
+    }
+    'src/views/shop.vue': {
+      routes:
+        | '/shop'
       views:
         | never
     }

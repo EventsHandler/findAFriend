@@ -27,6 +27,7 @@ export type Crate = {
   chance: Scalars['Float']['output']
   id: Scalars['ID']['output']
   name: Scalars['String']['output']
+  price: Scalars['Int']['output']
   rarity: RarityType
   rarityDrops?: Maybe<Array<CrateRarityDrop>>
 }
@@ -77,6 +78,7 @@ export type Location = {
 
 export type Mutation = {
   __typename?: 'Mutation'
+  addPoints: Scalars['Boolean']['output']
   buyCrate: Scalars['Boolean']['output']
   joinRoom: User
   leaveRoom: User
@@ -85,6 +87,11 @@ export type Mutation = {
   openCrate: Item
   register: AuthPayload
   updatePosition: User
+}
+
+export type MutationAddPointsArgs = {
+  amount: Scalars['Int']['input']
+  userId: Scalars['ID']['input']
 }
 
 export type MutationBuyCrateArgs = {
@@ -127,6 +134,7 @@ export type Query = {
   locationUsers: Array<User>
   locations: Array<Location>
   me?: Maybe<User>
+  userCrate: CrateInventory
   userCrates: Array<CrateInventory>
   userItems: Array<ItemInventory>
 }
@@ -141,6 +149,11 @@ export type QueryItemArgs = {
 
 export type QueryLocationUsersArgs = {
   locationId: Scalars['ID']['input']
+}
+
+export type QueryUserCrateArgs = {
+  crateId: Scalars['ID']['input']
+  userId: Scalars['ID']['input']
 }
 
 export type QueryUserCratesArgs = {
@@ -165,6 +178,7 @@ export type User = {
   inventories?: Maybe<Array<ItemInventory>>
   locationId?: Maybe<Scalars['ID']['output']>
   name: Scalars['String']['output']
+  points: Scalars['Int']['output']
   posx?: Maybe<Scalars['Float']['output']>
   posy?: Maybe<Scalars['Float']['output']>
 }
@@ -189,6 +203,31 @@ export type RegisterMutation = {
   register: { __typename?: 'AuthPayload'; token: string; user: { __typename?: 'User'; id: string; name: string } }
 }
 
+export type AddPointsMutationVariables = Exact<{
+  userId: Scalars['ID']['input']
+  amount: Scalars['Int']['input']
+}>
+
+export type AddPointsMutation = { __typename?: 'Mutation'; addPoints: boolean }
+
+export type OpenCrateMutationVariables = Exact<{
+  userId: Scalars['ID']['input']
+  crateId: Scalars['ID']['input']
+}>
+
+export type OpenCrateMutation = {
+  __typename?: 'Mutation'
+  openCrate: { __typename?: 'Item'; id: string; name: string; rarity: RarityType }
+}
+
+export type BuyCrateMutationVariables = Exact<{
+  userId: Scalars['ID']['input']
+  crateId: Scalars['ID']['input']
+  quantity: Scalars['Int']['input']
+}>
+
+export type BuyCrateMutation = { __typename?: 'Mutation'; buyCrate: boolean }
+
 export type LocationsQueryVariables = Exact<{ [key: string]: never }>
 
 export type LocationsQuery = {
@@ -207,6 +246,7 @@ export type MeQuery = {
     locationId?: string | null
     posx?: number | null
     posy?: number | null
+    points: number
   } | null
 }
 
@@ -270,7 +310,15 @@ export type UpdatePositionMutation = {
     locationId?: string | null
     posx?: number | null
     posy?: number | null
+    points: number
   }
+}
+
+export type CratesQueryVariables = Exact<{ [key: string]: never }>
+
+export type CratesQuery = {
+  __typename?: 'Query'
+  crates: Array<{ __typename?: 'Crate'; id: string; name: string; price: number; rarity: RarityType }>
 }
 
 export const LoginDocument = {
@@ -393,6 +441,153 @@ export const RegisterDocument = {
     },
   ],
 } as unknown as DocumentNode<RegisterMutation, RegisterMutationVariables>
+export const AddPointsDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'AddPoints' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'userId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'amount' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'addPoints' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'userId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'userId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'amount' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'amount' } },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<AddPointsMutation, AddPointsMutationVariables>
+export const OpenCrateDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'OpenCrate' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'userId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'crateId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'openCrate' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'userId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'userId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'crateId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'crateId' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rarity' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<OpenCrateMutation, OpenCrateMutationVariables>
+export const BuyCrateDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'BuyCrate' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'userId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'crateId' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } } },
+        },
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'quantity' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'buyCrate' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'userId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'userId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'crateId' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'crateId' } },
+              },
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'quantity' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'quantity' } },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<BuyCrateMutation, BuyCrateMutationVariables>
 export const LocationsDocument = {
   kind: 'Document',
   definitions: [
@@ -442,6 +637,7 @@ export const MeDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'points' } },
               ],
             },
           },
@@ -619,6 +815,7 @@ export const UpdatePositionDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'points' } },
               ],
             },
           },
@@ -627,3 +824,31 @@ export const UpdatePositionDocument = {
     },
   ],
 } as unknown as DocumentNode<UpdatePositionMutation, UpdatePositionMutationVariables>
+export const CratesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'Crates' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'crates' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rarity' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CratesQuery, CratesQueryVariables>

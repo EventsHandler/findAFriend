@@ -7,8 +7,10 @@ import { items as Query_items } from './events/resolvers/Query/items.js'
 import { locationUsers as Query_locationUsers } from './events/resolvers/Query/locationUsers.js'
 import { locations as Query_locations } from './events/resolvers/Query/locations.js'
 import { me as Query_me } from './events/resolvers/Query/me.js'
+import { userCrate as Query_userCrate } from './events/resolvers/Query/userCrate.js'
 import { userCrates as Query_userCrates } from './events/resolvers/Query/userCrates.js'
 import { userItems as Query_userItems } from './events/resolvers/Query/userItems.js'
+import { addPoints as Mutation_addPoints } from './events/resolvers/Mutation/addPoints.js'
 import { buyCrate as Mutation_buyCrate } from './events/resolvers/Mutation/buyCrate.js'
 import { joinRoom as Mutation_joinRoom } from './events/resolvers/Mutation/joinRoom.js'
 import { leaveRoom as Mutation_leaveRoom } from './events/resolvers/Mutation/leaveRoom.js'
@@ -34,10 +36,12 @@ export const resolvers: Resolvers = {
     locationUsers: Query_locationUsers,
     locations: Query_locations,
     me: Query_me,
+    userCrate: Query_userCrate,
     userCrates: Query_userCrates,
     userItems: Query_userItems,
   },
   Mutation: {
+    addPoints: Mutation_addPoints,
     buyCrate: Mutation_buyCrate,
     joinRoom: Mutation_joinRoom,
     leaveRoom: Mutation_leaveRoom,

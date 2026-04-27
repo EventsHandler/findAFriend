@@ -11,6 +11,7 @@ type User {
   posy: Float
   locationId: ID
 
+  points: Int!
   inventories: [ItemInventory!]
   crateInventories: [CrateInventory!]
 }
@@ -27,7 +28,7 @@ type Crate {
   name: String!
   rarity: RarityType!
   chance: Float!
-
+  price: Int!
   rarityDrops: [CrateRarityDrop!]
 }
 
@@ -83,6 +84,7 @@ extend type Query {
   item(id: ID!): Item
 
   userItems(userId: ID!): [ItemInventory!]!
+  userCrate(userId: ID!, crateId: ID!): CrateInventory!
   userCrates(userId: ID!): [CrateInventory!]!
 }
 
@@ -97,4 +99,6 @@ extend type Mutation {
   leaveRoom: User!
   updatePosition(locationId: ID!, lat: Float!, lng: Float!): User!
   locations: [Location!]
+
+  addPoints(userId: ID!, amount: Int!): Boolean!
 }
