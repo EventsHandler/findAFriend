@@ -79,12 +79,21 @@ const initMap = () => {
 
   markersLayer.value = L.layerGroup().addTo(map.value as L.Map)
   initRoomLayer(map.value as L.Map)
+
+  // Re-render locations on zoom change
+  map.value.on('zoomend', () => {
+    renderLocations()
+  })
 }
 
 const renderLocations = () => {
   if (!map.value || !markersLayer.value) return
 
   markersLayer.value.clearLayers()
+
+  const zoom = map.value.getZoom()
+  const iconSize = Math.max(16, zoom * 3) // Scale icon size with zoom
+  const anchor = iconSize / 2
 
   locations.value.forEach((loc: any) => {
     const isActive = activePOI.value?.id === loc.id
@@ -93,14 +102,15 @@ const renderLocations = () => {
       icon: L.divIcon({
         className: '',
         html: `
-          <div class="w-3 h-3 rounded-full border border-white/20
+          <div class="border-2 border-lime-400 bg-lime-400/20 rounded-sm shadow-[0_0_8px_#84ff7a]
             ${isActive
-              ? 'bg-white shadow-[0_0_12px_white]'
-              : 'bg-lime-400 shadow-[0_0_8px_#84ff7a]'}">
+              ? 'border-white bg-white/20 shadow-[0_0_12px_white]'
+              : 'border-lime-400 bg-lime-400/20'}"
+            style="width: ${iconSize - 8}px; height: ${iconSize - 8}px;">
           </div>
         `,
-        iconSize: [20, 20],
-        iconAnchor: [10, 10],
+        iconSize: [iconSize, iconSize],
+        iconAnchor: [anchor, anchor],
       }),
     })
 
@@ -155,8 +165,18 @@ const updateLocation = () => {
         })
       }
     },
-    (err) => console.error(err),
-    { enableHighAccuracy: true },
+    (err) => {
+      console.error('Geolocation error:', err)
+      // Handle permission denied or other errors
+      if (err.code === err.PERMISSION_DENIED) {
+        console.warn('Location permission denied')
+      }
+    },
+    { 
+      enableHighAccuracy: true, 
+      timeout: 10000, 
+      maximumAge: 300000 // Use cached position for up to 5 minutes
+    },
   )
 }
 
