@@ -43,6 +43,9 @@ export default defineConfig(({ mode }) => ({
             '/chat/send': {
               target: 'http://localhost:3000',
             },
+            '/chat/history': {
+              target: 'http://localhost:3000',
+            },
           },
         },
       }

@@ -28,6 +28,7 @@ model User {
   crateInventories CrateInventory[]
   userMissions     UserMission[]
   questCompletions QuestCompletion[]
+  chatMessages     ChatMessage[]
 
   locationId String? // current joined location
   location   Location? @relation(fields: [locationId], references: [id])
@@ -45,6 +46,20 @@ model Location {
 
   users    User[]
   missions Mission[]
+}
+
+model ChatMessage {
+  id           String   @id @default(cuid(2))
+  locationName String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([locationName, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 enum LocationTag {
