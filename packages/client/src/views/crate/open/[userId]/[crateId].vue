@@ -2,8 +2,8 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import crateClosed from '@/assets/crates/crate-closed.svg'
-import crateOpen from '@/assets/crates/crate-open.svg'
+// import crateClosed from '@/assets/crates/crate-closed.svg'
+// import crateOpen from '@/assets/crates/crate-open.svg'
 
 const route = useRoute()
 const router = useRouter()
@@ -28,6 +28,9 @@ function openCrate() {
     router.push('/inventory')
   }, 2500)
 }
+
+const crateClosed = true
+const crateOpen = false
 
 const currImage = computed(() => {
   if ((crateState.value === 'closed')) return crateClosed
@@ -74,12 +77,12 @@ const stateMessage = computed(() => {
           {{ stateMessage }}
         </h1>
 
-        <img
+        <!-- <img
           :src="currImage"
           alt="crate"
           class="w-48 h-48 object-contain transition-all duration-700"
           :class="crateState === 'reward' ? 'scale-110' : 'scale-100'"
-        />
+        /> -->
 
         <div v-if="crateState === 'reward'" class="mt-6 text-center">
           <div class="text-lg text-lime-300 font-bold tracking-wide">New Badge Earned</div>
