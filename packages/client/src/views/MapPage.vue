@@ -15,6 +15,8 @@ const locations = computed(() => result.value?.locations ?? [])
 const activePOI = ref<any>(null)
 const selectedLocationId = computed(() => activePOI.value?.id ?? null)
 
+const zoomLevel = ref(13)
+
 const { result: selectedLocationUsersResult } = useQuery(
   LocationUsersDocument,
   () => ({ locationId: selectedLocationId.value! }),
@@ -80,10 +82,12 @@ const initMap = () => {
   markersLayer.value = L.layerGroup().addTo(map.value as L.Map)
   initRoomLayer(map.value as L.Map)
 
-  // Re-render locations on zoom change
-  map.value.on('zoomend', () => {
-    renderLocations()
+  // Update zoom level on zoom change
+  map.value.on('zoom', () => {
+    zoomLevel.value = (map.value as L.Map).getZoom()
   })
+
+  zoomLevel.value = (map.value as L.Map).getZoom() // Initial value
 }
 
 const renderLocations = () => {
@@ -91,7 +95,7 @@ const renderLocations = () => {
 
   markersLayer.value.clearLayers()
 
-  const zoom = map.value.getZoom()
+  const zoom = zoomLevel.value
   const iconSize = Math.max(16, zoom * 3) // Scale icon size with zoom
   const anchor = iconSize / 2
 
@@ -123,6 +127,10 @@ const renderLocations = () => {
 }
 
 watch([locations, activePOI], () => {
+  renderLocations()
+})
+
+watch(zoomLevel, () => {
   renderLocations()
 })
 
