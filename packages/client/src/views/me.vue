@@ -27,7 +27,7 @@ const missions = [
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#0b0f0c] text-white font-sans">
+  <div class="min-h-screen bg-[#0b0f0c] text-white font-sans pb-20">
     <!-- TOP HUD -->
     <header class="p-4 flex justify-between items-center border-b border-lime-500/10 bg-[#0b0f0c]/80 backdrop-blur sticky top-0 z-20">
       <div class="flex items-center gap-2">
@@ -137,32 +137,5 @@ const missions = [
         </div>
       </section>
     </main>
-
-    <!-- BOTTOM NAV (GAME HUD) -->
-    <footer class="fixed bottom-0 left-0 right-0 bg-[#0b0f0c]/90 backdrop-blur-md border-t border-lime-500/10 flex justify-around py-4 z-30">
-      <router-link to="/MapPage" class="flex flex-col items-center text-gray-400 text-[10px] tracking-widest">
-        <svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M3 12L12 3l9 9" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M9 21V9h6v12" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        MAP
-      </router-link>
-
-      <button class="flex flex-col items-center text-gray-400 text-[10px] tracking-widest">
-        <svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="12" cy="12" r="8" />
-          <path d="M12 8v8M8 12h8" />
-        </svg>
-        QUESTS
-      </button>
-
-      <router-link to="/me" class="flex flex-col items-center text-lime-300 text-[10px] tracking-widest">
-        <svg class="w-5 h-5 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-        PROFILE
-      </router-link>
-    </footer>
   </div>
 </template>

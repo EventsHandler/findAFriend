@@ -125,7 +125,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#0b0f0c] text-white font-sans flex flex-col">
+  <div class="h-full bg-[#0b0f0c] text-white font-sans flex flex-col pb-20">
     <header
       class="p-4 flex items-center justify-between border-b border-lime-500/10 bg-[#0b0f0c]/80 backdrop-blur sticky top-0 z-20"
     >

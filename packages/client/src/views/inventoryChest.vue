@@ -26,24 +26,26 @@ function handleItemClick(item: any) {
 </script>
 
 <template>
-    <div class="chooseSection flex items-center bg-[#101712]" >
-            <button @click="router.push('/inventoryChest')" class="chestsBtn border bg-lime-500 border-lime-400/30 hover:bg-lime-400" > Chests </button>
-            <button @click="router.push('/inventoryBadge')" class="badgesBtn border border-lime-400/30 hover:bg-lime-400"> Badges </button>
-    </div>
-    <div class="inventory flex items-center flex-wrap border border-lime-500/30 bg-[#101712] p-8 shadow-[0_0_30px_rgba(132,255,122,0.05)]">
-        <div class="item border border-lime-500/30 flex flex-col" 
-            v-for="item in items" 
-            :key="item.id" 
-            role="button"
-            tabindex="0"
-            @click="handleItemClick(item)"
-            @keydown.enter="handleItemClick(item)">
-                <img :src="item.icon" :alt="item.name" />
-                <span class="item-name flex items-center " :class="rarityColor(item.type)">{{ item.name }}</span>
-                <div class="item-info flex items-center">
-                    <span class="item-type flex items-center " :class="rarityColor(item.type)">{{ item.type }}</span>
-                    <span class="item-qty flex items-center" :class="rarityColor(item.type)">x{{ item.quantity }}</span>
-                </div>
+    <div class="h-full pb-20">
+        <div class="chooseSection flex items-center bg-[#101712]" >
+                <button @click="router.push('/inventoryChest')" class="chestsBtn border bg-lime-500 border-lime-400/30 hover:bg-lime-400" > Chests </button>
+                <button @click="router.push('/inventoryBadge')" class="badgesBtn border border-lime-400/30 hover:bg-lime-400"> Badges </button>
+        </div>
+        <div class="inventory flex items-center flex-wrap border border-lime-500/30 bg-[#101712] p-8 shadow-[0_0_30px_rgba(132,255,122,0.05)]">
+            <div class="item border border-lime-500/30 flex flex-col" 
+                v-for="item in items" 
+                :key="item.id" 
+                role="button"
+                tabindex="0"
+                @click="handleItemClick(item)"
+                @keydown.enter="handleItemClick(item)">
+                    <img :src="item.icon" :alt="item.name" />
+                    <span class="item-name flex items-center " :class="rarityColor(item.type)">{{ item.name }}</span>
+                    <div class="item-info flex items-center">
+                        <span class="item-type flex items-center " :class="rarityColor(item.type)">{{ item.type }}</span>
+                        <span class="item-qty flex items-center" :class="rarityColor(item.type)">x{{ item.quantity }}</span>
+                    </div>
+            </div>
         </div>
     </div>
 </template>
