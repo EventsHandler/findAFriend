@@ -24,7 +24,7 @@ import ShopUnactive from '@/assets/navigationIcons/ShopUnactive.svg'
 
 const router = useRouter()
 
-const { result, refetch } = useQuery(CurrentUserDocument)
+const { result, refetch, loading : userLoading } = useQuery(CurrentUserDocument)
 const user = computed(() => result.value?.me)
 
 const crateItems = computed(
@@ -37,8 +37,10 @@ const crateItems = computed(
     })) ?? [],
 )
 
-const { result: badges } = useQuery(GetBadgesDocument)
+const { result: badges, loading : badgesLoading } = useQuery(GetBadgesDocument)
 const allBadges = computed(() => badges.value?.items)
+
+const isLoading = computed(() => userLoading.value && badgesLoading.value)
 
 const userBadges = computed(() =>
   user.value?.inventories?.map(badge => ({
@@ -140,7 +142,10 @@ onMounted(() => {
       <div
         class="p-4 sm:p-6 bg-[#101712] border border-t-0 border-lime-500/30 rounded-b-xl shadow-[0_0_30px_rgba(132,255,122,0.05)]"
       >
-        <div v-if="crateItems.length === 0" class="text-gray-400 text-center py-8 text-sm sm:text-base">
+        <div v-if="isLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base">
+          Loading...
+        </div>
+        <div v-if="crateItems.length === 0 && !isLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base">
           Nu aveți nici un crate în inventar.
         </div>
         <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
@@ -183,6 +188,9 @@ onMounted(() => {
         class="p-4 sm:p-6 bg-[#101712] border border-t-0 border-lime-500/30 rounded-b-xl shadow-[0_0_30px_rgba(132,255,122,0.05)]"
       >
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+        <div v-if="isLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base col-span-full">
+          Loading...
+        </div>
         <div
           v-for="badge in badgeItems"
           :key="badge.id"
