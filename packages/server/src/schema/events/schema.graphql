@@ -9,12 +9,25 @@ enum UserMissionStatus {
   COMPLETED
 }
 
+enum MissionCompletionKind {
+  MANUAL_CONFIRM
+  WALK_DISTANCE
+  STAY_TIME
+  CHAT_COUNT
+  PHOTO
+  TIMED
+}
+
 type Mission {
   id: ID!
   title: String!
   description: String
   rewardXp: Int!
   targetProgress: Int!
+  completionKind: MissionCompletionKind!
+  distanceMeters: Int
+  staySeconds: Int
+  timerSeconds: Int
   repeatable: Boolean!
   cooldownHours: Int!
   locationId: ID
@@ -28,6 +41,7 @@ type UserMission {
   progress: Int!
   status: UserMissionStatus!
   lockedUntil: String
+  startedAt: String
   mission: Mission!
 }
 
@@ -45,6 +59,7 @@ type User {
   id: ID!
   name: String!
   xp: Int!
+  level: Int!
   posx: Float
   posy: Float
   locationId: ID

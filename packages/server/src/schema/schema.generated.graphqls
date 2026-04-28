@@ -60,15 +60,28 @@ enum LocationTag {
 }
 
 type Mission {
+  completionKind: MissionCompletionKind!
   cooldownHours: Int!
   description: String
+  distanceMeters: Int
   id: ID!
   location: Location
   locationId: ID
   repeatable: Boolean!
   rewardXp: Int!
+  staySeconds: Int
   targetProgress: Int!
+  timerSeconds: Int
   title: String!
+}
+
+enum MissionCompletionKind {
+  CHAT_COUNT
+  MANUAL_CONFIRM
+  PHOTO
+  STAY_TIME
+  TIMED
+  WALK_DISTANCE
 }
 
 type Mutation {
@@ -122,6 +135,7 @@ type User {
   crateInventories: [CrateInventory!]
   id: ID!
   inventories: [ItemInventory!]
+  level: Int!
   locationId: ID
   name: String!
   points: Int!
@@ -138,6 +152,7 @@ type UserMission {
   mission: Mission!
   missionId: ID!
   progress: Int!
+  startedAt: String
   status: UserMissionStatus!
   userId: ID!
 }

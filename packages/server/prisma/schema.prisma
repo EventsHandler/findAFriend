@@ -24,6 +24,7 @@ model User {
   name             String           @unique
   password         String
   xp               Int              @default(0)
+  level            Int              @default(1)
   inventories      ItemInventory[]
   crateInventories CrateInventory[]
   userMissions     UserMission[]
@@ -68,12 +69,34 @@ enum LocationTag {
   LANDMARK
 }
 
+enum MissionCompletionKind {
+  /// User confirms completion by pressing a button.
+  MANUAL_CONFIRM
+  /// Progress advances from GPS position ticks (distance walked).
+  WALK_DISTANCE
+  /// Progress advances from GPS position ticks (time stayed).
+  STAY_TIME
+  /// Progress advances from chat messages.
+  CHAT_COUNT
+  /// User completes by taking a photo (GPS validated at capture).
+  PHOTO
+  /// User starts a timer; server completes after `timerSeconds`.
+  TIMED
+}
+
 model Mission {
   id             String @id @default(cuid(2))
   title          String
   description    String?
   rewardXp       Int
   targetProgress Int    @default(100)
+  completionKind MissionCompletionKind @default(MANUAL_CONFIRM)
+  /// For WALK_DISTANCE missions.
+  distanceMeters Int?
+  /// For STAY_TIME missions.
+  staySeconds    Int?
+  /// For TIMED missions (timer duration).
+  timerSeconds   Int?
   /// If true, completing the quest records history and starts a cooldown before it can be claimed again.
   repeatable     Boolean @default(false)
   /// Hours after completion until a repeatable quest can be claimed again (e.g. 24 = daily refresh).
@@ -94,6 +117,8 @@ model UserMission {
   missionId   String
   progress    Int               @default(0)
   status      UserMissionStatus @default(ACTIVE)
+  /// For TIMED missions: when the timer was started.
+  startedAt   DateTime?
   completedAt DateTime?
   /// When set on a completed repeatable quest, claim is allowed again after this time.
   lockedUntil DateTime?

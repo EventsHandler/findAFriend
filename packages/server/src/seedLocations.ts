@@ -12,7 +12,8 @@ async function main() {
       (gen_random_uuid()::text, 'Parcul la izvor', 47.045507, 28.789853, 'PARK'),
       (gen_random_uuid()::text, 'Centru', 47.023637, 28.833994, 'LANDMARK'),
       (gen_random_uuid()::text, 'Parcul Afgan', 47.050175, 28.863678, 'PARK'),
-      (gen_random_uuid()::text, 'Parcul Dendrariu', 47.033654, 28.807309, 'PARK');
+      (gen_random_uuid()::text, 'Parcul Dendrariu', 47.033654, 28.807309, 'PARK'),
+      (gen_random_uuid()::text, 'debug', 47.01771462640434, 28.743851057771067, 'LANDMARK');
   `);
 
   console.log("✅ Locations reseeded with accurate coordinates");

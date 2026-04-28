@@ -87,17 +87,31 @@ export const LocationTag = {
 export type LocationTag = (typeof LocationTag)[keyof typeof LocationTag]
 export type Mission = {
   __typename?: 'Mission'
+  completionKind: MissionCompletionKind
   cooldownHours: Scalars['Int']['output']
   description?: Maybe<Scalars['String']['output']>
+  distanceMeters?: Maybe<Scalars['Int']['output']>
   id: Scalars['ID']['output']
   location?: Maybe<Location>
   locationId?: Maybe<Scalars['ID']['output']>
   repeatable: Scalars['Boolean']['output']
   rewardXp: Scalars['Int']['output']
+  staySeconds?: Maybe<Scalars['Int']['output']>
   targetProgress: Scalars['Int']['output']
+  timerSeconds?: Maybe<Scalars['Int']['output']>
   title: Scalars['String']['output']
 }
 
+export const MissionCompletionKind = {
+  ChatCount: 'CHAT_COUNT',
+  ManualConfirm: 'MANUAL_CONFIRM',
+  Photo: 'PHOTO',
+  StayTime: 'STAY_TIME',
+  Timed: 'TIMED',
+  WalkDistance: 'WALK_DISTANCE',
+} as const
+
+export type MissionCompletionKind = (typeof MissionCompletionKind)[keyof typeof MissionCompletionKind]
 export type Mutation = {
   __typename?: 'Mutation'
   addPoints: Scalars['Boolean']['output']
@@ -246,6 +260,7 @@ export type User = {
   crateInventories?: Maybe<Array<CrateInventory>>
   id: Scalars['ID']['output']
   inventories?: Maybe<Array<ItemInventory>>
+  level: Scalars['Int']['output']
   locationId?: Maybe<Scalars['ID']['output']>
   name: Scalars['String']['output']
   points: Scalars['Int']['output']
@@ -267,6 +282,7 @@ export type UserMission = {
   mission: Mission
   missionId: Scalars['ID']['output']
   progress: Scalars['Int']['output']
+  startedAt?: Maybe<Scalars['String']['output']>
   status: UserMissionStatus
   userId: Scalars['ID']['output']
 }
@@ -390,6 +406,10 @@ export type ClaimMissionMutation = {
       title: string
       rewardXp: number
       targetProgress: number
+      completionKind: MissionCompletionKind
+      distanceMeters?: number | null
+      staySeconds?: number | null
+      timerSeconds?: number | null
       repeatable: boolean
       cooldownHours: number
     }
@@ -414,6 +434,10 @@ export type UpdateMissionProgressMutation = {
       id: string
       rewardXp: number
       targetProgress: number
+      completionKind: MissionCompletionKind
+      distanceMeters?: number | null
+      staySeconds?: number | null
+      timerSeconds?: number | null
       repeatable: boolean
       cooldownHours: number
     }
@@ -440,6 +464,10 @@ export type CompletePhotoMissionMutation = {
       title: string
       rewardXp: number
       targetProgress: number
+      completionKind: MissionCompletionKind
+      distanceMeters?: number | null
+      staySeconds?: number | null
+      timerSeconds?: number | null
       repeatable: boolean
       cooldownHours: number
     }
@@ -466,6 +494,10 @@ export type CompleteMissionMutation = {
       title: string
       rewardXp: number
       targetProgress: number
+      completionKind: MissionCompletionKind
+      distanceMeters?: number | null
+      staySeconds?: number | null
+      timerSeconds?: number | null
       repeatable: boolean
       cooldownHours: number
     }
@@ -492,6 +524,10 @@ export type StartTimedMissionMutation = {
       title: string
       rewardXp: number
       targetProgress: number
+      completionKind: MissionCompletionKind
+      distanceMeters?: number | null
+      staySeconds?: number | null
+      timerSeconds?: number | null
       repeatable: boolean
       cooldownHours: number
     }
@@ -514,6 +550,7 @@ export type MeQuery = {
     id: string
     name: string
     xp: number
+    level: number
     locationId?: string | null
     posx?: number | null
     posy?: number | null
@@ -523,6 +560,7 @@ export type MeQuery = {
       id: string
       progress: number
       status: UserMissionStatus
+      startedAt?: string | null
       lockedUntil?: string | null
       mission: {
         __typename?: 'Mission'
@@ -531,6 +569,10 @@ export type MeQuery = {
         description?: string | null
         rewardXp: number
         targetProgress: number
+        completionKind: MissionCompletionKind
+        distanceMeters?: number | null
+        staySeconds?: number | null
+        timerSeconds?: number | null
         repeatable: boolean
         cooldownHours: number
       }
@@ -559,6 +601,10 @@ export type MissionsQuery = {
     description?: string | null
     rewardXp: number
     targetProgress: number
+    completionKind: MissionCompletionKind
+    distanceMeters?: number | null
+    staySeconds?: number | null
+    timerSeconds?: number | null
     repeatable: boolean
     cooldownHours: number
     locationId?: string | null
@@ -1072,6 +1118,10 @@ export const ClaimMissionDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'title' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'completionKind' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'distanceMeters' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'staySeconds' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'timerSeconds' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
                     ],
@@ -1138,6 +1188,10 @@ export const UpdateMissionProgressDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'completionKind' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'distanceMeters' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'staySeconds' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'timerSeconds' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
                     ],
@@ -1215,6 +1269,10 @@ export const CompletePhotoMissionDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'title' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'completionKind' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'distanceMeters' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'staySeconds' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'timerSeconds' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
                     ],
@@ -1292,6 +1350,10 @@ export const CompleteMissionDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'title' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'completionKind' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'distanceMeters' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'staySeconds' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'timerSeconds' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
                     ],
@@ -1369,6 +1431,10 @@ export const StartTimedMissionDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'title' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'completionKind' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'distanceMeters' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'staySeconds' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'timerSeconds' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
                     ],
@@ -1429,6 +1495,7 @@ export const MeDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'xp' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'level' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
@@ -1442,6 +1509,7 @@ export const MeDocument = {
                       { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'progress' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'status' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'startedAt' } },
                       { kind: 'Field', name: { kind: 'Name', value: 'lockedUntil' } },
                       {
                         kind: 'Field',
@@ -1454,6 +1522,10 @@ export const MeDocument = {
                             { kind: 'Field', name: { kind: 'Name', value: 'description' } },
                             { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
                             { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'completionKind' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'distanceMeters' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'staySeconds' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'timerSeconds' } },
                             { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
                             { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
                           ],
@@ -1526,6 +1598,10 @@ export const MissionsDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'description' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'rewardXp' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'targetProgress' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'completionKind' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'distanceMeters' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'staySeconds' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'timerSeconds' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'repeatable' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'cooldownHours' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
