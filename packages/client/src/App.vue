@@ -116,7 +116,7 @@ const goToChat = () => {
         >
           <div
             class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-all"
-            :class="isMap ? 'bg-lime-400/10 border border-lime-400/20' : ''"
+            :class="isMap ? 'bg-lime-400/10 border border-lime-400/20' : 'bg-[#0b0f0c]/50 border border-lime-500/10'"
           >
             <img
               :src="isMap ? MapActive : MapUnactive"
