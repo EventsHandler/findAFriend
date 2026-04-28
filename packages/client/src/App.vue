@@ -29,7 +29,7 @@ const isQuest = computed(() =>
 )
 
 const isShop = computed(() =>
-  route.path === '/shop' || route.path === '/inventory'
+  route.path === '/inventory'
 )
 
 const isChat = computed(() =>
@@ -65,7 +65,7 @@ const goToChat = () => {
       >
         <!-- SHOP -->
         <router-link
-          to="/shop"
+          to="/inventory"
           class="group flex flex-col items-center justify-center h-full transition-all"
         >
           <div
@@ -82,7 +82,7 @@ const goToChat = () => {
             class="hidden sm:block text-[10px] mt-1 tracking-widest"
             :class="isShop ? 'text-lime-300' : 'text-gray-400'"
           >
-            SHOP
+            INVENTORY
           </span>
         </router-link>
 

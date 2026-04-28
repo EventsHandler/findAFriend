@@ -8,8 +8,6 @@ async function main() {
   await prisma.$executeRawUnsafe(`
     INSERT INTO "Location" ("id", "name", "posx", "posy", "tag") VALUES
       (gen_random_uuid()::text, 'Parcul Valea Morilor', 47.018313, 28.822356, 'PARK'),
-      (gen_random_uuid()::text, 'Parcul Ștefan cel Mare și Sfânt', 47.024672, 28.830882, 'PARK'),
-      (gen_random_uuid()::text, 'Catedrala Nașterii Domnului', 47.026378, 28.828738, 'LANDMARK'),
       (gen_random_uuid()::text, 'Parcul Valea Trandafirilor', 47.004205, 28.853141, 'PARK'),
       (gen_random_uuid()::text, 'Parcul la izvor', 47.045507, 28.789853, 'PARK'),
       (gen_random_uuid()::text, 'Centru', 47.023637, 28.833994, 'LANDMARK'),

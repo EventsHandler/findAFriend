@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { CurrentUserDocument, GetBadgesDocument } from '../api/graphql'
 import { useQuery } from '@vue/apollo-composable'
@@ -20,11 +20,12 @@ import badge_7 from "../assets/badges/legendary/CommunityIcon.svg"
 import badge_8 from "../assets/badges/legendary/SocialLegend.svg"
 import badge_9 from "../assets/badges/legendary/Unstoppable.svg"
 
+import ShopUnactive from '@/assets/navigationIcons/ShopUnactive.svg'
+
 const router = useRouter()
 
-const { result } = useQuery(CurrentUserDocument)
+const { result, refetch } = useQuery(CurrentUserDocument)
 const user = computed(() => result.value?.me)
-console.log(user)
 
 const crateItems = computed(
   () =>
@@ -110,10 +111,25 @@ function handleItemClick(item: any) {
     if (!user.value?.id) return
     router.push(`/crate/open/${user.value.id}/${item.id}`)
 }
+onMounted(() => {
+  refetch()
+})
 </script>
 
 <template>
-  <div class="p-3 sm:p-6 space-y-6 bg-[#0b0f0c] min-h-screen">
+  <div class="p-3 sm:p-6 space-y-6 bg-[#0b0f0c] min-h-screen mb-20">
+    <div class="flex justify-end">
+      <router-link
+        to="/shop"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-lime-500/30 bg-[#101712] hover:bg-[#16211a] text-lime-300 text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lime-500/10"
+      >
+        <img
+          :src="ShopUnactive"
+          class="w-5 h-5 object-contain"
+        />
+        <span>Go to Shop</span>
+      </router-link>
+    </div>
     <!-- CRATES SECTION -->
     <section>
       <div
@@ -146,7 +162,7 @@ function handleItemClick(item: any) {
             </div>
             <div class="space-y-2 mt-3">
               <p class="text-xs sm:text-sm text-center truncate" :class="rarityColor(item.rarity)">{{ item.name }}</p>
-              <div class="flex justify-between text-[10px] sm:text-xs">
+              <div class="flex justify-between text-[12px] sm:text-[16px]">
                 <span :class="rarityColor(item.rarity)"> {{ item.rarity }} </span>
                 <span :class="rarityColor(item.rarity)"> x{{ item.quantity }} </span>
               </div>
@@ -178,7 +194,7 @@ function handleItemClick(item: any) {
             <img
               :src="getBadgeImage(badge.svgId)"
               :alt="badge.name"
-              class="w-12 h-12 sm:w-16 sm:h-16 object-contain transition-all duration-300"
+              class="w-15 h-15 sm:w-30 sm:h-30 object-contain transition-all duration-300"
               :class="badge.unlocked ? 'opacity-100' : 'opacity-30 grayscale'"
             />
             <div v-if="!badge.unlocked" class="absolute inset-0 flex items-center justify-center text-2xl">🔒</div>
@@ -190,7 +206,7 @@ function handleItemClick(item: any) {
             >
               {{ badge.name }}
             </p>
-            <div class="flex justify-between text-[10px] sm:text-xs">
+            <div class="flex justify-between text-[12px] sm:text-[16px]">
               <span :class="badge.unlocked ? rarityColor(badge.rarity) : 'text-gray-500'">
                 {{ badge.unlocked ? badge.rarity : 'LOCKED' }}
               </span>
