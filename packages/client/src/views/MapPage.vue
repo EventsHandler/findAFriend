@@ -67,6 +67,13 @@ const { result: selectedLocationUsersResult } = useQuery(
 
 const selectedLocationUsers = computed(() => selectedLocationUsersResult.value?.locationUsers ?? [])
 
+const distance = computed(() => {
+  if (!activePOI.value || !playerMarker) return null
+  const playerLatLng = playerMarker.getLatLng()
+  const destLatLng = L.latLng(activePOI.value.posx, activePOI.value.posy)
+  return calculateDistance(playerLatLng.lat, playerLatLng.lng, destLatLng.lat, destLatLng.lng)
+})
+
 const {
   me,
   currentRoomId,
@@ -136,6 +143,35 @@ function isManualCompleteMissionTitle(title: string) {
     t.includes('comanda o bautura') ||
     t.includes('fotografie de meniu')
   )
+}
+
+function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371e3 // metres
+  const φ1 = lat1 * Math.PI / 180
+  const φ2 = lat2 * Math.PI / 180
+  const Δφ = (lat2 - lat1) * Math.PI / 180
+  const Δλ = (lng2 - lng1) * Math.PI / 180
+  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) *
+    Math.sin(Δλ / 2) * Math.sin(Δλ / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  const d = R * c
+  return d
+}
+
+async function getRoute(start: L.LatLng, end: L.LatLng): Promise<L.LatLng[]> {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/foot/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`
+    const response = await fetch(url)
+    const data = await response.json()
+    if (data.routes && data.routes[0]) {
+      const coordinates = data.routes[0].geometry.coordinates
+      return coordinates.map(([lng, lat]: [number, number]) => L.latLng(lat, lng))
+    }
+  } catch (e) {
+    console.warn('Failed to get route:', e)
+  }
+  return [start, end] // fallback to straight line
 }
 
 async function getCurrentGps() {
@@ -249,9 +285,16 @@ const handleLeaveRoom = async () => {
 const mapContainer = ref<HTMLElement | null>(null)
 const map = ref<L.Map | null>(null)
 const markersLayer = ref<L.LayerGroup | null>(null)
+const pathLayer = ref<L.LayerGroup | null>(null)
 
 const lastUpdate = ref('Never')
 let playerMarker: L.Marker | null = null
+const playerLatLng = ref<L.LatLng | null>(null)
+const routeDrawnFor = ref<string | null>(null)
+const routePoints = ref<L.LatLng[]>([])
+let permanentPolyline: L.Polyline | null = null
+let animatedPolyline: L.Polyline | null = null
+const pathAnimationTimers: number[] = []
 const hasCenteredOnce = ref(false)
 
 const playerIcon = L.divIcon({
@@ -280,6 +323,7 @@ const initMap = () => {
   }).addTo(map.value as L.Map)
 
   markersLayer.value = L.layerGroup().addTo(map.value as L.Map)
+  pathLayer.value = L.layerGroup().addTo(map.value as L.Map)
   initRoomLayer(map.value as L.Map)
 
   // Update zoom level on zoom change
@@ -340,9 +384,57 @@ watch([locations, activePOI], () => {
   renderLocations()
 })
 
+watch(activePOI, () => {
+  routeDrawnFor.value = null
+  if (activePOI.value) {
+    drawPathAnimated()
+  } else {
+    // clearPathAnimation()
+  }
+})
+
 watch(zoomLevel, () => {
   renderLocations()
 })
+
+function clearPathAnimation() {
+  if (!pathLayer.value) return
+  pathLayer.value.clearLayers()
+  routeDrawnFor.value = null
+  pathAnimationTimers.forEach((timeoutId) => clearTimeout(timeoutId))
+  pathAnimationTimers.length = 0
+}
+
+async function drawPathAnimated() {
+  if (!pathLayer.value) return
+  if (!activePOI.value || !playerMarker) return
+  if (routeDrawnFor.value === activePOI.value.id) return
+
+  clearPathAnimation()
+
+  const playerLatLngValue = playerMarker.getLatLng()
+  const destLatLng = L.latLng(activePOI.value.posx, activePOI.value.posy)
+  const routePoints = await getRoute(playerLatLngValue, destLatLng)
+
+  const polyline = L.polyline([], {
+    color: 'lime',
+    weight: 3,
+    opacity: 0.8
+  })
+
+  pathLayer.value.addLayer(polyline)
+
+  const numPoints = routePoints.length
+  const delay = Math.max(20, 1000 / Math.max(1, numPoints))
+  for (let i = 0; i < numPoints; i++) {
+    const timeoutId = window.setTimeout(() => {
+      polyline.addLatLng(routePoints[i])
+    }, i * delay)
+    pathAnimationTimers.push(timeoutId)
+  }
+
+  routeDrawnFor.value = activePOI.value.id
+}
 
 watch([roomUsers, currentRoomId], () => {
   if (!currentRoomId.value) {
@@ -376,6 +468,11 @@ const updateLocation = () => {
         }).addTo(map.value as L.Map)
       } else {
         playerMarker.setLatLng([latitude, longitude])
+      }
+
+      playerLatLng.value = new L.LatLng(latitude, longitude)
+      if (activePOI.value && routeDrawnFor.value !== activePOI.value.id) {
+        drawPathAnimated()
       }
 
       if (currentRoomId.value) {
@@ -478,7 +575,7 @@ onUnmounted(() => {
     <!-- TOP BAR -->
     <header class="h-12 flex items-center justify-between px-4 border-b border-white/10">
       <div class="text-lime-400 text-sm uppercase tracking-widest">
-        Hartă
+        Hartă{{ distance ? ` - ${Math.round(distance)}m` : '' }}
       </div>
 
       <div class="text-xs text-gray-400">
@@ -497,7 +594,7 @@ onUnmounted(() => {
         class="relative"
         :class="activePOI ? 'flex-1' : 'w-full h-full'"
       >
-        <div ref="mapContainer" class="w-full h-full"></div>
+        <div ref="mapContainer" class="w-full h-full bg-gray-900"></div>
       </div>
 
       <!-- MENU -->
