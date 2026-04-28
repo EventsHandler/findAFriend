@@ -87,6 +87,14 @@ function isOnCooldown(lockedUntil: string | null | undefined) {
   return new Date(lockedUntil).getTime() > Date.now()
 }
 
+function formatCompletedAt(iso: string) {
+  try {
+    return new Date(iso).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
+  } catch {
+    return iso
+  }
+}
+
 const nearbyQuests = computed(() => {
   const user = me.value
   const hasPos = typeof user?.posx === 'number' && typeof user?.posy === 'number'
@@ -202,8 +210,9 @@ const stats = computed(() => {
                   {{ row.quest.description }}
                 </div>
                 <div class="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-widest">
-                  <span class="text-[var(--c-accent)]/90">+{{ row.quest.rewardXp }} XP</span>
-                  <span class="text-white/40" v-if="row.location">
+                  <span class="text-lime-300/90">+{{ row.quest.rewardXp }} XP</span>
+                  <span class="text-cyan-200/90">+{{ Math.max(1, Math.round((row.quest.rewardXp ?? 0) * 0.5)) }} PTS</span>
+                  <span class="text-gray-500" v-if="row.location">
                     {{ row.location.name }} · {{ fmtDistance(row.distanceM) }}
                   </span>
                   <span class="text-white/40" v-else>Misiune globală</span>
@@ -247,6 +256,31 @@ const stats = computed(() => {
               </router-link>
             </div>
           </UiCard>
+        </div>
+      </section>
+
+      <section v-if="me && (me.questHistory?.length ?? 0) > 0">
+        <div class="flex items-end justify-between gap-3 px-1">
+          <div>
+            <h2 class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Istoric misiuni</h2>
+            <p class="text-[11px] text-gray-500 mt-1">Ultimele completări.</p>
+          </div>
+        </div>
+
+        <div class="mt-3 space-y-2 max-h-72 overflow-y-auto pr-1 styled-scrollbar">
+          <div
+            v-for="q in me.questHistory"
+            :key="q.id"
+            class="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-[#0a0e0b] border border-white/5 text-[11px]"
+          >
+            <div class="min-w-0">
+              <div class="font-medium text-gray-200 truncate">{{ q.title }}</div>
+              <div class="text-[10px] text-gray-500 mt-0.5">{{ formatCompletedAt(q.completedAt) }}</div>
+            </div>
+            <div class="shrink-0 text-lime-300/90 tabular-nums">
+              +{{ q.rewardXp }} XP · +{{ Math.max(1, Math.round((q.rewardXp ?? 0) * 0.5)) }} PTS
+            </div>
+          </div>
         </div>
       </section>
     </UiContainer>

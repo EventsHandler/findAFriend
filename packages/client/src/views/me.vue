@@ -12,8 +12,6 @@ import UiButton from '../ui/UiButton.vue'
 import UiModal from '../ui/UiModal.vue'
 import UiContainer from '../ui/UiContainer.vue'
 
-const XP_PER_LEVEL = 600
-
 const router = useRouter()
 const actionError = ref('')
 const { client: apollo } = useApolloClient()
@@ -29,7 +27,9 @@ const ongoingMissions = computed(() => {
 
 const levelInfo = computed(() => {
   const xp = user.value?.xp ?? 0
-  const level = Math.floor(xp / XP_PER_LEVEL) + 1
+  // Keep in sync with server leveling (see server questRewards.ts).
+  const XP_PER_LEVEL = 100
+  const level = user.value?.level ?? (Math.floor(xp / XP_PER_LEVEL) + 1)
   const xpInLevel = xp % XP_PER_LEVEL
   const pct = Math.min(100, (xpInLevel / XP_PER_LEVEL) * 100)
   return { xp, level, xpInLevel, pct, span: XP_PER_LEVEL }
@@ -96,6 +96,12 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
             class="text-[10px] bg-orange-500/15 text-orange-200 px-2 py-1 rounded-full border border-orange-500/25 tracking-widest uppercase"
           >
             LVL {{ levelInfo.level }}
+          </div>
+          <div
+            v-if="user"
+            class="text-[10px] bg-lime-500/15 text-lime-200 px-2 py-1 rounded-full border border-lime-400/20 tabular-nums tracking-widest uppercase"
+          >
+            {{ user.points }} PTS
           </div>
           <UiButton variant="danger" size="sm" @click="logoutConfirmOpen = true">Deconectare</UiButton>
         </div>
@@ -169,8 +175,8 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
                 <p v-if="um.mission.description" class="text-[11px] text-white/45 mt-1 leading-snug">
                   {{ um.mission.description }}
                 </p>
-                <div class="text-[10px] text-[var(--c-accent)] mt-2 tracking-wider uppercase">
-                  Recompensă +{{ um.mission.rewardXp }} XP
+                <div class="text-[10px] text-lime-300 mt-2 tracking-wider uppercase">
+                  Recompensă +{{ um.mission.rewardXp }} XP · +{{ Math.max(1, Math.round((um.mission.rewardXp ?? 0) * 0.5)) }} PTS
                 </div>
               </div>
             </div>

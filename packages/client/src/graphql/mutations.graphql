@@ -78,6 +78,10 @@ mutation ClaimMission($missionId: ID!) {
       title
       rewardXp
       targetProgress
+      completionKind
+      distanceMeters
+      staySeconds
+      timerSeconds
       repeatable
       cooldownHours
     }
@@ -94,6 +98,10 @@ mutation UpdateMissionProgress($userMissionId: ID!, $progress: Int!) {
       id
       rewardXp
       targetProgress
+      completionKind
+      distanceMeters
+      staySeconds
+      timerSeconds
       repeatable
       cooldownHours
     }
@@ -111,6 +119,10 @@ mutation CompletePhotoMission($missionId: ID!, $lat: Float!, $lng: Float!) {
       title
       rewardXp
       targetProgress
+      completionKind
+      distanceMeters
+      staySeconds
+      timerSeconds
       repeatable
       cooldownHours
     }
@@ -128,6 +140,10 @@ mutation CompleteMission($missionId: ID!, $lat: Float!, $lng: Float!) {
       title
       rewardXp
       targetProgress
+      completionKind
+      distanceMeters
+      staySeconds
+      timerSeconds
       repeatable
       cooldownHours
     }
@@ -145,6 +161,10 @@ mutation StartTimedMission($missionId: ID!, $lat: Float!, $lng: Float!) {
       title
       rewardXp
       targetProgress
+      completionKind
+      distanceMeters
+      staySeconds
+      timerSeconds
       repeatable
       cooldownHours
     }

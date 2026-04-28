@@ -12,8 +12,10 @@
   --c-border: rgba(132, 255, 122, 0.10);
   --c-border-strong: rgba(132, 255, 122, 0.20);
 
-  --c-accent: #84ff7a; /* lime-ish */
-  --c-accent-2: #fb923c; /* orange-ish */
+  --c-accent: #84ff7a;
+  /* lime-ish */
+  --c-accent-2: #fb923c;
+  /* orange-ish */
   --c-danger: #f87171;
 
   /* Radii */
@@ -52,6 +54,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

@@ -22,6 +22,7 @@ import {
   LocationsDocument,
   LocationUsersDocument,
   MissionsDocument,
+  MissionCompletionKind,
   StartTimedMissionDocument,
   UserMissionStatus,
 } from '../api/graphql'
@@ -141,6 +142,10 @@ async function confirmCompleteNow() {
   await onCompleteMission(id)
 }
 
+// For timed mission countdown labels.
+const nowMs = ref(Date.now())
+let nowInterval: number | null = null
+
 const myMissionsByMissionId = computed(() => {
   const missions = me.value?.userMissions ?? []
   const map = new Map<string, (typeof missions)[number]>()
@@ -177,32 +182,16 @@ function cooldownRemaining(lockedUntil: string | null | undefined) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`
 }
 
-function isPhotoMissionTitle(title: string) {
-  const t = title.toLowerCase()
-  return t.includes('poză') || t.includes('poza') || t.includes('fotograf')
-}
-
-function isTimedStartMissionTitle(title: string) {
-  const t = title.toLowerCase()
-  return t.includes('sprint 2 minute') || t.includes('stretch 5 minute') || t.includes('respira')
-}
-
-function isManualCompleteMissionTitle(title: string) {
-  const t = title.toLowerCase()
-  return (
-    t.includes('hidratare') ||
-    t.includes('descoperă') ||
-    t.includes('descopera') ||
-    t.includes('încearcă ceva nou') ||
-    t.includes('incearca ceva nou') ||
-    t.includes('împarte un desert') ||
-    t.includes('imparte un desert') ||
-    t.includes('recenzie rapidă') ||
-    t.includes('recenzie rapida') ||
-    t.includes('comandă o băutură') ||
-    t.includes('comanda o bautura') ||
-    t.includes('fotografie de meniu')
-  )
+function timedRemainingLabel(startedAt: string | null | undefined, timerSeconds: number | null | undefined) {
+  if (!startedAt || !timerSeconds) return ''
+  const started = new Date(startedAt).getTime()
+  if (!Number.isFinite(started)) return ''
+  const totalMs = timerSeconds * 1000
+  const leftMs = Math.max(0, totalMs - (nowMs.value - started))
+  const totalSecondsLeft = Math.ceil(leftMs / 1000)
+  const mm = Math.floor(totalSecondsLeft / 60)
+  const ss = totalSecondsLeft % 60
+  return mm > 0 ? `${mm}m ${String(ss).padStart(2, '0')}s` : `${ss}s`
 }
 
 function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -683,6 +672,10 @@ onMounted(() => {
   ensureMapMounted()
   updateLocation()
 
+  nowInterval = window.setInterval(() => {
+    nowMs.value = Date.now()
+  }, 1000)
+
   intervalId = setInterval(updateLocation, 5000)
 })
 
@@ -699,6 +692,7 @@ watch(selectedLocationId, () => {
 
 onUnmounted(() => {
   if (intervalId) clearInterval(intervalId)
+  if (nowInterval) window.clearInterval(nowInterval)
   if (map.value) {
     map.value.remove()
     map.value = null
@@ -886,18 +880,23 @@ onUnmounted(() => {
                 <div class="mt-3 flex items-center justify-between gap-3">
                   <div class="text-[11px] text-[var(--c-accent)] tabular-nums">+{{ m.rewardXp }} XP</div>
 
-                  <div
-                    v-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && m.repeatable && isOnCooldown(myMissionsByMissionId.get(m.id)?.lockedUntil)"
-                    class="text-[11px] text-amber-200/80 tabular-nums"
-                  >
-                    {{ cooldownRemaining(myMissionsByMissionId.get(m.id)?.lockedUntil) }}
-                  </div>
-
                   <div class="flex items-center gap-2">
+                    <div
+                      v-if="
+                        myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed &&
+                        m.repeatable &&
+                        isOnCooldown(myMissionsByMissionId.get(m.id)?.lockedUntil)
+                      "
+                      class="text-[11px] text-amber-200/80 tabular-nums"
+                    >
+                      {{ cooldownRemaining(myMissionsByMissionId.get(m.id)?.lockedUntil) }}
+                    </div>
+
                     <UiButton
                       v-if="
                         myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
-                        isTimedStartMissionTitle(m.title)
+                        !myMissionsByMissionId.get(m.id)?.startedAt &&
+                        m.completionKind === MissionCompletionKind.Timed
                       "
                       :disabled="startingTimer"
                       @click="onStartTimedMission(m.id)"
@@ -907,10 +906,21 @@ onUnmounted(() => {
                       Pornește
                     </UiButton>
 
+                    <span
+                      v-else-if="
+                        myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
+                        !!myMissionsByMissionId.get(m.id)?.startedAt &&
+                        m.completionKind === MissionCompletionKind.Timed
+                      "
+                      class="text-[10px] px-2 py-1 rounded bg-cyan-500/10 border border-cyan-300/20 text-cyan-200 uppercase tracking-widest"
+                    >
+                      Rulează… {{ timedRemainingLabel(myMissionsByMissionId.get(m.id)?.startedAt, m.timerSeconds) }}
+                    </span>
+
                     <UiButton
                       v-else-if="
                         myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
-                        isManualCompleteMissionTitle(m.title)
+                        m.completionKind === MissionCompletionKind.ManualConfirm
                       "
                       :disabled="completing"
                       @click="requestConfirmComplete(m.id, m.title)"
@@ -923,7 +933,7 @@ onUnmounted(() => {
                     <label
                       v-else-if="
                         myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
-                        isPhotoMissionTitle(m.title)
+                        m.completionKind === MissionCompletionKind.Photo
                       "
                       class="text-[11px] px-3 py-2 rounded-xl bg-cyan-500/10 border border-cyan-300/20 text-cyan-100 cursor-pointer"
                       :class="(completingPhoto || photoBusyByMissionId.has(m.id) ? 'opacity-40 cursor-not-allowed' : '')"
@@ -988,7 +998,7 @@ onUnmounted(() => {
                       :style="{
                         width: `${Math.min(100, ((myMissionsByMissionId.get(m.id)?.progress ?? 0) / m.targetProgress) * 100)}%`,
                       }"
-                    />
+                    ></div>
                   </div>
                 </div>
               </div>
