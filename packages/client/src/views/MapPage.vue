@@ -580,19 +580,6 @@ onUnmounted(() => {
             <div class="text-[10px] text-gray-500 uppercase tracking-[0.25em]">
               Misiuni ({{ missionsForLocation.length }})
             </div>
-            <div class="flex items-center gap-2">
-              <div class="text-[10px] text-gray-500 tracking-widest uppercase">
-                refresh: <span class="text-lime-300/80">{{ missionsLastRefreshedLabel }}</span>
-              </div>
-              <button
-                type="button"
-                class="text-[10px] px-2.5 py-1 rounded-lg bg-lime-500/10 text-lime-300 border border-lime-400/20 uppercase tracking-widest disabled:opacity-40"
-                :disabled="missionsLoading || !selectedLocationId"
-                @click="refreshMissions"
-              >
-                refresh
-              </button>
-            </div>
           </div>
           <div v-if="questActionError" class="text-xs text-red-300/90 px-2 py-1">
             {{ questActionError }}
@@ -603,7 +590,7 @@ onUnmounted(() => {
           <div v-else-if="missionsForLocation.length === 0" class="text-xs text-slate-500 italic px-2 py-1">
             Nu există misiuni pentru această locație
           </div>
-          <div v-else class="space-y-2 max-h-44 overflow-y-auto pr-2 styled-scrollbar">
+          <div v-else class="space-y-2 pr-2 styled-scrollbar">
             <div
               v-for="m in missionsForLocation"
               :key="m.id"
@@ -628,7 +615,7 @@ onUnmounted(() => {
                   <span
                     v-else-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && m.repeatable && isOnCooldown(myMissionsByMissionId.get(m.id)?.lockedUntil)"
                     class="text-amber-200 border border-amber-300/25 bg-amber-500/10 px-2 py-0.5 rounded"
-                  >Răcire</span>
+                  >În așteptare</span>
                   <span
                     v-else-if="myMissionsByMissionId.has(m.id) && m.repeatable"
                     class="text-cyan-200 border border-cyan-300/25 bg-cyan-500/10 px-2 py-0.5 rounded"
@@ -745,18 +732,11 @@ onUnmounted(() => {
         </div>
 
         <div class="mt-4 grid grid-cols-1 gap-2">
-          <button
+          <button v-if="me?.locationId !== activePOI.id"
             class="w-full bg-lime-500/15 border border-lime-400/25 text-lime-200 py-2 rounded-xl hover:bg-lime-500/20 transition-colors"
             @click="joinRoom(activePOI.id)"
           >
-            {{ me?.locationId === activePOI.id ? 'Reîmprospătează camera' : 'Intră în cameră' }}
-          </button>
-
-          <button
-            class="w-full bg-white/5 border border-white/10 text-white py-2 rounded-xl hover:bg-white/10 transition-colors"
-            @click="openChat(activePOI.id)"
-          >
-            Deschide chat-ul
+            Intră în cameră
           </button>
 
           <button
@@ -765,6 +745,13 @@ onUnmounted(() => {
             @click="handleLeaveRoom"
           >
             Ieși din cameră
+          </button>
+
+          <button
+            class="w-full bg-white/5 border border-white/10 text-white py-2 rounded-xl hover:bg-white/10 transition-colors"
+            @click="openChat(activePOI.id)"
+          >
+            Deschide chat-ul
           </button>
         </div>
 

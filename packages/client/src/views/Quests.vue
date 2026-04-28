@@ -164,19 +164,8 @@ const stats = computed(() => {
             <p class="text-[11px] text-gray-500 mt-1">
               Sortate după distanță (necesită poziția GPS).
             </p>
-          <p class="text-[10px] text-gray-500 mt-1 tracking-widest uppercase">
-            refresh: <span class="text-lime-300/80">{{ missionsLastRefreshedLabel }}</span>
-          </p>
           </div>
         <div class="flex items-center gap-2">
-          <button
-            type="button"
-            class="text-[10px] px-3 py-2 rounded-lg bg-lime-500/10 text-lime-300 border border-lime-400/20 uppercase tracking-widest disabled:opacity-40"
-            :disabled="missionsLoading || !currentLocationId"
-            @click="refreshMissions"
-          >
-            refresh
-          </button>
           <router-link
             to="/MapPage"
             class="text-[10px] px-3 py-2 rounded-lg bg-lime-500/10 text-lime-300 border border-lime-400/20 uppercase tracking-widest"

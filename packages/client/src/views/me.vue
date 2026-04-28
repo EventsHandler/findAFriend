@@ -196,34 +196,6 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
           </div>
         </div>
       </section>
-
-      <!-- NEARBY PLAYERS -->
-      <section>
-        <h2 class="text-[10px] text-gray-400 mb-3 tracking-[0.2em] uppercase px-2">Jucători în zonă</h2>
-        <div class="space-y-3">
-          <div
-            v-for="u in users"
-            :key="u.id"
-            class="flex items-center justify-between bg-[#101712] border border-lime-500/10 p-4 rounded-xl"
-          >
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-lime-500/5 border border-lime-400/20 flex items-center justify-center">
-                <svg class="w-5 h-5 text-lime-400/70" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="8" r="4" stroke="currentColor"/>
-                  <path d="M4 20c2-4 14-4 16 0" stroke="currentColor"/>
-                </svg>
-              </div>
-              <div>
-                <div class="text-sm">{{ u.name }}</div>
-                <div class="text-[10px] text-gray-500 mt-0.5">{{ u.distance }} • {{ u.status }}</div>
-              </div>
-            </div>
-            <button class="text-[10px] px-3 py-1.5 rounded-full bg-orange-500/10 text-orange-300 border border-orange-400/20 uppercase tracking-widest">
-              Invită
-            </button>
-          </div>
-        </div>
-      </section>
     </main>
   </div>
 </template>
