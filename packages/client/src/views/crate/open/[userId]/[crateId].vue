@@ -1,48 +1,127 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useMutation } from '@vue/apollo-composable'
+import { OpenCrateDocument, RarityType, CurrentUserDocument } from '../../../../api/graphql'
 
-// import crateClosed from '@/assets/crates/crate-closed.svg'
-// import crateOpen from '@/assets/crates/crate-open.svg'
+import CommonCrateClosed from '../../../../assets/crates/CommonChestClosed.svg'
+import CommonCrateOpened from '../../../../assets/crates/CommonChestOpened.svg'
+import EpicCrateClosed from '../../../../assets/crates/EpicChestClosed.svg'
+import EpicCrateOpened from '../../../../assets/crates/EpicChestOpened.svg'
+import LegendaryCrateClosed from '../../../../assets/crates/LegendaryChestClosed.svg'
+import LegendaryCrateOpened from '../../../../assets/crates/LegendaryChestOpened.svg'
+
+import badge_1 from '../../../../assets/badges/common/FirstStep.svg'
+import badge_2 from '../../../../assets/badges/common/Lucky.svg'
+import badge_3 from '../../../../assets/badges/common/SocialSpark.svg'
+
+import badge_4 from '../../../../assets/badges/epic/ConnectionBuilder.svg'
+import badge_5 from '../../../../assets/badges/epic/Momentum.svg'
+import badge_6 from '../../../../assets/badges/epic/TeamPlayer.svg'
+
+import badge_7 from '../../../../assets/badges/legendary/CommunityIcon.svg'
+import badge_8 from '../../../../assets/badges/legendary/SocialLegend.svg'
+import badge_9 from '../../../../assets/badges/legendary/Unstoppable.svg'
 
 const route = useRoute()
 const router = useRouter()
-const userId = computed(() => String(route.params.userId || ''))
-const crateId = computed(() => String(route.params.crateId || ''))
-
 
 const crateState = ref<'closed' | 'open' | 'reward'>('closed')
 const isOpening = ref(false)
+const reward = ref<any>(null)
 
-function openCrate() {
-  if (isOpening.value) return
+const { mutate: openCrateMutation } = useMutation(OpenCrateDocument, {
+  refetchQueries: [{ query: CurrentUserDocument }],
+  awaitRefetchQueries: true,
+})
 
-  isOpening.value = true
-  crateState.value = 'open'
-
-  setTimeout(() => {
-    crateState.value = 'reward'
-  }, 1000)
-
-  setTimeout(() => {
-    router.push('/inventory')
-  }, 2500)
+const badgeMap: Record<string, string> = {
+  badge_1,
+  badge_2,
+  badge_3,
+  badge_4,
+  badge_5,
+  badge_6,
+  badge_7,
+  badge_8,
+  badge_9,
 }
 
-const crateClosed = true
-const crateOpen = false
+function getClosedImage() {
+  switch (reward.value?.rarity) {
+    case RarityType.Common:
+      return CommonCrateClosed
+    case RarityType.Epic:
+      return EpicCrateClosed
+    case RarityType.Legendary:
+      return LegendaryCrateClosed
+    default:
+      return CommonCrateClosed
+  }
+}
+function getOpenImage() {
+  switch (reward.value?.rarity) {
+    case RarityType.Common:
+      return CommonCrateOpened
+    case RarityType.Epic:
+      return EpicCrateOpened
+    case RarityType.Legendary:
+      return LegendaryCrateOpened
+    default:
+      return CommonCrateOpened
+  }
+}
 
 const currImage = computed(() => {
-  if ((crateState.value === 'closed')) return crateClosed
-  if ((crateState.value === 'open')) return crateOpen
-  // return crateBadge
+  if (crateState.value === 'closed') return getClosedImage()
+  if (crateState.value === 'open') return getOpenImage()
+  return reward.value?.svg
 })
 
 const stateMessage = computed(() => {
-  if ((crateState.value === 'closed')) return 'Tap!'
-  if ((crateState.value === 'open')) return 'Opening...'
-  return 'New badge unlocked!'
+  if (crateState.value === 'closed') return 'Apasă!'
+  if (crateState.value === 'open') return 'Se deschide...'
+  return 'Noul tău badge!'
 })
+
+async function openCrate() {
+  if (isOpening.value) return
+
+  isOpening.value = true
+
+  try {
+    crateState.value = 'closed'
+    await new Promise(r => setTimeout(r, 400))
+    crateState.value = 'open'
+    const res = await openCrateMutation({
+      userId: String(route.params.userId),
+      crateId: String(route.params.crateId),
+    })
+
+    const item = res?.data?.openCrate
+
+    if (!item) {
+      throw new Error('No reward received')
+    }
+
+    reward.value = {
+      name: item.name,
+      rarity: item.rarity,
+      svg: badgeMap[item.svgId] || CommonCrateClosed,
+    }
+    await new Promise(r => setTimeout(r, 700))
+    crateState.value = 'reward'
+
+    setTimeout(() => {
+      router.push('/inventory')
+    }, 1500)
+  } catch (err) {
+    console.error('Open crate failed:', err)
+    crateState.value = 'closed'
+  } finally {
+    isOpening.value = false
+  }
+}
 </script>
 
 <template>
@@ -71,22 +150,20 @@ const stateMessage = computed(() => {
       />
 
       <div class="relative z-10 flex flex-col items-center">
-        <div class="text-xs text-gray-400 tracking-widest uppercase mb-2">Crate #{{ crateId }}</div>
-
         <h1 class="text-2xl font-bold text-lime-400 tracking-widest uppercase mb-8">
           {{ stateMessage }}
         </h1>
 
-        <!-- <img
+        <img
           :src="currImage"
           alt="crate"
           class="w-48 h-48 object-contain transition-all duration-700"
           :class="crateState === 'reward' ? 'scale-110' : 'scale-100'"
-        /> -->
+        />
 
         <div v-if="crateState === 'reward'" class="mt-6 text-center">
-          <div class="text-lg text-lime-300 font-bold tracking-wide">New Badge Earned</div>
-          <div class="text-sm text-gray-400 mt-1 tracking-widest uppercase">Explorer</div>
+          <div class="text-lg text-lime-300 font-bold tracking-wide">Nou badge câștigat!</div>
+          <div class="text-sm text-gray-400 mt-1 tracking-widest uppercase">{{ reward.name }}</div>
         </div>
 
         <button
@@ -94,11 +171,11 @@ const stateMessage = computed(() => {
           @click="openCrate"
           class="mt-8 w-full py-3 bg-lime-500 text-black font-bold rounded-xl hover:bg-lime-400 transition-colors shadow-[0_0_15px_rgba(132,255,122,0.3)]"
         >
-          OPEN REWARD BOX
+          DESCHIDE CRATE-UL CU RECOMPENSĂ
         </button>
 
         <div v-if="crateState === 'open'" class="mt-8 text-xs text-gray-400 tracking-widest uppercase animate-pulse">
-          Unlocking reward...
+          Deblocarea recompensei...
         </div>
       </div>
     </div>

@@ -4,10 +4,25 @@ import { useRouter } from 'vue-router'
 import { CurrentUserDocument, GetBadgesDocument } from '../api/graphql'
 import { useQuery } from '@vue/apollo-composable'
 import { RarityType } from '../api/graphql'
+import CommonCrate from '../assets/crates/CommonChestClosed.svg'
+import EpicCrate from '../assets/crates/EpicChestClosed.svg'
+import LegendaryCrate from '../assets/crates/LegendaryChestClosed.svg'
+
+import badge_1 from "../assets/badges/common/FirstStep.svg"
+import badge_2 from "../assets/badges/common/Lucky.svg"
+import badge_3 from "../assets/badges/common/SocialSpark.svg"
+
+import badge_4 from "../assets/badges/epic/ConnectionBuilder.svg"
+import badge_5 from "../assets/badges/epic/Momentum.svg"
+import badge_6 from "../assets/badges/epic/TeamPlayer.svg"
+
+import badge_7 from "../assets/badges/legendary/CommunityIcon.svg"
+import badge_8 from "../assets/badges/legendary/SocialLegend.svg"
+import badge_9 from "../assets/badges/legendary/Unstoppable.svg"
 
 const router = useRouter()
 
-const { result, refetch } = useQuery(CurrentUserDocument)
+const { result } = useQuery(CurrentUserDocument)
 const user = computed(() => result.value?.me)
 console.log(user)
 
@@ -65,18 +80,35 @@ function rarityColor(type: string) {
 function rarityImage(type: string) {
   switch (type) {
     case RarityType.Common:
-      return 'img1'
+      return CommonCrate
     case RarityType.Epic:
-      return 'img2'
+      return EpicCrate
     case RarityType.Legendary:
-      return 'img3'
+      return LegendaryCrate
     default:
-      return 'text-white'
+      return CommonCrate
   }
 }
 
+const badgeImages: Record<string, string> = {
+  badge_1,
+  badge_2,
+  badge_3,
+  badge_4,
+  badge_5,
+  badge_6,
+  badge_7,
+  badge_8,
+  badge_9,
+}
+
+function getBadgeImage(name: string) {
+  return badgeImages[name] || badge_1 
+}
+
 function handleItemClick(item: any) {
-  console.log('Clicked item:', item.name)
+    if (!user.value?.id) return
+    router.push(`/crate/open/${user.value.id}/${item.id}`)
 }
 </script>
 
@@ -131,18 +163,20 @@ function handleItemClick(item: any) {
       >
         Badge-uri
       </div>
+            <div
+        class="p-4 sm:p-6 bg-[#101712] border border-t-0 border-lime-500/30 rounded-b-xl shadow-[0_0_30px_rgba(132,255,122,0.05)]"
+      >
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         <div
           v-for="badge in badgeItems"
           :key="badge.id"
           role="button"
           tabindex="0"
-          @click="badge.unlocked && handleItemClick(badge)"
           class="group relative flex flex-col justify-between p-3 rounded-2xl border border-lime-500/20 bg-[#0d1410] hover:bg-[#16211a] transition-all duration-300 aspect-square shadow-md"
         >
           <div class="flex justify-center items-center flex-1 relative">
             <img
-              :src="badge.svgId"
+              :src="getBadgeImage(badge.svgId)"
               :alt="badge.name"
               class="w-12 h-12 sm:w-16 sm:h-16 object-contain transition-all duration-300"
               :class="badge.unlocked ? 'opacity-100' : 'opacity-30 grayscale'"
@@ -164,6 +198,7 @@ function handleItemClick(item: any) {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   </div>

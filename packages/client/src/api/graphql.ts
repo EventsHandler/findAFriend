@@ -311,7 +311,7 @@ export type OpenCrateMutationVariables = Exact<{
 
 export type OpenCrateMutation = {
   __typename?: 'Mutation'
-  openCrate: { __typename?: 'Item'; id: string; name: string; rarity: RarityType }
+  openCrate: { __typename?: 'Item'; id: string; name: string; rarity: RarityType; svgId: string }
 }
 
 export type BuyCrateMutationVariables = Exact<{
@@ -829,6 +829,7 @@ export const OpenCrateDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'rarity' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'svgId' } },
               ],
             },
           },
