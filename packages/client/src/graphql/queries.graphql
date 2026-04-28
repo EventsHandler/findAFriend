@@ -73,3 +73,41 @@ query Crates {
     rarity
   }
 }
+
+query CurrentUser {
+  me {
+    id
+    name
+    locationId
+    posx
+    posy
+    points
+    crateInventories {
+      crate {
+        rarity
+        name
+      }
+      quantity
+      crateId
+      userId
+    }
+    inventories {
+      item {
+        id
+        name
+        svgId
+        rarity
+      }
+      quantity
+    }
+  }
+}
+
+query GetBadges {
+  items {
+    id
+    name
+    rarity
+    svgId
+  }
+}

@@ -27,6 +27,7 @@ mutation OpenCrate($userId: ID!, $crateId: ID!) {
     id
     name
     rarity
+    svgId
   }
 }
 

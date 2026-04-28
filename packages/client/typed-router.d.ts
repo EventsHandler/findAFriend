@@ -44,6 +44,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/inventory': RouteRecordInfo<
+      '/inventory',
+      '/inventory',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/inventoryBadge': RouteRecordInfo<
       '/inventoryBadge',
       '/inventoryBadge',
@@ -121,6 +128,12 @@ declare module 'vue-router/auto-routes' {
     'src/views/HelloWorld.vue': {
       routes:
         | '/HelloWorld'
+      views:
+        | never
+    }
+    'src/views/inventory.vue': {
+      routes:
+        | '/inventory'
       views:
         | never
     }

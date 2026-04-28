@@ -56,6 +56,7 @@ export type Item = {
   id: Scalars['ID']['output']
   name: Scalars['String']['output']
   rarity: RarityType
+  svgId: Scalars['String']['output']
 }
 
 export type ItemInventory = {
@@ -310,7 +311,7 @@ export type OpenCrateMutationVariables = Exact<{
 
 export type OpenCrateMutation = {
   __typename?: 'Mutation'
-  openCrate: { __typename?: 'Item'; id: string; name: string; rarity: RarityType }
+  openCrate: { __typename?: 'Item'; id: string; name: string; rarity: RarityType; svgId: string }
 }
 
 export type BuyCrateMutationVariables = Exact<{
@@ -588,6 +589,40 @@ export type CratesQuery = {
   crates: Array<{ __typename?: 'Crate'; id: string; name: string; price: number; rarity: RarityType }>
 }
 
+export type CurrentUserQueryVariables = Exact<{ [key: string]: never }>
+
+export type CurrentUserQuery = {
+  __typename?: 'Query'
+  me?: {
+    __typename?: 'User'
+    id: string
+    name: string
+    locationId?: string | null
+    posx?: number | null
+    posy?: number | null
+    points: number
+    crateInventories?: Array<{
+      __typename?: 'CrateInventory'
+      quantity: number
+      crateId: string
+      userId: string
+      crate?: { __typename?: 'Crate'; rarity: RarityType; name: string } | null
+    }> | null
+    inventories?: Array<{
+      __typename?: 'ItemInventory'
+      quantity: number
+      item?: { __typename?: 'Item'; id: string; name: string; svgId: string; rarity: RarityType } | null
+    }> | null
+  } | null
+}
+
+export type GetBadgesQueryVariables = Exact<{ [key: string]: never }>
+
+export type GetBadgesQuery = {
+  __typename?: 'Query'
+  items: Array<{ __typename?: 'Item'; id: string; name: string; rarity: RarityType; svgId: string }>
+}
+
 export const LoginDocument = {
   kind: 'Document',
   definitions: [
@@ -794,6 +829,7 @@ export const OpenCrateDocument = {
                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                 { kind: 'Field', name: { kind: 'Name', value: 'rarity' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'svgId' } },
               ],
             },
           },
@@ -1573,3 +1609,107 @@ export const CratesDocument = {
     },
   ],
 } as unknown as DocumentNode<CratesQuery, CratesQueryVariables>
+export const CurrentUserDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'CurrentUser' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'me' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'locationId' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'posx' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'posy' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'points' } },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'crateInventories' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'crate' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'rarity' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                          ],
+                        },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'quantity' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'crateId' } },
+                      { kind: 'Field', name: { kind: 'Name', value: 'userId' } },
+                    ],
+                  },
+                },
+                {
+                  kind: 'Field',
+                  name: { kind: 'Name', value: 'inventories' },
+                  selectionSet: {
+                    kind: 'SelectionSet',
+                    selections: [
+                      {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'item' },
+                        selectionSet: {
+                          kind: 'SelectionSet',
+                          selections: [
+                            { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'svgId' } },
+                            { kind: 'Field', name: { kind: 'Name', value: 'rarity' } },
+                          ],
+                        },
+                      },
+                      { kind: 'Field', name: { kind: 'Name', value: 'quantity' } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CurrentUserQuery, CurrentUserQueryVariables>
+export const GetBadgesDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'query',
+      name: { kind: 'Name', value: 'GetBadges' },
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'items' },
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'rarity' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'svgId' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GetBadgesQuery, GetBadgesQueryVariables>

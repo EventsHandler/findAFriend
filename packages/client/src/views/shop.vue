@@ -2,6 +2,9 @@
 import { useQuery, useMutation } from '@vue/apollo-composable'
 import { MeDocument, AddPointsDocument, CratesDocument, BuyCrateDocument } from '../api/graphql'
 import { computed, ref } from 'vue'
+import CommonCrateClosed from '../assets/crates/CommonChestClosed.svg'
+import EpicCrateClosed from '../assets/crates/EpicChestClosed.svg'
+import LegendaryCrateClosed from '../assets/crates/LegendaryChestClosed.svg'
 
 type Rarity = 'COMMON' | 'EPIC' | 'LEGENDARY'
 
@@ -28,6 +31,17 @@ const shopCrates = computed(() => {
   return Object.values(grouped).filter(Boolean)
 })
 
+function getImage(rarity: string) {
+  switch (rarity) {
+    case 'COMMON':
+      return CommonCrateClosed
+    case 'EPIC':
+      return EpicCrateClosed
+    case 'LEGENDARY':
+      return LegendaryCrateClosed
+  }
+}
+
 const errorMessage = ref('')
 const succes = ref(false)
 
@@ -43,14 +57,14 @@ async function buyCrateHandler(crate: any) {
     })
     succes.value = true
     setTimeout(() => {
-        succes.value =  false
+      succes.value = false
     }, 1500)
     await refetch()
   } catch (err) {
     console.log(err)
     errorMessage.value = 'Nu aveti suficiente puncte'
     setTimeout(() => {
-        errorMessage.value = ''
+      errorMessage.value = ''
     }, 1500)
   }
 }
@@ -124,20 +138,33 @@ async function addPointsHandler() {
         <div
           v-for="crate in shopCrates"
           :key="crate.id"
-          class="p-5 rounded-2xl bg-[#101712] border border-lime-500/10 flex justify-between items-center"
+          class="group relative p-5 rounded-2xl bg-[#101712] border border-lime-500/10 flex items-center justify-between overflow-hidden hover:border-lime-400/30 transition"
         >
-          <div>
-            <div>
-              <div class="text-sm font-bold uppercase tracking-widest text-lime-300">
-                {{ crate.rarity }}
-              </div>
-              <div class="text-xs text-gray-400 mt-1">Preț: {{ crate.price }} P</div>
-            </div>
+          <div class="absolute right-4 opacity-10 group-hover:opacity-20 transition">
+            <img :src="getImage(crate.rarity)" class="w-20 h-20" />
           </div>
 
+          <div class="relative z-10">
+            <div class="text-xs tracking-widest uppercase text-gray-400">Crate</div>
+
+            <div
+              class="text-sm font-bold uppercase tracking-widest"
+              :class="{
+                'text-gray-300': crate.rarity === 'COMMON',
+                'text-blue-400': crate.rarity === 'EPIC',
+                'text-yellow-400': crate.rarity === 'LEGENDARY',
+              }"
+            >
+              {{ crate.rarity }}
+            </div>
+
+            <div class="text-xs text-gray-400 mt-1">Preț: {{ crate.price }} P</div>
+          </div>
+
+          <!-- RIGHT BUTTON -->
           <button
             @click="buyCrateHandler(crate)"
-            class="text-[10px] px-4 py-2 rounded-full border border-lime-400/20 bg-lime-500/10 text-lime-300 uppercase tracking-widest hover:bg-lime-500 hover:text-black transition"
+            class="relative z-10 text-[10px] px-4 py-2 rounded-full border border-lime-400/20 bg-lime-500/10 text-lime-300 uppercase tracking-widest hover:bg-lime-500 hover:text-black transition"
           >
             Cumpără
           </button>

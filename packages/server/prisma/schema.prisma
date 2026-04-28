@@ -153,7 +153,7 @@ model Item {
   id     String @id @default(cuid(2))
   name   String @unique   
   rarity RarityType
-
+  svgId String @default("")
   inventories ItemInventory[]
 }
 

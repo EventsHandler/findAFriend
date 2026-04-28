@@ -14,6 +14,7 @@ const actionError = ref('')
 const { client: apollo } = useApolloClient()
 
 const { result, loading, error, refetch: refetchMe } = useQuery(MeDocument)
+console.log(error)
 
 const user = computed(() => result.value?.me)
 

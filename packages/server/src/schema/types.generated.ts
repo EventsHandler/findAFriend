@@ -59,6 +59,7 @@ export type Item = {
   id: Scalars['ID']['output']
   name: Scalars['String']['output']
   rarity: RarityType
+  svgId: Scalars['String']['output']
 }
 
 export type ItemInventory = {
@@ -481,6 +482,7 @@ export type ItemResolvers<
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   rarity?: Resolver<ResolversTypes['RarityType'], ParentType, ContextType>
+  svgId?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
 
