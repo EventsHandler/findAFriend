@@ -27,6 +27,7 @@ const route = useRoute()
 const router = useRouter()
 
 const crateState = ref<'closed' | 'open' | 'reward'>('closed')
+const redirectButton = ref<boolean>(false)
 const isOpening = ref(false)
 const reward = ref<any>(null)
 const { result } = useQuery(CurrentUserDocument)
@@ -122,9 +123,7 @@ async function openCrate() {
     await new Promise(r => setTimeout(r, 700))
     crateState.value = 'reward'
 
-    setTimeout(() => {
-      router.push('/inventory')
-    }, 1500)
+    redirectButton.value = true
   } catch (err) {
     console.error('Open crate failed:', err)
     crateState.value = 'closed'
@@ -181,7 +180,15 @@ async function openCrate() {
           @click="openCrate"
           class="mt-8 w-full py-3 bg-lime-500 text-black font-bold rounded-xl hover:bg-lime-400 transition-colors shadow-[0_0_15px_rgba(132,255,122,0.3)]"
         >
-          DESCHIDE CRATE-UL CU RECOMPENSĂ
+          Deschide crate-ul cu recompensă
+        </button>
+
+        <button
+          v-if="redirectButton"
+          @click="router.push('/inventory')"
+          class="mt-8 w-full py-3 bg-lime-500 text-black font-bold rounded-xl hover:bg-lime-400 transition-colors shadow-[0_0_15px_rgba(132,255,122,0.3)]"
+        >
+          Înapoi la inventar
         </button>
 
         <div v-if="crateState === 'open'" class="mt-8 text-xs text-gray-400 tracking-widest uppercase animate-pulse">

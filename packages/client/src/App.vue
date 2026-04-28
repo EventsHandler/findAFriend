@@ -9,8 +9,8 @@ import MapUnactive from '@/assets/navigationIcons/MapUnactive.svg'
 import QuestActive from '@/assets/navigationIcons/QuestActive.svg'
 import QuestUnactive from '@/assets/navigationIcons/QuestInactive.svg'
 
-import ShopActive from '@/assets/navigationIcons/ShopActive.svg'
-import ShopUnactive from '@/assets/navigationIcons/ShopUnactive.svg'
+import InventoryActive from '@/assets/navigationIcons/InventoryBackpackActive.svg'
+import InventoryUnactive from '@/assets/navigationIcons/InventoryBackpackUnactive.svg'
 
 import ChatActive from '@/assets/navigationIcons/ChatActive.svg'
 import ChatUnactive from '@/assets/navigationIcons/ChatUnactive.svg'
@@ -73,7 +73,7 @@ const goToChat = () => {
             :class="isShop ? 'bg-lime-400/10 border border-lime-400/20' : ''"
           >
             <img
-              :src="isShop ? ShopActive : ShopUnactive"
+              :src="isShop ? InventoryActive : InventoryUnactive"
               class="w-6 h-6 sm:w-7 sm:h-7"
             />
           </div>
