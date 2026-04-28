@@ -4,6 +4,10 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuery } from '@vue/apollo-composable'
 import { MeDocument } from '../../api/graphql'
+import UiButton from '../../ui/UiButton.vue'
+import UiCard from '../../ui/UiCard.vue'
+import UiEmptyState from '../../ui/UiEmptyState.vue'
+import UiContainer from '../../ui/UiContainer.vue'
 
 type ChatMessage = {
   id: string
@@ -24,9 +28,16 @@ const messages = ref<ChatMessage[]>([])
 const draft = ref('')
 const sending = ref(false)
 const errorText = ref<string | null>(null)
+const sendError = ref<string | null>(null)
 
 const loadingHistory = ref(false)
 const hasMoreHistory = ref(true)
+const connectionStatus = ref<'connecting' | 'connected' | 'error'>('connecting')
+
+const isNearBottom = ref(true)
+const hasNewMessages = ref(false)
+
+let historyDebounceTimer: number | null = null
 
 const bottomRef = ref<HTMLElement | null>(null)
 const scrollRef = ref<HTMLElement | null>(null)
@@ -45,6 +56,14 @@ function scrollToBottom() {
 }
 
 const reachedTopOnce = ref(false)
+
+function updateNearBottom() {
+  const el = scrollRef.value
+  if (!el) return
+  const dist = el.scrollHeight - el.scrollTop - el.clientHeight
+  isNearBottom.value = dist < 160
+  if (isNearBottom.value) hasNewMessages.value = false
+}
 
 async function loadHistory({ reset }: { reset: boolean }) {
   if (loadingHistory.value) return
@@ -113,9 +132,13 @@ async function loadHistory({ reset }: { reset: boolean }) {
 function onScroll() {
   const el = scrollRef.value
   if (!el) return
+  updateNearBottom()
   if (el.scrollTop < 120) {
     reachedTopOnce.value = true
-    void loadHistory({ reset: false })
+    if (historyDebounceTimer) window.clearTimeout(historyDebounceTimer)
+    historyDebounceTimer = window.setTimeout(() => {
+      void loadHistory({ reset: false })
+    }, 120)
   }
 }
 
@@ -123,9 +146,12 @@ function resetConnection() {
   errorText.value = null
   messages.value = []
   hasMoreHistory.value = true
+  connectionStatus.value = 'connecting'
+  hasNewMessages.value = false
 
   if (!pusherKey || !pusherCluster) {
     errorText.value = 'Chat is not configured (missing VITE_PUSHER_KEY / VITE_PUSHER_CLUSTER).'
+    connectionStatus.value = 'error'
     return
   }
 
@@ -141,11 +167,20 @@ function resetConnection() {
     if (!data?.id || !data?.text) return
     if (messages.value.some((m) => m.id === data.id)) return
     messages.value.push(data)
-    scrollToBottom()
+    if (isNearBottom.value) {
+      scrollToBottom()
+    } else {
+      hasNewMessages.value = true
+    }
+  })
+
+  channel.bind('pusher:subscription_succeeded', () => {
+    connectionStatus.value = 'connected'
   })
 
   channel.bind('pusher:subscription_error', () => {
     errorText.value = 'Failed to subscribe to chat channel.'
+    connectionStatus.value = 'error'
   })
 }
 
@@ -180,6 +215,7 @@ async function sendMessage() {
 
   sending.value = true
   errorText.value = null
+  sendError.value = null
   try {
     const res = await fetch(`${API_URL}/chat/send`, {
       method: 'POST',
@@ -198,7 +234,7 @@ async function sendMessage() {
     }
     draft.value = ''
   } catch (e) {
-    errorText.value = e instanceof Error ? e.message : 'Failed to send message.'
+    sendError.value = e instanceof Error ? e.message : 'Nu am putut trimite mesajul.'
   } finally {
     sending.value = false
   }
@@ -206,6 +242,7 @@ async function sendMessage() {
 
 onMounted(() => {
   resetConnection()
+  nextTick(() => updateNearBottom())
 })
 
 watch(locationName, () => {
@@ -218,66 +255,92 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="h-screen bg-[#0b0f0c] text-white font-sans flex flex-col pb-20">
+  <div class="app-screen flex flex-col pb-nav-safe" :style="{ '--chat-h': '84px' }">
     <header
-      class="p-4 flex items-center justify-between border-b border-lime-500/10 bg-[#0b0f0c]/80 backdrop-blur sticky top-0 z-20"
+      class="p-4 flex items-center justify-between border-b border-[var(--c-border)] bg-[color:rgba(11,15,12,0.80)] backdrop-blur sticky top-0 z-20"
     >
       <div class="flex items-center gap-3">
-        <button
-          class="text-[10px] text-gray-300 border border-gray-700 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors tracking-widest uppercase"
-          @click="router.push('/MapPage')"
-        >
-          Înapoi
-        </button>
+        <UiButton variant="ghost" size="sm" @click="router.push('/MapPage')">Înapoi</UiButton>
         <div>
           <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Chat locație</div>
         </div>
       </div>
 
-      <div class="text-[10px] text-gray-400 tracking-widest uppercase">
+      <div class="text-[10px] text-white/45 tracking-widest uppercase">
         <span v-if="meLoading">Se conectează…</span>
         <span v-else-if="me">ca {{ me.name }}</span>
         <span v-else>neautentificat</span>
       </div>
     </header>
 
-    <main ref="scrollRef" class="flex-1 p-4 pb-28 overflow-y-auto" @scroll.passive="onScroll">
-      <div
-        v-if="errorText"
-        class="mb-4 text-red-300 border border-red-400/20 bg-red-400/5 rounded-xl p-3 text-xs tracking-widest"
+    <main ref="scrollRef" class="flex-1 overflow-y-auto styled-scrollbar" @scroll.passive="onScroll">
+      <UiContainer
+        class="py-4"
+        :style="{ paddingBottom: 'calc(var(--chat-h) + var(--nav-h) + var(--safe-bottom))' }"
       >
-        {{ errorText }}
+      <div class="mb-3 flex items-center justify-between gap-3">
+        <div class="text-[10px] text-white/35 tracking-widest uppercase">
+          <span v-if="connectionStatus === 'connecting'">se conectează…</span>
+          <span v-else-if="connectionStatus === 'connected'">conectat</span>
+          <span v-else>deconectat</span>
+        </div>
+        <UiButton
+          v-if="hasNewMessages"
+          variant="ghost"
+          size="sm"
+          @click="scrollToBottom(); hasNewMessages = false"
+        >
+          Mesaje noi
+        </UiButton>
       </div>
+
+      <UiEmptyState
+        v-if="!meLoading && !me"
+        class="mb-4"
+        title="Chat indisponibil"
+        description="Autentifică-te ca să trimiți mesaje. Poți citi istoricul dacă serverul permite."
+        action-label="Mergi la login"
+        tone="info"
+        @action="router.push('/login')"
+      />
+
+      <UiCard v-if="errorText" variant="surface2" class="mb-4" :padded="true">
+        <div class="text-red-200 text-xs tracking-widest uppercase">Eroare</div>
+        <div class="mt-1 text-[11px] text-white/65">{{ errorText }}</div>
+      </UiCard>
+
+      <UiCard v-if="sendError" variant="surface2" class="mb-4" :padded="true">
+        <div class="text-red-200 text-xs tracking-widest uppercase">Mesaj netrimis</div>
+        <div class="mt-1 text-[11px] text-white/65">{{ sendError }}</div>
+        <div class="mt-3 flex justify-end">
+          <UiButton variant="ghost" size="sm" :disabled="sending || !draft.trim() || !me" @click="sendMessage">
+            Reîncearcă
+          </UiButton>
+        </div>
+      </UiCard>
 
       <div
         v-if="loadingHistory"
-        class="mb-4 text-center text-[10px] text-gray-500 tracking-widest uppercase"
+        class="mb-4 text-center text-[10px] text-white/35 tracking-widest uppercase"
       >
-        Se încarcă istoricul…
+        Se încarcă mesaje mai vechi…
       </div>
 
       <div
         v-else-if="messages.length > 0 && hasMoreHistory"
         class="mb-4 text-center text-[10px] text-gray-500 tracking-widest uppercase"
       >
-        Derulează în sus pentru mai multe…
+        Derulează în sus pentru mesaje mai vechi…
       </div>
 
       <div
         v-else-if="messages.length > 0 && !hasMoreHistory"
-        class="mb-4 text-center text-[10px] text-gray-600 tracking-widest uppercase"
+        class="mb-4 text-center text-[10px] text-white/30 tracking-widest uppercase"
       >
         Începutul conversației
       </div>
 
-      <div
-        v-if="messages.length > 0 && !reachedTopOnce"
-        class="mb-4 text-center text-[10px] text-gray-700 tracking-widest uppercase"
-      >
-        (debug) scroll container OK
-      </div>
-
-      <div v-if="messages.length === 0" class="text-center py-10 text-lime-300/70 text-xs tracking-widest">
+      <div v-if="messages.length === 0" class="text-center py-10 text-[var(--c-accent)]/70 text-xs tracking-widest">
         NICIUN MESAJ ÎNCĂ
       </div>
 
@@ -285,48 +348,44 @@ onBeforeUnmount(() => {
         <div
           v-for="m in messages"
           :key="m.id"
-          class="p-4 rounded-2xl border border-lime-500/10 bg-[#101712]"
-          :class="me?.id === m.user.id ? 'border-lime-400/30 bg-[#0f1611]' : ''"
+          class="p-4 rounded-2xl border bg-[var(--c-surface)]"
+          :class="me?.id === m.user.id ? 'border-[var(--c-border-strong)] bg-[color:rgba(15,22,17,1)]' : 'border-[var(--c-border)]'"
         >
           <div class="flex items-center justify-between gap-3">
-            <div class="text-xs text-lime-300 font-semibold tracking-wide">
+            <div class="text-xs text-[var(--c-accent)] font-semibold tracking-wide">
               {{ m.user.name }}
-              <span v-if="me?.id === m.user.id" class="text-[10px] text-gray-400 ml-2 tracking-widest uppercase"
+              <span v-if="me?.id === m.user.id" class="text-[10px] text-white/45 ml-2 tracking-widest uppercase"
                 >(tu)</span
               >
             </div>
-            <div class="text-[10px] text-gray-500 tracking-widest uppercase">
+            <div class="text-[10px] text-white/35 tracking-widest uppercase">
               {{ new Date(m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
             </div>
           </div>
-          <div class="mt-2 text-sm text-white/90 whitespace-pre-wrap break-words">{{ m.text }}</div>
+          <div class="mt-2 text-sm text-white/85 whitespace-pre-wrap break-words">{{ m.text }}</div>
         </div>
       </div>
       <div ref="bottomRef" class="h-1"></div>
+      </UiContainer>
     </main>
 
-    <footer class="fixed bottom-0 left-0 right-0 p-4 bg-[#0b0f0c]/90 backdrop-blur-md border-t border-lime-500/10">
-      <form
-        class="max-w-3xl mx-auto flex gap-3"
-        @submit.prevent="sendMessage"
-      >
+    <footer
+      class="fixed left-0 right-0 p-4 bg-[color:rgba(11,15,12,0.90)] backdrop-blur-md border-t border-[var(--c-border)]"
+      :style="{ bottom: 'calc(var(--nav-h) + var(--safe-bottom))' }"
+    >
+      <UiContainer :padded="false">
+        <form class="px-4 flex gap-3" @submit.prevent="sendMessage">
         <input
           v-model="draft"
-          class="flex-1 bg-[#0b0f0c] border border-lime-500/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-lime-400 transition-colors"
+          class="flex-1 bg-[var(--c-bg)] border border-[var(--c-border-strong)]/60 rounded-xl px-4 py-3 text-sm focus:border-[var(--c-border-strong)] transition-colors"
           :placeholder="me ? 'Scrie un mesaj…' : 'Autentifică-te pentru chat…'"
           :disabled="!me || sending"
         />
-        <button
-          type="submit"
-          class="px-5 py-3 rounded-xl bg-lime-500 text-black font-bold text-xs tracking-widest uppercase disabled:opacity-50"
-          :disabled="!me || sending || !draft.trim()"
-        >
+        <UiButton type="submit" :disabled="!me || sending || !draft.trim()" :loading="sending">
           Trimite
-        </button>
-      </form>
-      <div class="max-w-3xl mx-auto mt-2 text-[10px] text-gray-500 tracking-widest uppercase">
-        Canal: location-{{ encodeURIComponent(locationName) }}
-      </div>
+        </UiButton>
+        </form>
+      </UiContainer>
     </footer>
   </div>
 </template>
