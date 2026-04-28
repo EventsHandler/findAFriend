@@ -231,7 +231,6 @@ onBeforeUnmount(() => {
         </button>
         <div>
           <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Chat locație</div>
-          <div class="text-lg font-bold text-lime-300">{{ locationName }}</div>
         </div>
       </div>
 
