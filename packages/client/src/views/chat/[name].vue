@@ -17,7 +17,7 @@ const route = useRoute()
 const router = useRouter()
 const locationName = computed(() => String(route.params.name || ''))
 
-const { result: meResult, loading: meLoading } = useQuery(MeDocument)
+const { result: meResult, loading: meLoading, refetch: refetchMe } = useQuery(MeDocument)
 const me = computed(() => meResult.value?.me ?? null)
 
 const messages = ref<ChatMessage[]>([])
@@ -39,6 +39,24 @@ const API_URL = (import.meta.env.VITE_API_URL ?? '') as string
 let pusher: Pusher | null = null
 let channel: ReturnType<Pusher['subscribe']> | null = null
 let isCleaningUp = false
+
+let questRefreshTimer: number | null = null
+let lastQuestRefreshAt = 0
+function scheduleQuestRefresh() {
+  // Quests can progress server-side based on chat events; refetch Me best-effort.
+  const now = Date.now()
+  if (now - lastQuestRefreshAt < 1500) return
+  lastQuestRefreshAt = now
+
+  if (questRefreshTimer) window.clearTimeout(questRefreshTimer)
+  questRefreshTimer = window.setTimeout(() => {
+    const fn = refetchMe
+    if (!fn) return
+    void Promise.resolve(fn()).catch(() => {
+      // ignore
+    })
+  }, 600)
+}
 
 function scrollToBottom() {
   nextTick(() => bottomRef.value?.scrollIntoView({ block: 'end' }))
@@ -142,6 +160,11 @@ function resetConnection() {
     if (messages.value.some((m) => m.id === data.id)) return
     messages.value.push(data)
     scrollToBottom()
+
+    // If this message could advance our missions, refresh quest progress UI.
+    if (me.value?.id && data.user?.id === me.value.id) {
+      scheduleQuestRefresh()
+    }
   })
 
   channel.bind('pusher:subscription_error', () => {
@@ -197,6 +220,8 @@ async function sendMessage() {
       throw new Error(body?.error || `HTTP ${res.status}`)
     }
     draft.value = ''
+    // Server may auto-progress missions from chat; refresh the cached Me state shortly after sending.
+    scheduleQuestRefresh()
   } catch (e) {
     errorText.value = e instanceof Error ? e.message : 'Failed to send message.'
   } finally {
@@ -213,6 +238,7 @@ watch(locationName, () => {
 })
 
 onBeforeUnmount(() => {
+  if (questRefreshTimer) window.clearTimeout(questRefreshTimer)
   cleanupConnection()
 })
 </script>

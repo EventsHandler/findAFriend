@@ -12,6 +12,7 @@ query Me {
     id
     name
     xp
+    level
     locationId
     posx
     posy
@@ -20,6 +21,7 @@ query Me {
       id
       progress
       status
+      startedAt
       lockedUntil
       mission {
         id
@@ -27,6 +29,10 @@ query Me {
         description
         rewardXp
         targetProgress
+        completionKind
+        distanceMeters
+        staySeconds
+        timerSeconds
         repeatable
         cooldownHours
       }
@@ -48,6 +54,10 @@ query Missions($locationId: ID) {
     description
     rewardXp
     targetProgress
+    completionKind
+    distanceMeters
+    staySeconds
+    timerSeconds
     repeatable
     cooldownHours
     locationId

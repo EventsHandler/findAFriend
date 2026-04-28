@@ -2,6 +2,7 @@ import { prisma } from '../../../../prisma.js'
 import type { MutationResolvers } from './../../../types.generated.js'
 import { CLAIM_RADIUS_METERS, haversineMeters } from '../missionArea'
 import { missionError } from '../missionErrors'
+import { applyQuestRewards } from '../questRewards'
 
 export const completeMission: NonNullable<MutationResolvers['completeMission']> = async (
   _parent,
@@ -57,10 +58,7 @@ export const completeMission: NonNullable<MutationResolvers['completeMission']> 
         rewardXp: um.mission.rewardXp,
       },
     })
-    await tx.user.update({
-      where: { id: user.id },
-      data: { xp: { increment: um.mission.rewardXp } },
-    })
+    await applyQuestRewards(tx as any, { userId: user.id, rewardXp: um.mission.rewardXp })
     return tx.userMission.update({
       where: { id: um.id },
       data: {

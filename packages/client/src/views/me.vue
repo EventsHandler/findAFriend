@@ -7,8 +7,6 @@ import {
 } from '../api/graphql'
 import { computed, ref } from 'vue'
 
-const XP_PER_LEVEL = 600
-
 const router = useRouter()
 const actionError = ref('')
 const { client: apollo } = useApolloClient()
@@ -25,7 +23,9 @@ const ongoingMissions = computed(() => {
 
 const levelInfo = computed(() => {
   const xp = user.value?.xp ?? 0
-  const level = Math.floor(xp / XP_PER_LEVEL) + 1
+  // Keep in sync with server leveling (see server questRewards.ts).
+  const XP_PER_LEVEL = 100
+  const level = user.value?.level ?? (Math.floor(xp / XP_PER_LEVEL) + 1)
   const xpInLevel = xp % XP_PER_LEVEL
   const pct = Math.min(100, (xpInLevel / XP_PER_LEVEL) * 100)
   return { xp, level, xpInLevel, pct, span: XP_PER_LEVEL }
@@ -87,6 +87,12 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
       <div class="flex items-center gap-3">
         <div v-if="user" class="text-xs bg-orange-500/20 text-orange-300 px-2 py-1 rounded-full border border-orange-500/30">
           LVL {{ levelInfo.level }}
+        </div>
+        <div
+          v-if="user"
+          class="text-xs bg-lime-500/15 text-lime-200 px-2 py-1 rounded-full border border-lime-400/20 tabular-nums"
+        >
+          {{ user.points }} PTS
         </div>
         <button @click="logout" class="text-[10px] text-gray-400 border border-gray-700 px-2 py-1 rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-colors">
           DECONECTARE
@@ -158,7 +164,7 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
                   {{ um.mission.description }}
                 </p>
                 <div class="text-[10px] text-lime-300 mt-2 tracking-wider">
-                  Recompensă +{{ um.mission.rewardXp }} XP
+                  Recompensă +{{ um.mission.rewardXp }} XP · +{{ Math.max(1, Math.round((um.mission.rewardXp ?? 0) * 0.5)) }} PTS
                 </div>
               </div>
             </div>
