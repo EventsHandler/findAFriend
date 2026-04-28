@@ -14,8 +14,9 @@ const user = computed(() => result.value?.me)
 const { result: cratesResult } = useQuery(CratesDocument)
 const crates = computed(() => cratesResult.value?.crates ?? [])
 
-const { mutate: addPoints } = useMutation(AddPointsDocument)
-const { mutate: buyCrate } = useMutation(BuyCrateDocument)
+const { mutate: addPoints, loading: addPointsLoading } = useMutation(AddPointsDocument)
+const { mutate: buyCrate, loading: buyCrateLoading } = useMutation(BuyCrateDocument)
+const isLoading = computed(() => addPointsLoading.value || buyCrateLoading.value)
 
 const shopCrates = computed(() => {
   const grouped: Record<Rarity, any | null> = {
@@ -74,7 +75,7 @@ async function addPointsHandler() {
   try {
     await addPoints({
       userId: user?.value?.id,
-      amount: 100,
+      amount: 1000,
     })
     await refetch()
   } catch (err) {
@@ -164,18 +165,20 @@ async function addPointsHandler() {
           <!-- RIGHT BUTTON -->
           <button
             @click="buyCrateHandler(crate)"
+            :disabled="isLoading"
             class="relative z-10 text-[10px] px-4 py-2 rounded-full border border-lime-400/20 bg-lime-500/10 text-lime-300 uppercase tracking-widest hover:bg-lime-500 hover:text-black transition"
           >
-            Cumpără
+            {{ isLoading ? 'Loading' : 'Cumpără' }}
           </button>
         </div>
       </section>
 
       <button
         @click="addPointsHandler"
+        :disabled="isLoading"
         class="w-full py-3 rounded-xl border border-lime-500/20 text-lime-300 tracking-widest uppercase"
       >
-        +100 puncte
+        {{ isLoading ? 'Loading...' : '+1000 PUNCTE' }}
       </button>
     </main>
   </div>
