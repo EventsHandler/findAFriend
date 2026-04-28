@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useMutation } from '@vue/apollo-composable'
+import { useMutation, useQuery } from '@vue/apollo-composable'
 import { OpenCrateDocument, RarityType, CurrentUserDocument } from '../../../../api/graphql'
 
 import CommonCrateClosed from '../../../../assets/crates/CommonChestClosed.svg'
@@ -29,11 +29,19 @@ const router = useRouter()
 const crateState = ref<'closed' | 'open' | 'reward'>('closed')
 const isOpening = ref(false)
 const reward = ref<any>(null)
+const { result } = useQuery(CurrentUserDocument)
+const user = computed(() => result.value?.me)
+const crateId = route.params.crateId
+const currCrate = user.value?.crateInventories?.find(
+    crate => crate.crateId === crateId
+  )
 
 const { mutate: openCrateMutation } = useMutation(OpenCrateDocument, {
   refetchQueries: [{ query: CurrentUserDocument }],
   awaitRefetchQueries: true,
 })
+
+console.log(currCrate);
 
 const badgeMap: Record<string, string> = {
   badge_1,
@@ -48,7 +56,8 @@ const badgeMap: Record<string, string> = {
 }
 
 function getClosedImage() {
-  switch (reward.value?.rarity) {
+  if(!currCrate) return
+  switch (currCrate.crate?.rarity) {
     case RarityType.Common:
       return CommonCrateClosed
     case RarityType.Epic:
@@ -60,7 +69,8 @@ function getClosedImage() {
   }
 }
 function getOpenImage() {
-  switch (reward.value?.rarity) {
+  if(!currCrate) return
+  switch (currCrate.crate?.rarity) {
     case RarityType.Common:
       return CommonCrateOpened
     case RarityType.Epic:
