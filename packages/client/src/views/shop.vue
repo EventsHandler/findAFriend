@@ -89,15 +89,15 @@ async function addPointsHandler() {
     <header class="sticky top-0 z-20 p-4 border-b border-lime-500/10 bg-[#0b0f0c]/90 backdrop-blur-md">
       <div class="flex items-center justify-between">
         <div>
-          <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Sistem recompense</div>
-          <h1 class="text-xl font-bold text-lime-300 tracking-widest uppercase">Magazin crate-uri</h1>
+          <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase cursor-default">Sistem recompense</div>
+          <h1 class="text-xl font-bold text-lime-300 tracking-widest uppercase cursor-default">Magazin crate-uri</h1>
         </div>
 
         <div
           class="px-4 py-2 rounded-xl bg-[#101712] border border-lime-500/20 shadow-[0_0_20px_rgba(132,255,122,0.05)]"
         >
-          <div class="text-[10px] text-gray-400 uppercase tracking-widest">Puncte</div>
-          <div class="text-lg font-bold text-lime-400">{{ user?.points ?? 0 }}</div>
+          <div class="text-[10px] text-gray-400 uppercase tracking-widest cursor-default">Puncte</div>
+          <div class="text-lg font-bold text-lime-400 cursor-default">{{ user?.points ?? 0 }}</div>
         </div>
       </div>
     </header>
@@ -166,9 +166,9 @@ async function addPointsHandler() {
           <button
             @click="buyCrateHandler(crate)"
             :disabled="isLoading"
-            class="relative z-10 text-[10px] px-4 py-2 rounded-full border border-lime-400/20 bg-lime-500/10 text-lime-300 uppercase tracking-widest hover:bg-lime-500 hover:text-black transition"
+            class="relative z-10 text-[10px] px-4 py-2 rounded-full border border-lime-400/20 bg-lime-500/10 text-lime-300 uppercase tracking-widest hover:bg-lime-500 hover:text-black transition cursor-pointer"
           >
-            {{ isLoading ? 'Loading' : 'Cumpără' }}
+            {{ isLoading ? 'Loading...' : 'Cumpără' }}
           </button>
         </div>
       </section>
@@ -176,7 +176,7 @@ async function addPointsHandler() {
       <button
         @click="addPointsHandler"
         :disabled="isLoading"
-        class="w-full py-3 rounded-xl border border-lime-500/20 text-lime-300 tracking-widest uppercase"
+        class="w-full py-3 rounded-xl border border-lime-500/20 text-lime-300 tracking-widest uppercase hover:bg-lime-500 hover:text-black transition cursor-pointer"
       >
         {{ isLoading ? 'Loading...' : '+1000 PUNCTE' }}
       </button>
