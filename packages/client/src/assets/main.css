@@ -1,5 +1,97 @@
 @import "tailwindcss";
 
+/* ---------- Design tokens (semantic, app-wide) ---------- */
+:root {
+  /* Colors */
+  --c-bg: #0b0f0c;
+  --c-surface: #101712;
+  --c-surface-2: #0a0e0b;
+  --c-text: #ffffff;
+  --c-muted: rgba(255, 255, 255, 0.68);
+  --c-faint: rgba(255, 255, 255, 0.42);
+  --c-border: rgba(132, 255, 122, 0.10);
+  --c-border-strong: rgba(132, 255, 122, 0.20);
+
+  --c-accent: #84ff7a;
+  /* lime-ish */
+  --c-accent-2: #fb923c;
+  /* orange-ish */
+  --c-danger: #f87171;
+
+  /* Radii */
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --r-2xl: 22px;
+
+  /* Shadows */
+  --shadow-soft: 0 0 30px rgba(132, 255, 122, 0.05);
+  --shadow-accent: 0 0 15px rgba(132, 255, 122, 0.28);
+
+  /* Layout */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-h: 74px;
+  --chat-h: 84px;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Make focus visible without being loud. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid rgba(132, 255, 122, 0.55);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- App utilities (token-backed helpers) ---------- */
+.app-screen {
+  min-height: 100dvh;
+  background: var(--c-bg);
+  color: var(--c-text);
+}
+
+.pb-nav-safe {
+  padding-bottom: calc(var(--nav-h) + var(--safe-bottom));
+}
+
+.pb-chat-safe {
+  padding-bottom: calc(var(--chat-h) + var(--safe-bottom));
+}
+
+.ui-surface {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-2xl);
+}
+
+.ui-surface-2 {
+  background: var(--c-surface-2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--r-xl);
+}
+
 /* Scrollbar styling (opt-in via .styled-scrollbar) */
 .styled-scrollbar {
   scrollbar-width: thin;

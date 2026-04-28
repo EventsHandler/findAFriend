@@ -6,13 +6,17 @@ import {
   UserMissionStatus,
 } from '../api/graphql'
 import { computed, ref } from 'vue'
+import UiTopBar from '../ui/UiTopBar.vue'
+import UiCard from '../ui/UiCard.vue'
+import UiButton from '../ui/UiButton.vue'
+import UiModal from '../ui/UiModal.vue'
+import UiContainer from '../ui/UiContainer.vue'
 
 const router = useRouter()
 const actionError = ref('')
 const { client: apollo } = useApolloClient()
 
 const { result, loading, error, refetch: refetchMe } = useQuery(MeDocument)
-console.log(error)
 
 const user = computed(() => result.value?.me)
 
@@ -32,6 +36,8 @@ const levelInfo = computed(() => {
 })
 
 const pageLoading = computed(() => loading.value)
+
+const logoutConfirmOpen = ref(false)
 
 const logout = () => {
   localStorage.removeItem('token')
@@ -72,56 +78,61 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#0b0f0c] text-white font-sans pb-20">
-    <!-- TOP HUD -->
-    <header class="p-4 flex justify-between items-center border-b border-lime-500/10 bg-[#0b0f0c]/80 backdrop-blur sticky top-0 z-20">
-      <div class="flex items-center gap-2">
-        <svg class="w-6 h-6 text-lime-400" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" opacity="0.3"/>
-          <circle cx="12" cy="12" r="6" stroke="currentColor" opacity="0.6"/>
-          <path d="M12 12 L20 6" stroke="currentColor"/>
-        </svg>
-        <span class="text-sm tracking-widest text-lime-300">PROFIL</span>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <div v-if="user" class="text-xs bg-orange-500/20 text-orange-300 px-2 py-1 rounded-full border border-orange-500/30">
-          LVL {{ levelInfo.level }}
+  <div class="app-screen pb-nav-safe">
+    <UiTopBar title="PROFIL">
+      <template #left>
+        <div class="mt-1 flex items-center gap-2">
+          <svg class="w-5 h-5 text-[var(--c-accent)]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" opacity="0.3"/>
+            <circle cx="12" cy="12" r="6" stroke="currentColor" opacity="0.6"/>
+            <path d="M12 12 L20 6" stroke="currentColor"/>
+          </svg>
         </div>
-        <div
-          v-if="user"
-          class="text-xs bg-lime-500/15 text-lime-200 px-2 py-1 rounded-full border border-lime-400/20 tabular-nums"
-        >
-          {{ user.points }} PTS
+      </template>
+      <template #right>
+        <div class="flex items-center gap-2">
+          <div
+            v-if="user"
+            class="text-[10px] bg-orange-500/15 text-orange-200 px-2 py-1 rounded-full border border-orange-500/25 tracking-widest uppercase"
+          >
+            LVL {{ levelInfo.level }}
+          </div>
+          <div
+            v-if="user"
+            class="text-[10px] bg-lime-500/15 text-lime-200 px-2 py-1 rounded-full border border-lime-400/20 tabular-nums tracking-widest uppercase"
+          >
+            {{ user.points }} PTS
+          </div>
+          <UiButton variant="danger" size="sm" @click="logoutConfirmOpen = true">Deconectare</UiButton>
         </div>
-        <button @click="logout" class="text-[10px] text-gray-400 border border-gray-700 px-2 py-1 rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-colors">
-          DECONECTARE
-        </button>
-      </div>
-    </header>
+      </template>
+    </UiTopBar>
 
-    <main class="p-4 pb-24 space-y-6">
+    <UiContainer as="main" class="py-4 pb-24 space-y-6">
       <!-- USER CARD -->
-      <section v-if="user" class="relative p-6 rounded-2xl bg-gradient-to-br from-[#101712] to-[#050705] border border-lime-500/20 overflow-hidden">
+      <section
+        v-if="user"
+        class="relative p-6 rounded-2xl bg-gradient-to-br from-[var(--c-surface)] to-[#050705] border border-[var(--c-border-strong)] overflow-hidden"
+      >
         <div class="absolute inset-0 opacity-10"
              style="background-image: linear-gradient(#1a2a1f 1px, transparent 1px), linear-gradient(90deg, #1a2a1f 1px, transparent 1px); background-size: 20px 20px;">
         </div>
         
         <div class="relative flex items-center gap-4">
-          <div class="w-16 h-16 rounded-full bg-lime-500/10 border-2 border-lime-400/50 flex items-center justify-center shadow-[0_0_20px_rgba(132,255,122,0.2)]">
-            <svg class="w-8 h-8 text-lime-400" viewBox="0 0 24 24" fill="none">
+          <div class="w-16 h-16 rounded-full bg-white/5 border-2 border-[var(--c-border-strong)] flex items-center justify-center shadow-[var(--shadow-soft)]">
+            <svg class="w-8 h-8 text-[var(--c-accent)]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="8" r="4" stroke="currentColor"/>
               <path d="M4 20c2-4 14-4 16 0" stroke="currentColor"/>
             </svg>
           </div>
           <div>
             <h2 class="text-xl font-bold text-white tracking-wide">{{ user.name }}</h2>
-            <div class="text-xs text-lime-300 opacity-70 tracking-widest uppercase">Operator ID: {{ user.id.slice(-6) }}</div>
+            <div class="text-xs text-[var(--c-accent)]/70 tracking-widest uppercase">Operator ID: {{ user.id.slice(-6) }}</div>
           </div>
         </div>
       </section>
 
-      <div v-else-if="pageLoading" class="text-center py-10 text-lime-300 animate-pulse tracking-widest">
+      <div v-else-if="pageLoading" class="text-center py-10 text-[var(--c-accent)] animate-pulse tracking-widest">
         SE ÎNCARCĂ...
       </div>
 
@@ -131,13 +142,13 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
 
       <!-- XP BAR -->
       <div v-if="user" class="px-2">
-        <div class="flex justify-between text-[10px] text-gray-400 mb-2 uppercase tracking-widest">
+        <div class="flex justify-between text-[10px] text-white/55 mb-2 uppercase tracking-widest">
           <span>XP (level {{ levelInfo.level }})</span>
-          <span class="text-lime-300">{{ levelInfo.xpInLevel }} / {{ levelInfo.span }} · {{ levelInfo.xp }} total</span>
+          <span class="text-[var(--c-accent)]">{{ levelInfo.xpInLevel }} / {{ levelInfo.span }} · {{ levelInfo.xp }} total</span>
         </div>
-        <div class="h-1.5 bg-gray-800 rounded-full overflow-hidden border border-white/5">
+        <div class="h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
           <div
-            class="h-full bg-gradient-to-r from-lime-400 to-orange-400 shadow-[0_0_10px_rgba(132,255,122,0.5)] transition-all duration-300"
+            class="h-full bg-gradient-to-r from-[var(--c-accent)] to-orange-400 shadow-[var(--shadow-accent)] transition-all duration-300"
             :style="{ width: `${levelInfo.pct}%` }"
           ></div>
         </div>
@@ -147,62 +158,74 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
 
       <!-- MISSIONS -->
       <section v-if="user">
-        <h2 class="text-[10px] text-gray-400 mb-3 tracking-[0.2em] uppercase px-2">Misiuni în desfășurare</h2>
-        <div v-if="ongoingMissions.length === 0" class="text-xs text-gray-500 px-2">
+        <h2 class="text-[10px] text-white/55 mb-3 tracking-[0.2em] uppercase px-2">Misiuni în desfășurare</h2>
+        <div v-if="ongoingMissions.length === 0" class="text-xs text-white/40 px-2">
           Nu ai misiuni active. Pornește una de pe hartă.
         </div>
         <div class="space-y-3">
-          <div
+          <UiCard
             v-for="um in ongoingMissions"
             :key="um.id"
-            class="p-4 rounded-xl bg-[#0f1511] border border-lime-500/10 group hover:border-lime-500/30 transition-colors space-y-3"
+            variant="surface"
+            class="group hover:border-[var(--c-border-strong)] transition-colors space-y-3"
           >
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <div class="text-sm font-medium">{{ um.mission.title }}</div>
-                <p v-if="um.mission.description" class="text-[11px] text-gray-500 mt-1 leading-snug">
+                <p v-if="um.mission.description" class="text-[11px] text-white/45 mt-1 leading-snug">
                   {{ um.mission.description }}
                 </p>
-                <div class="text-[10px] text-lime-300 mt-2 tracking-wider">
+                <div class="text-[10px] text-lime-300 mt-2 tracking-wider uppercase">
                   Recompensă +{{ um.mission.rewardXp }} XP · +{{ Math.max(1, Math.round((um.mission.rewardXp ?? 0) * 0.5)) }} PTS
                 </div>
               </div>
             </div>
             <div>
-              <div class="flex justify-between text-[10px] text-gray-500 mb-1">
+              <div class="flex justify-between text-[10px] text-white/40 mb-1">
                 <span>Progres</span>
                 <span>{{ um.progress }} / {{ um.mission.targetProgress }}</span>
               </div>
-              <div class="h-1 bg-gray-800 rounded-full overflow-hidden">
+              <div class="h-1 bg-black/40 rounded-full overflow-hidden">
                 <div
-                  class="h-full bg-lime-400/80 transition-all"
+                  class="h-full bg-[var(--c-accent)]/80 transition-all"
                   :style="{
                     width: `${Math.min(100, (um.progress / um.mission.targetProgress) * 100)}%`,
                   }"
                 ></div>
               </div>
             </div>
-          </div>
+          </UiCard>
         </div>
       </section>
 
       <!-- QUEST HISTORY -->
       <section v-if="user && questHistory.length > 0">
-        <h2 class="text-[10px] text-gray-400 mb-3 tracking-[0.2em] uppercase px-2">Istoric misiuni</h2>
-        <div class="space-y-2 max-h-64 overflow-y-auto pr-1">
+        <h2 class="text-[10px] text-white/55 mb-3 tracking-[0.2em] uppercase px-2">Istoric misiuni</h2>
+        <div class="space-y-2 max-h-64 overflow-y-auto pr-1 styled-scrollbar">
           <div
             v-for="q in questHistory"
             :key="q.id"
-            class="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-[#0a0e0b] border border-white/5 text-[11px]"
+            class="flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg bg-[var(--c-surface-2)] border border-white/5 text-[11px]"
           >
             <div class="min-w-0">
-              <div class="font-medium text-gray-200 truncate">{{ q.title }}</div>
-              <div class="text-[10px] text-gray-500 mt-0.5">{{ formatCompletedAt(q.completedAt) }}</div>
+              <div class="font-medium text-white/80 truncate">{{ q.title }}</div>
+              <div class="text-[10px] text-white/35 mt-0.5">{{ formatCompletedAt(q.completedAt) }}</div>
             </div>
-            <div class="shrink-0 text-lime-300/90 tabular-nums">+{{ q.rewardXp }} XP</div>
+            <div class="shrink-0 text-[var(--c-accent)]/90 tabular-nums">+{{ q.rewardXp }} XP</div>
           </div>
         </div>
       </section>
-    </main>
+    </UiContainer>
   </div>
+
+  <UiModal
+    :open="logoutConfirmOpen"
+    tone="danger"
+    title="Te deconectezi?"
+    description="Vei avea nevoie să te autentifici din nou ca să continui."
+    confirm-label="Da, deconectează-mă"
+    cancel-label="Anulează"
+    @close="logoutConfirmOpen = false"
+    @confirm="logout"
+  />
 </template>

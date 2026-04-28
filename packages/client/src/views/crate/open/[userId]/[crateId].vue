@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMutation, useQuery } from '@vue/apollo-composable'
 import { OpenCrateDocument, RarityType, CurrentUserDocument } from '../../../../api/graphql'
+import UiCard from '../../../../ui/UiCard.vue'
+import UiButton from '../../../../ui/UiButton.vue'
 
 import CommonCrateClosed from '../../../../assets/crates/CommonChestClosed.svg'
 import CommonCrateOpened from '../../../../assets/crates/CommonChestOpened.svg'
@@ -41,8 +43,6 @@ const { mutate: openCrateMutation } = useMutation(OpenCrateDocument, {
   refetchQueries: [{ query: CurrentUserDocument }],
   awaitRefetchQueries: true,
 })
-
-console.log(currCrate);
 
 const badgeMap: Record<string, string> = {
   badge_1,
@@ -125,7 +125,6 @@ async function openCrate() {
 
     redirectButton.value = true
   } catch (err) {
-    console.error('Open crate failed:', err)
     crateState.value = 'closed'
   } finally {
     isOpening.value = false
@@ -135,7 +134,7 @@ async function openCrate() {
 
 <template>
   <div
-    class="min-h-screen bg-[#0b0f0c] text-white font-sans flex flex-col items-center justify-center p-4 relative overflow-hidden"
+    class="app-screen flex flex-col items-center justify-center p-4 relative overflow-hidden pb-nav-safe"
   >
     <div class="absolute top-4 left-4 flex items-center gap-2">
       <svg class="w-6 h-6 text-lime-400" viewBox="0 0 24 24" fill="none">
@@ -146,9 +145,7 @@ async function openCrate() {
       <span class="text-sm tracking-widest text-lime-300 uppercase"> Reward System </span>
     </div>
 
-    <div
-      class="w-full max-w-md bg-[#101712] border border-lime-500/20 p-8 rounded-2xl shadow-[0_0_30px_rgba(132,255,122,0.05)] relative overflow-hidden"
-    >
+    <UiCard class="w-full max-w-md relative overflow-hidden" :padded="false">
       <div
         class="absolute inset-0 opacity-10 pointer-events-none"
         style="
@@ -158,7 +155,7 @@ async function openCrate() {
         "
       />
 
-      <div class="relative z-10 flex flex-col items-center">
+      <div class="relative z-10 flex flex-col items-center p-6 sm:p-8">
         <h1 class="text-2xl font-bold text-lime-400 tracking-widest uppercase mb-8">
           {{ stateMessage }}
         </h1>
@@ -175,27 +172,19 @@ async function openCrate() {
           <div class="text-sm text-gray-400 mt-1 tracking-widest uppercase">{{ reward.name }}</div>
         </div>
 
-        <button
-          v-if="crateState === 'closed'"
-          @click="openCrate"
-          class="mt-8 w-full py-3 bg-lime-500 text-black font-bold rounded-xl hover:bg-lime-400 transition-colors shadow-[0_0_15px_rgba(132,255,122,0.3)]"
-        >
+        <UiButton v-if="crateState === 'closed'" block :loading="isOpening" @click="openCrate" class="mt-8">
           Deschide crate-ul cu recompensă
-        </button>
+        </UiButton>
 
-        <button
-          v-if="redirectButton"
-          @click="router.push('/inventory')"
-          class="mt-8 w-full py-3 bg-lime-500 text-black font-bold rounded-xl hover:bg-lime-400 transition-colors shadow-[0_0_15px_rgba(132,255,122,0.3)]"
-        >
+        <UiButton v-if="redirectButton" block @click="router.push('/inventory')" class="mt-3">
           Înapoi la inventar
-        </button>
+        </UiButton>
 
         <div v-if="crateState === 'open'" class="mt-8 text-xs text-gray-400 tracking-widest uppercase animate-pulse">
           Deblocarea recompensei...
         </div>
       </div>
-    </div>
+    </UiCard>
 
     <div class="mt-8 flex gap-4 opacity-50">
       <div class="h-1 w-12 bg-lime-500/30 rounded-full" />

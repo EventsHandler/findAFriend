@@ -3,6 +3,9 @@ import { ref } from 'vue'
 import { useApolloClient, useMutation } from '@vue/apollo-composable'
 import { useRouter } from 'vue-router'
 import { LoginDocument, RegisterDocument } from '../api/graphql'
+import UiCard from '../ui/UiCard.vue'
+import UiInput from '../ui/UiInput.vue'
+import UiButton from '../ui/UiButton.vue'
 
 const isLogin = ref(true)
 const name = ref('')
@@ -14,6 +17,21 @@ const { client: apollo } = useApolloClient()
 
 const { mutate: loginMutate, loading: loginLoading } = useMutation(LoginDocument)
 const { mutate: registerMutate, loading: registerLoading } = useMutation(RegisterDocument)
+
+function friendlyAuthError(e: unknown) {
+  const msg = e instanceof Error ? e.message : String(e ?? '')
+  const m = msg.toLowerCase()
+  if (m.includes('network') || m.includes('failed to fetch') || m.includes('ecconn') || m.includes('timeout')) {
+    return 'Nu pot contacta serverul. Verifică internetul și încearcă din nou.'
+  }
+  if (m.includes('invalid') || m.includes('unauthorized') || m.includes('auth') || m.includes('parol') || m.includes('password')) {
+    return 'Utilizator sau parolă incorecte.'
+  }
+  if (m.includes('already') || m.includes('exists')) {
+    return 'Acest utilizator există deja. Încearcă să te autentifici.'
+  }
+  return msg || 'A apărut o eroare. Încearcă din nou.'
+}
 
 const handleSubmit = async () => {
   error.value = ''
@@ -35,13 +53,13 @@ const handleSubmit = async () => {
       }
     }
   } catch (e: any) {
-    error.value = e.message
+    error.value = friendlyAuthError(e)
   }
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#0b0f0c] text-white font-sans flex flex-col items-center justify-center p-4">
+  <div class="app-screen flex flex-col items-center justify-center p-4">
     <!-- HUD Decoration -->
     <div class="absolute top-4 left-4 flex items-center gap-2">
       <svg class="w-6 h-6 text-lime-400" viewBox="0 0 24 24" fill="none">
@@ -52,63 +70,52 @@ const handleSubmit = async () => {
       <span class="text-sm tracking-widest text-lime-300">SISTEM {{ isLogin ? 'AUTENTIFICARE' : 'ÎNREGISTRARE' }}</span>
     </div>
 
-    <div class="w-full max-w-md bg-[#101712] border border-lime-500/20 p-8 rounded-2xl shadow-[0_0_30px_rgba(132,255,122,0.05)] relative overflow-hidden">
-      <!-- Grid Overlay -->
-      <div class="absolute inset-0 opacity-10 pointer-events-none"
-           style="background-image: linear-gradient(#1a2a1f 1px, transparent 1px), linear-gradient(90deg, #1a2a1f 1px, transparent 1px); background-size: 20px 20px;">
-      </div>
+    <UiCard class="w-full max-w-md relative overflow-hidden" :padded="false">
+      <div
+        class="absolute inset-0 opacity-10 pointer-events-none"
+        style="background-image: linear-gradient(#1a2a1f 1px, transparent 1px), linear-gradient(90deg, #1a2a1f 1px, transparent 1px); background-size: 20px 20px;"
+      />
 
-      <div class="relative z-10">
-        <h1 class="text-2xl font-bold text-lime-400 mb-6 tracking-widest uppercase">
+      <div class="relative p-6 sm:p-8">
+        <h1 class="text-xl sm:text-2xl font-bold text-[var(--c-accent)] mb-6 tracking-widest uppercase">
           {{ isLogin ? 'Autentificare' : 'Înregistrare' }}
         </h1>
 
-        <form @submit.prevent="handleSubmit" class="space-y-6">
-          <div>
-            <label class="block text-xs text-gray-400 mb-2 tracking-widest uppercase">Utilizator</label>
-            <input 
-              v-model="name"
-              type="text" 
-              class="w-full bg-[#0b0f0c] border border-lime-500/30 rounded-xl p-3 text-sm focus:outline-none focus:border-lime-400 transition-colors"
-              placeholder="Numele tău..."
-              required
-            />
-          </div>
+        <form @submit.prevent="handleSubmit" class="space-y-5">
+          <UiInput
+            v-model="name"
+            label="Utilizator"
+            placeholder="Numele tău…"
+            autocomplete="username"
+            required
+          />
 
-          <div>
-            <label class="block text-xs text-gray-400 mb-2 tracking-widest uppercase">Parolă</label>
-            <input 
-              v-model="password"
-              type="password" 
-              class="w-full bg-[#0b0f0c] border border-lime-500/30 rounded-xl p-3 text-sm focus:outline-none focus:border-lime-400 transition-colors"
-              placeholder="••••••••"
-              required
-            />
-          </div>
+          <UiInput
+            v-model="password"
+            label="Parolă"
+            type="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+            hint="Minim 8 caractere recomandat."
+          />
 
-          <div v-if="error" class="text-red-400 text-xs bg-red-400/10 p-2 rounded-lg border border-red-400/20">
+          <div v-if="error" class="text-red-300 text-xs bg-red-400/10 p-3 rounded-xl border border-red-400/20">
             {{ error }}
           </div>
 
-          <button 
-            type="submit"
-            :disabled="loginLoading || registerLoading"
-            class="w-full py-3 bg-lime-500 text-black font-bold rounded-xl hover:bg-lime-400 transition-colors shadow-[0_0_15px_rgba(132,255,122,0.3)] disabled:opacity-50"
-          >
+          <UiButton type="submit" :loading="loginLoading || registerLoading" :disabled="loginLoading || registerLoading" block>
             {{ isLogin ? 'CONECTEAZĂ' : 'CREEAZĂ PROFIL' }}
-          </button>
+          </UiButton>
         </form>
 
         <div class="mt-6 text-center">
-          <button 
-            @click="isLogin = !isLogin"
-            class="text-xs text-gray-400 hover:text-lime-300 transition-colors uppercase tracking-widest"
-          >
+          <UiButton variant="ghost" size="sm" @click="isLogin = !isLogin">
             {{ isLogin ? 'Nu ai cont? Înregistrează-te' : 'Ai deja cont? Autentifică-te' }}
-          </button>
+          </UiButton>
         </div>
       </div>
-    </div>
+    </UiCard>
 
     <!-- HUD Footer -->
     <div class="mt-8 flex gap-4 opacity-50">

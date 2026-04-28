@@ -3,6 +3,12 @@ import { computed, ref, watch } from 'vue'
 import { useQuery } from '@vue/apollo-composable'
 import { useRouter } from 'vue-router'
 import { LocationsDocument, MeDocument, MissionsDocument, UserMissionStatus } from '../api/graphql'
+import UiTopBar from '../ui/UiTopBar.vue'
+import UiCard from '../ui/UiCard.vue'
+import UiBadge from '../ui/UiBadge.vue'
+import UiButton from '../ui/UiButton.vue'
+import UiEmptyState from '../ui/UiEmptyState.vue'
+import UiContainer from '../ui/UiContainer.vue'
 
 const router = useRouter()
 
@@ -129,74 +135,78 @@ const stats = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#0b0f0c] text-white font-sans pb-24">
-    <header
-      class="p-4 flex items-center justify-between border-b border-lime-500/10 bg-[#0b0f0c]/80 backdrop-blur sticky top-0 z-20"
-    >
-      <div class="flex items-center gap-2">
-        <span class="text-sm tracking-widest text-lime-300">MISIUNI</span>
-      </div>
-      <div class="text-[10px] text-gray-500 tracking-widest uppercase">
-        <span v-if="meLoading || missionsLoading">se încarcă…</span>
-        <span v-else-if="me">ca {{ me.name }}</span>
-      </div>
-    </header>
+  <div class="app-screen pb-nav-safe">
+    <UiTopBar
+      title="MISIUNI"
+      :right-text="meLoading || missionsLoading ? 'se încarcă…' : me ? `ca ${me.name}` : ''"
+    />
 
-    <main class="p-4 space-y-6">
-      <section class="rounded-2xl bg-[#101712] border border-lime-500/10 p-4">
-        <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Statistici</div>
-        <div class="mt-3 grid grid-cols-2 gap-3">
-          <div class="rounded-xl bg-[#0a0e0b] border border-white/5 p-3">
-            <div class="text-[10px] text-gray-500 uppercase tracking-widest">Active</div>
-            <div class="mt-1 text-lg font-bold text-lime-300 tabular-nums">{{ stats.active }}</div>
-          </div>
-          <div class="rounded-xl bg-[#0a0e0b] border border-white/5 p-3">
-            <div class="text-[10px] text-gray-500 uppercase tracking-widest">XP câștigat</div>
-            <div class="mt-1 text-lg font-bold text-orange-300 tabular-nums">{{ stats.earnedXp }}</div>
-          </div>
-          <div class="rounded-xl bg-[#0a0e0b] border border-white/5 p-3">
-            <div class="text-[10px] text-gray-500 uppercase tracking-widest">Finalizate</div>
-            <div class="mt-1 text-lg font-bold text-gray-200 tabular-nums">{{ stats.completedTotal }}</div>
-          </div>
-          <div class="rounded-xl bg-[#0a0e0b] border border-white/5 p-3">
-            <div class="text-[10px] text-gray-500 uppercase tracking-widest">Astăzi</div>
-            <div class="mt-1 text-lg font-bold text-cyan-200 tabular-nums">{{ stats.completedToday }}</div>
-          </div>
+    <UiContainer as="main" class="py-4 space-y-6">
+      <div class="flex items-center justify-between gap-3">
+        <div class="text-[10px] text-white/55 tracking-[0.25em] uppercase">
+          Ultima actualizare: <span class="tabular-nums">{{ missionsLastRefreshedLabel }}</span>
         </div>
-      </section>
+        <div class="flex items-center gap-2">
+          <UiButton variant="ghost" size="sm" :disabled="missionsLoading" @click="refreshMissions">
+            Reîmprospătează
+          </UiButton>
+          <router-link to="/MapPage">
+            <UiButton variant="ghost" size="sm">Hartă</UiButton>
+          </router-link>
+        </div>
+      </div>
+
+      <UiCard>
+        <div class="text-[10px] text-white/55 tracking-[0.25em] uppercase">Statistici</div>
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <UiCard variant="surface2" class="p-3" :padded="false">
+            <div class="text-[10px] text-white/40 uppercase tracking-widest">Active</div>
+            <div class="mt-1 text-lg font-bold text-[var(--c-accent)] tabular-nums">{{ stats.active }}</div>
+          </UiCard>
+          <UiCard variant="surface2" class="p-3" :padded="false">
+            <div class="text-[10px] text-white/40 uppercase tracking-widest">XP câștigat</div>
+            <div class="mt-1 text-lg font-bold text-orange-300 tabular-nums">{{ stats.earnedXp }}</div>
+          </UiCard>
+          <UiCard variant="surface2" class="p-3" :padded="false">
+            <div class="text-[10px] text-white/40 uppercase tracking-widest">Finalizate</div>
+            <div class="mt-1 text-lg font-bold text-white/80 tabular-nums">{{ stats.completedTotal }}</div>
+          </UiCard>
+          <UiCard variant="surface2" class="p-3" :padded="false">
+            <div class="text-[10px] text-white/40 uppercase tracking-widest">Astăzi</div>
+            <div class="mt-1 text-lg font-bold text-cyan-200 tabular-nums">{{ stats.completedToday }}</div>
+          </UiCard>
+        </div>
+      </UiCard>
 
       <section>
         <div class="flex items-end justify-between gap-3 px-1">
           <div>
-            <h2 class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Misiuni din apropiere</h2>
-            <p class="text-[11px] text-gray-500 mt-1">
-              Sortate după distanță (necesită poziția GPS).
+            <h2 class="text-[10px] text-white/55 tracking-[0.25em] uppercase">Misiuni din apropiere</h2>
+            <p class="text-[11px] text-white/40 mt-1">
+              Sortate după distanță. Dacă nu vezi distanțe, activează locația și mergi pe Hartă.
             </p>
           </div>
-        <div class="flex items-center gap-2">
-          <router-link
-            to="/MapPage"
-            class="text-[10px] px-3 py-2 rounded-lg bg-lime-500/10 text-lime-300 border border-lime-400/20 uppercase tracking-widest"
-          >
-            Deschide harta
-          </router-link>
-        </div>
         </div>
 
-        <div v-if="nearbyQuests.length === 0" class="text-xs text-gray-500 px-1 mt-3">
-          Nu s-au găsit misiuni.
-        </div>
+        <UiEmptyState
+          v-if="nearbyQuests.length === 0 && !missionsLoading"
+          class="mt-3"
+          title="Nicio misiune aici"
+          description="Selectează o locație pe Hartă și asigură-te că ai GPS activ."
+          action-label="Deschide harta"
+          tone="info"
+          @action="router.push('/MapPage')"
+        />
 
         <div v-else class="mt-3 space-y-3">
-          <div
+          <UiCard
             v-for="row in nearbyQuests"
             :key="row.quest.id"
-            class="rounded-2xl bg-[#101712] border border-lime-500/10 p-4"
           >
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <div class="text-sm font-semibold text-white truncate">{{ row.quest.title }}</div>
-                <div v-if="row.quest.description" class="text-[11px] text-gray-500 mt-1 leading-snug">
+                <div v-if="row.quest.description" class="text-[11px] text-white/45 mt-1 leading-snug">
                   {{ row.quest.description }}
                 </div>
                 <div class="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-widest">
@@ -205,33 +215,47 @@ const stats = computed(() => {
                   <span class="text-gray-500" v-if="row.location">
                     {{ row.location.name }} · {{ fmtDistance(row.distanceM) }}
                   </span>
-                  <span class="text-gray-500" v-else>Misiune globală</span>
+                  <span class="text-white/40" v-else>Misiune globală</span>
                 </div>
               </div>
-              <div class="shrink-0 text-[9px] uppercase tracking-wider">
-                <span
-                  v-if="row.status === UserMissionStatus.Active"
-                  class="text-lime-300 border border-lime-400/25 bg-lime-500/10 px-2 py-0.5 rounded"
-                >În desfășurare</span>
-                <span
+              <div class="shrink-0">
+                <UiBadge v-if="row.status === UserMissionStatus.Active" tone="success">În desfășurare</UiBadge>
+                <UiBadge
                   v-else-if="row.status === UserMissionStatus.Completed && !row.quest.repeatable"
-                  class="text-orange-300 border border-orange-400/25 bg-orange-500/10 px-2 py-0.5 rounded"
-                >Finalizată</span>
-                <span
+                  tone="warning"
+                >Finalizată</UiBadge>
+                <UiBadge
                   v-else-if="row.status === UserMissionStatus.Completed && row.quest.repeatable && isOnCooldown(row.cooldown)"
-                  class="text-amber-200 border border-amber-300/25 bg-amber-500/10 px-2 py-0.5 rounded"
-                >Răcire</span>
-                <span
+                  tone="warning"
+                >Răcire</UiBadge>
+                <UiBadge
                   v-else-if="row.status === UserMissionStatus.Completed && row.quest.repeatable"
-                  class="text-cyan-200 border border-cyan-300/25 bg-cyan-500/10 px-2 py-0.5 rounded"
-                >Repetabilă</span>
-                <span
-                  v-else
-                  class="text-gray-400 border border-white/10 bg-white/5 px-2 py-0.5 rounded"
-                >Nouă</span>
+                  tone="info"
+                >Repetabilă</UiBadge>
+                <UiBadge v-else tone="neutral">Nouă</UiBadge>
               </div>
             </div>
-          </div>
+
+            <div class="mt-4 flex justify-end gap-2">
+              <router-link
+                v-if="row.quest.locationId"
+                :to="{
+                  path: '/MapPage',
+                  query: {
+                    locationId: row.quest.locationId,
+                    missionId: row.quest.id,
+                  },
+                }"
+              >
+                <UiButton variant="ghost" size="sm">
+                  {{ row.status === UserMissionStatus.Active ? 'Continuă' : 'Deschide locația' }}
+                </UiButton>
+              </router-link>
+              <router-link v-else to="/MapPage">
+                <UiButton variant="ghost" size="sm">Deschide pe Hartă</UiButton>
+              </router-link>
+            </div>
+          </UiCard>
         </div>
       </section>
 
@@ -259,7 +283,7 @@ const stats = computed(() => {
           </div>
         </div>
       </section>
-    </main>
+    </UiContainer>
   </div>
 </template>
 
