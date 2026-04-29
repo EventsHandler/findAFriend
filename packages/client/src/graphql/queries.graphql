@@ -17,6 +17,8 @@ query Me {
     posx
     posy
     points
+    profileDescription
+    profileTags
     userMissions {
       id
       progress
@@ -76,7 +78,7 @@ query LocationUsers($locationId: ID!) {
 }
 
 query Crates {
-  crates{
+  crates {
     id
     name
     price

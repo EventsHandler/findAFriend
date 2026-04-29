@@ -11,6 +11,7 @@ import UiCard from '../ui/UiCard.vue'
 import UiButton from '../ui/UiButton.vue'
 import UiModal from '../ui/UiModal.vue'
 import UiContainer from '../ui/UiContainer.vue'
+import UserProfileSection from '../components/UserProfileSection.vue'
 
 const router = useRouter()
 const actionError = ref('')
@@ -155,6 +156,14 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
       </div>
 
       <p v-if="actionError" class="text-[11px] text-red-400 px-2">{{ actionError }}</p>
+
+      <!-- PROFILE SECTION -->
+      <UserProfileSection
+        v-if="user"
+        :user-id="user.id"
+        :profile-description="user.profileDescription"
+        :profile-tags="user.profileTags"
+      />
 
       <!-- MISSIONS -->
       <section v-if="user">
