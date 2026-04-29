@@ -8,6 +8,13 @@ import { ApolloError } from '@apollo/client/core'
 import { useRoom } from '../composables/useRoom'
 import { useMapSync } from '../composables/useMapSync'
 import { useChatRoom } from '../composables/useChatRoom'
+import { useRoute, useRouter } from 'vue-router'
+import UiTopBar from '../ui/UiTopBar.vue'
+import UiButton from '../ui/UiButton.vue'
+import UiCard from '../ui/UiCard.vue'
+import UiBadge from '../ui/UiBadge.vue'
+import UiEmptyState from '../ui/UiEmptyState.vue'
+import UiModal from '../ui/UiModal.vue'
 import {
   ClaimMissionDocument,
   CompleteMissionDocument,
@@ -15,12 +22,16 @@ import {
   LocationsDocument,
   LocationUsersDocument,
   MissionsDocument,
+  MissionCompletionKind,
   StartTimedMissionDocument,
   UserMissionStatus,
 } from '../api/graphql'
 
 const { result } = useQuery(LocationsDocument)
 const locations = computed(() => result.value?.locations ?? [])
+
+const route = useRoute()
+const router = useRouter()
 
 const activePOI = ref<any>(null)
 const selectedLocationId = computed(() => activePOI.value?.id ?? null)
@@ -96,11 +107,65 @@ const geoError = ref<string | null>(null)
 const questActionError = ref<string | null>(null)
 const photoBusyByMissionId = ref(new Set<string>())
 
+const isJoinedHere = computed(() => {
+  return !!currentRoomId.value && me.value?.locationId === selectedLocationId.value
+})
+
+const showAllParticipants = ref(false)
+const confirmComplete = ref<{ open: boolean; missionId: string | null; title: string }>({
+  open: false,
+  missionId: null,
+  title: '',
+})
+
+const missionElById = ref(new Map<string, HTMLElement>())
+function setMissionEl(id: string) {
+  return (node: Element | { $el?: unknown } | null) => {
+    const map = missionElById.value
+    if (!node) {
+      map.delete(id)
+      return
+    }
+    const el = node instanceof Element ? node : (node.$el as unknown)
+    if (el instanceof HTMLElement) map.set(id, el)
+  }
+}
+
+function requestConfirmComplete(missionId: string, title: string) {
+  confirmComplete.value = { open: true, missionId, title }
+}
+
+async function confirmCompleteNow() {
+  const id = confirmComplete.value.missionId
+  if (!id) return
+  confirmComplete.value.open = false
+  await onCompleteMission(id)
+}
+
+// For timed mission countdown labels.
+const nowMs = ref(Date.now())
+let nowInterval: number | null = null
+
 const myMissionsByMissionId = computed(() => {
   const missions = me.value?.userMissions ?? []
   const map = new Map<string, (typeof missions)[number]>()
   for (const um of missions) map.set(um.mission.id, um)
   return map
+})
+
+const sortedMissionsForLocation = computed(() => {
+  const rows = [...missionsForLocation.value]
+  rows.sort((a, b) => {
+    const sa = myMissionsByMissionId.value.get(a.id)?.status ?? null
+    const sb = myMissionsByMissionId.value.get(b.id)?.status ?? null
+    const rank = (s: any) =>
+      s === UserMissionStatus.Active ? 0 : s === UserMissionStatus.Completed ? 2 : 1
+    const ra = rank(sa)
+    const rb = rank(sb)
+    if (ra !== rb) return ra - rb
+    return a.title.localeCompare(b.title)
+  })
+  return rows
 })
 
 function isOnCooldown(lockedUntil: string | null | undefined) {
@@ -117,32 +182,16 @@ function cooldownRemaining(lockedUntil: string | null | undefined) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`
 }
 
-function isPhotoMissionTitle(title: string) {
-  const t = title.toLowerCase()
-  return t.includes('poză') || t.includes('poza') || t.includes('fotograf')
-}
-
-function isTimedStartMissionTitle(title: string) {
-  const t = title.toLowerCase()
-  return t.includes('sprint 2 minute') || t.includes('stretch 5 minute') || t.includes('respira')
-}
-
-function isManualCompleteMissionTitle(title: string) {
-  const t = title.toLowerCase()
-  return (
-    t.includes('hidratare') ||
-    t.includes('descoperă') ||
-    t.includes('descopera') ||
-    t.includes('încearcă ceva nou') ||
-    t.includes('incearca ceva nou') ||
-    t.includes('împarte un desert') ||
-    t.includes('imparte un desert') ||
-    t.includes('recenzie rapidă') ||
-    t.includes('recenzie rapida') ||
-    t.includes('comandă o băutură') ||
-    t.includes('comanda o bautura') ||
-    t.includes('fotografie de meniu')
-  )
+function timedRemainingLabel(startedAt: string | null | undefined, timerSeconds: number | null | undefined) {
+  if (!startedAt || !timerSeconds) return ''
+  const started = new Date(startedAt).getTime()
+  if (!Number.isFinite(started)) return ''
+  const totalMs = timerSeconds * 1000
+  const leftMs = Math.max(0, totalMs - (nowMs.value - started))
+  const totalSecondsLeft = Math.ceil(leftMs / 1000)
+  const mm = Math.floor(totalSecondsLeft / 60)
+  const ss = totalSecondsLeft % 60
+  return mm > 0 ? `${mm}m ${String(ss).padStart(2, '0')}s` : `${ss}s`
 }
 
 function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number) {
@@ -384,6 +433,78 @@ watch([locations, activePOI], () => {
   renderLocations()
 })
 
+// Deep-link support: /MapPage?locationId=...
+watch(
+  [() => route.query.locationId, locations],
+  ([locationId]) => {
+    const id = typeof locationId === 'string' ? locationId : null
+    if (!id) return
+    if (activePOI.value?.id === id) return
+    const loc = locations.value.find((l: any) => l?.id === id)
+    if (!loc) return
+    activePOI.value = loc
+    // Optional: center map on the selected location for clarity.
+    map.value?.setView([loc.posx, loc.posy], Math.max(14, zoomLevel.value))
+  },
+  { immediate: true },
+)
+
+// Persist last opened location for a smoother return-to-map experience.
+watch(
+  activePOI,
+  (loc) => {
+    try {
+      if (loc?.id) localStorage.setItem('lastLocationId', String(loc.id))
+      else localStorage.removeItem('lastLocationId')
+    } catch {
+      // ignore
+    }
+  },
+  { deep: false },
+)
+
+onMounted(() => {
+  try {
+    const qLoc = typeof route.query.locationId === 'string' ? route.query.locationId : null
+    if (qLoc) return
+    const last = localStorage.getItem('lastLocationId')
+    if (!last) return
+    const loc = locations.value.find((l: any) => l?.id === last)
+    if (!loc) return
+    activePOI.value = loc
+  } catch {
+    // ignore
+  }
+})
+
+function focusMissionFromQuery() {
+  const missionId = typeof route.query.missionId === 'string' ? route.query.missionId : null
+  if (!missionId) return
+  requestAnimationFrame(() => {
+    const el = missionElById.value.get(missionId)
+    if (!el) return
+    el.scrollIntoView({ block: 'nearest' })
+  })
+}
+
+let missionHighlightTimer: number | null = null
+watch(
+  [() => route.query.missionId, sortedMissionsForLocation],
+  () => {
+    focusMissionFromQuery()
+    if (missionHighlightTimer) window.clearTimeout(missionHighlightTimer)
+    if (typeof route.query.missionId !== 'string') return
+    missionHighlightTimer = window.setTimeout(() => {
+      // Clear highlight without disrupting other query params.
+      const q = { ...route.query }
+      delete (q as any).missionId
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      router.replace({ query: q as any })
+    }, 4500)
+  },
+  { immediate: true },
+)
+
 watch(activePOI, () => {
   routeDrawnFor.value = null
   if (activePOI.value) {
@@ -504,6 +625,12 @@ const updateLocation = () => {
 
 let intervalId: number | null = null
 
+function retryGeolocation() {
+  geoError.value = null
+  updateLocation()
+  if (!intervalId) intervalId = setInterval(updateLocation, 5000)
+}
+
 async function onClaimLocationMission(missionId: string) {
   questActionError.value = null
   if (!localStorage.getItem('token')) {
@@ -545,6 +672,10 @@ onMounted(() => {
   ensureMapMounted()
   updateLocation()
 
+  nowInterval = window.setInterval(() => {
+    nowMs.value = Date.now()
+  }, 1000)
+
   intervalId = setInterval(updateLocation, 5000)
 })
 
@@ -561,6 +692,7 @@ watch(selectedLocationId, () => {
 
 onUnmounted(() => {
   if (intervalId) clearInterval(intervalId)
+  if (nowInterval) window.clearInterval(nowInterval)
   if (map.value) {
     map.value.remove()
     map.value = null
@@ -570,18 +702,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="h-dvh w-full bg-[#0b0f0c] text-white flex flex-col pb-20">
-
-    <!-- TOP BAR -->
-    <header class="h-12 flex items-center justify-between px-4 border-b border-white/10">
-      <div class="text-lime-400 text-sm uppercase tracking-widest">
-        Hartă{{ distance ? ` - ${Math.round(distance)}m` : '' }}
-      </div>
-
-      <div class="text-xs text-gray-400">
-        {{ lastUpdate }}
-      </div>
-    </header>
+  <div class="h-dvh w-full app-screen flex flex-col pb-nav-safe">
+    <UiTopBar :title="`HARTĂ${distance ? ` · ${Math.round(distance)}m` : ''}`" :right-text="String(lastUpdate ?? '')" />
 
     <!-- MAIN AREA -->
     <div
@@ -600,7 +722,7 @@ onUnmounted(() => {
       <!-- MENU -->
       <aside
         v-if="activePOI"
-        class="bg-[#0b0f0c]/85 backdrop-blur-xl border border-lime-500/15 md:border-l md:border-t-0 md:border-r-0 md:border-b-0 p-4 md:p-5 shadow-[0_0_30px_rgba(0,0,0,0.45)] overflow-y-auto styled-scrollbar"
+        class="bg-[color:rgba(11,15,12,0.72)] backdrop-blur-xl border border-[var(--c-border)] md:border-l md:border-t-0 md:border-r-0 md:border-b-0 p-4 md:p-5 shadow-[0_0_30px_rgba(0,0,0,0.45)] overflow-y-auto styled-scrollbar"
         :class="[
           'w-full md:w-[22rem]',
           'border-t',
@@ -615,13 +737,7 @@ onUnmounted(() => {
               {{ activePOI.name }}
             </div>
           </div>
-          <button
-            type="button"
-            class="shrink-0 text-[10px] text-gray-300 border border-gray-700/80 px-2.5 py-1.5 rounded-lg hover:bg-white/5 transition-colors tracking-widest uppercase"
-            @click="activePOI = null"
-          >
-            Închide
-          </button>
+          <UiButton variant="ghost" size="sm" @click="activePOI = null">Închide</UiButton>
         </div>
 
         <div class="mt-4 flex items-center justify-between gap-3 text-xs">
@@ -634,222 +750,260 @@ onUnmounted(() => {
             {{ selectedLocationUsers.length }} aici
           </div>
         </div>
-        <div v-if="geoError" class="mt-2 text-xs text-amber-300/90">
-          Geolocation: {{ geoError }}
+        <UiEmptyState
+          v-if="geoError"
+          class="mt-3"
+          title="Locația e oprită"
+          :description="`Nu pot accesa GPS: ${geoError}. Pentru misiuni pe distanță, activează locația și încearcă din nou.`"
+          action-label="Reîncearcă"
+          tone="warning"
+          @action="retryGeolocation"
+        />
+
+        <div class="mt-4 grid grid-cols-1 gap-2">
+          <UiButton v-if="me?.locationId !== activePOI.id" variant="primary" block @click="joinRoom(activePOI.id)">
+            Intră în cameră
+          </UiButton>
+
+          <UiButton v-if="me?.locationId === activePOI.id" variant="danger" block @click="handleLeaveRoom">
+            Ieși din cameră
+          </UiButton>
+
+          <UiButton variant="ghost" block @click="openChat(activePOI.id)">
+            Deschide chat-ul
+          </UiButton>
         </div>
 
-        <div class="mt-4 rounded-xl bg-[#101712]/70 border border-lime-500/10 p-3">
-          <div class="text-[10px] text-gray-500 uppercase tracking-[0.25em] mb-2">
-            Participanți ({{ selectedLocationUsers.length }})
-          </div>
-          <div class="max-h-32 overflow-y-auto space-y-1">
-            <div
-              v-for="user in selectedLocationUsers"
-              :key="user.id"
-              class="text-xs px-2 py-1 rounded bg-[#0a0e0b] border border-white/5 flex items-center justify-between"
+        <div class="mt-5">
+          <div class="flex items-center justify-between">
+            <div class="text-[10px] text-white/55 uppercase tracking-[0.25em]">
+              Participanți <span class="text-white/35">({{ selectedLocationUsers.length }})</span>
+            </div>
+            <UiButton
+              v-if="selectedLocationUsers.length > 6"
+              variant="ghost"
+              size="sm"
+              @click="showAllParticipants = !showAllParticipants"
             >
-              <span class="text-slate-300">{{ user.name }}</span>
-              <div class="flex items-center gap-1">
+              {{ showAllParticipants ? 'Mai puțin' : 'Toți' }}
+            </UiButton>
+          </div>
+
+          <div class="mt-2 rounded-2xl border border-white/10 bg-black/20">
+            <div class="max-h-32 overflow-y-auto styled-scrollbar divide-y divide-white/5">
+              <div
+                v-for="user in (showAllParticipants ? selectedLocationUsers : selectedLocationUsers.slice(0, 6))"
+                :key="user.id"
+                class="px-3 py-2 flex items-center justify-between"
+              >
+                <div class="min-w-0 flex items-center gap-2">
+                  <span class="text-xs text-white/80 truncate">{{ user.name }}</span>
+                  <span v-if="me?.id === user.id" class="text-[10px] text-[var(--c-accent)] tracking-widest uppercase"
+                    >tu</span
+                  >
+                </div>
                 <div
                   v-if="user.posx && user.posy"
                   class="w-2 h-2 bg-green-400 rounded-full"
                   title="Has position"
-                ></div>
-                <div
-                  v-if="me?.id === user.id"
-                  class="text-[10px] text-lime-400"
-                >
-                  (you)
-                </div>
+                />
               </div>
-            </div>
-            <div
-              v-if="selectedLocationUsers.length === 0"
-              class="text-xs text-slate-500 italic px-2 py-1"
-            >
-              Niciun participant încă
+
+              <div v-if="selectedLocationUsers.length === 0" class="px-3 py-3 text-xs text-white/35">
+                Niciun participant încă.
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="mt-4 rounded-xl bg-[#101712]/70 border border-lime-500/10 p-3">
-          <div class="flex items-center justify-between gap-3 mb-2">
-            <div class="text-[10px] text-gray-500 uppercase tracking-[0.25em]">
-              Misiuni ({{ missionsForLocation.length }})
+        <div class="mt-5">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-[10px] text-white/55 uppercase tracking-[0.25em]">
+              Misiuni <span class="text-white/35">({{ missionsForLocation.length }})</span>
             </div>
           </div>
-          <div v-if="questActionError" class="text-xs text-red-300/90 px-2 py-1">
-            {{ questActionError }}
+
+          <UiEmptyState
+            v-if="questActionError"
+            title="Nu a mers"
+            :description="questActionError"
+            tone="danger"
+            class="mt-2"
+          />
+
+          <div v-if="missionsLoading" class="mt-2 text-xs text-white/35">
+            Se încarcă misiunile…
           </div>
-          <div v-if="missionsLoading" class="text-xs text-slate-500 italic px-2 py-1">
-            Se încarcă misiunile...
+          <div v-else-if="missionsForLocation.length === 0" class="mt-2 text-xs text-white/35">
+            Nu există misiuni pentru această locație.
           </div>
-          <div v-else-if="missionsForLocation.length === 0" class="text-xs text-slate-500 italic px-2 py-1">
-            Nu există misiuni pentru această locație
-          </div>
-          <div v-else class="space-y-2 pr-2 styled-scrollbar">
-            <div
-              v-for="m in missionsForLocation"
-              :key="m.id"
-              class="px-3 py-2.5 rounded-lg bg-[#0a0e0b] border border-white/5 hover:border-lime-500/20 transition-colors"
-            >
-              <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0">
-                  <div class="text-xs text-white font-medium">{{ m.title }}</div>
-                  <div v-if="m.description" class="text-[11px] text-slate-400 mt-0.5 leading-snug">
-                    {{ m.description }}
+
+          <div v-else class="mt-2 rounded-2xl border border-white/10 bg-black/20">
+            <div class="max-h-[42dvh] overflow-y-auto styled-scrollbar divide-y divide-white/5">
+              <div
+                v-for="m in sortedMissionsForLocation"
+                :key="m.id"
+                :ref="setMissionEl(m.id)"
+                class="px-3 py-3"
+                :class="route.query.missionId === m.id ? 'bg-[var(--c-accent)]/5 ring-1 ring-[var(--c-border-strong)] rounded-xl' : ''"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="text-sm font-semibold text-white truncate">{{ m.title }}</div>
+                    <div v-if="m.description" class="mt-1 text-[12px] leading-snug text-white/45">
+                      {{ m.description }}
+                    </div>
+                  </div>
+                  <div class="shrink-0">
+                    <UiBadge v-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active" tone="success">
+                      Activă
+                    </UiBadge>
+                    <UiBadge
+                      v-else-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && !m.repeatable"
+                      tone="warning"
+                    >
+                      Finalizată
+                    </UiBadge>
+                    <UiBadge
+                      v-else-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && m.repeatable && isOnCooldown(myMissionsByMissionId.get(m.id)?.lockedUntil)"
+                      tone="warning"
+                    >
+                      Răcire
+                    </UiBadge>
+                    <UiBadge v-else-if="myMissionsByMissionId.has(m.id) && m.repeatable" tone="info">
+                      Repetabilă
+                    </UiBadge>
+                    <UiBadge v-else tone="neutral">Nouă</UiBadge>
                   </div>
                 </div>
-                <div class="shrink-0 text-[9px] uppercase tracking-wider">
-                  <span
-                    v-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active"
-                    class="text-lime-300 border border-lime-400/25 bg-lime-500/10 px-2 py-0.5 rounded"
-                  >În desfășurare</span>
-                  <span
-                    v-else-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && !m.repeatable"
-                    class="text-orange-300 border border-orange-400/25 bg-orange-500/10 px-2 py-0.5 rounded"
-                  >Finalizată</span>
-                  <span
-                    v-else-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && m.repeatable && isOnCooldown(myMissionsByMissionId.get(m.id)?.lockedUntil)"
-                    class="text-amber-200 border border-amber-300/25 bg-amber-500/10 px-2 py-0.5 rounded"
-                  >În așteptare</span>
-                  <span
-                    v-else-if="myMissionsByMissionId.has(m.id) && m.repeatable"
-                    class="text-cyan-200 border border-cyan-300/25 bg-cyan-500/10 px-2 py-0.5 rounded"
-                  >Repetabilă</span>
-                  <span
-                    v-else
-                    class="text-gray-400 border border-white/10 bg-white/5 px-2 py-0.5 rounded"
-                  >Nouă</span>
-                </div>
-              </div>
 
-              <div
-                v-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active"
-                class="mt-2"
-              >
-                <div class="flex justify-between text-[10px] text-gray-500 mb-1">
-                  <span>Progres</span>
-                  <span>
-                    {{ myMissionsByMissionId.get(m.id)?.progress }} / {{ m.targetProgress }}
-                  </span>
-                </div>
-                <div class="h-1 bg-gray-800 rounded-full overflow-hidden">
-                  <div
-                    class="h-full bg-lime-400/80 transition-all"
-                    :style="{
-                      width: `${Math.min(100, ((myMissionsByMissionId.get(m.id)?.progress ?? 0) / m.targetProgress) * 100)}%`,
-                    }"
-                  ></div>
-                </div>
-              </div>
+                <div class="mt-3 flex items-center justify-between gap-3">
+                  <div class="text-[11px] text-[var(--c-accent)] tabular-nums">+{{ m.rewardXp }} XP</div>
 
-              <div class="mt-2 flex items-center justify-between gap-2">
-                <div class="text-[10px] text-lime-300/90 tracking-wider">
-                  +{{ m.rewardXp }} XP
-                </div>
-                <div
-                  v-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && m.repeatable && isOnCooldown(myMissionsByMissionId.get(m.id)?.lockedUntil)"
-                  class="text-[10px] text-amber-200/80 tabular-nums"
-                >
-                  {{ cooldownRemaining(myMissionsByMissionId.get(m.id)?.lockedUntil) }}
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <button
-                    v-if="
-                      myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
-                      isTimedStartMissionTitle(m.title)
-                    "
-                    class="text-[10px] px-2 py-1 rounded bg-cyan-500/10 border border-cyan-300/20 text-cyan-200 disabled:opacity-40"
-                    :disabled="startingTimer"
-                    @click="onStartTimedMission(m.id)"
-                  >
-                    Start
-                  </button>
-
-                  <button
-                    v-else-if="
-                      myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
-                      isManualCompleteMissionTitle(m.title)
-                    "
-                    class="text-[10px] px-2 py-1 rounded bg-orange-500/10 border border-orange-400/20 text-orange-200 disabled:opacity-40"
-                    :disabled="completing"
-                    @click="onCompleteMission(m.id)"
-                  >
-                    Finalizat
-                  </button>
-
-                  <label
-                    v-else-if="
-                      myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
-                      isPhotoMissionTitle(m.title)
-                    "
-                    class="text-[10px] px-2 py-1 rounded bg-cyan-500/10 border border-cyan-300/20 text-cyan-200 disabled:opacity-40 cursor-pointer"
-                    :class="(completingPhoto || photoBusyByMissionId.has(m.id) ? 'opacity-40 cursor-not-allowed' : '')"
-                  >
-                    Fă poză
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      class="hidden"
-                      :disabled="completingPhoto || photoBusyByMissionId.has(m.id)"
-                      @change="(e: Event) => {
-                        const input = e.target as HTMLInputElement
-                        const file = input.files?.[0]
-                        if (file) onCompletePhotoMission(m.id, file)
-                        input.value = ''
-                      }"
-                    />
-                  </label>
-                  <button
-                    v-if="myMissionsByMissionId.get(m.id)?.status !== UserMissionStatus.Active"
-                    class="text-[10px] px-2 py-1 rounded bg-lime-500/15 border border-lime-400/25 text-lime-200 disabled:opacity-40"
-                    :disabled="
-                      claiming ||
-                      (myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && !m.repeatable) ||
-                      (myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed &&
+                  <div class="flex items-center gap-2">
+                    <div
+                      v-if="
+                        myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed &&
                         m.repeatable &&
-                        isOnCooldown(myMissionsByMissionId.get(m.id)?.lockedUntil))
-                    "
-                    @click="onClaimLocationMission(m.id)"
-                  >
-                    {{
-                      myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && !m.repeatable
-                        ? 'Finalizată'
-                        : myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && m.repeatable
-                          ? 'Din nou'
-                          : 'Pornește'
-                    }}
-                  </button>
+                        isOnCooldown(myMissionsByMissionId.get(m.id)?.lockedUntil)
+                      "
+                      class="text-[11px] text-amber-200/80 tabular-nums"
+                    >
+                      {{ cooldownRemaining(myMissionsByMissionId.get(m.id)?.lockedUntil) }}
+                    </div>
+
+                    <UiButton
+                      v-if="
+                        myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
+                        !myMissionsByMissionId.get(m.id)?.startedAt &&
+                        m.completionKind === MissionCompletionKind.Timed
+                      "
+                      :disabled="startingTimer"
+                      @click="onStartTimedMission(m.id)"
+                      variant="ghost"
+                      size="sm"
+                    >
+                      Pornește
+                    </UiButton>
+
+                    <span
+                      v-else-if="
+                        myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
+                        !!myMissionsByMissionId.get(m.id)?.startedAt &&
+                        m.completionKind === MissionCompletionKind.Timed
+                      "
+                      class="text-[10px] px-2 py-1 rounded bg-cyan-500/10 border border-cyan-300/20 text-cyan-200 uppercase tracking-widest"
+                    >
+                      Rulează… {{ timedRemainingLabel(myMissionsByMissionId.get(m.id)?.startedAt, m.timerSeconds) }}
+                    </span>
+
+                    <UiButton
+                      v-else-if="
+                        myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
+                        m.completionKind === MissionCompletionKind.ManualConfirm
+                      "
+                      :disabled="completing"
+                      @click="requestConfirmComplete(m.id, m.title)"
+                      variant="ghost"
+                      size="sm"
+                    >
+                      Finalizează
+                    </UiButton>
+
+                    <label
+                      v-else-if="
+                        myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active &&
+                        m.completionKind === MissionCompletionKind.Photo
+                      "
+                      class="text-[11px] px-3 py-2 rounded-xl bg-cyan-500/10 border border-cyan-300/20 text-cyan-100 cursor-pointer"
+                      :class="(completingPhoto || photoBusyByMissionId.has(m.id) ? 'opacity-40 cursor-not-allowed' : '')"
+                    >
+                      Fă poză
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        class="hidden"
+                        :disabled="completingPhoto || photoBusyByMissionId.has(m.id)"
+                        @change="(e: Event) => {
+                          const input = e.target as HTMLInputElement
+                          const file = input.files?.[0]
+                          if (file) onCompletePhotoMission(m.id, file)
+                          input.value = ''
+                        }"
+                      />
+                    </label>
+
+                    <UiButton
+                      v-if="myMissionsByMissionId.get(m.id)?.status !== UserMissionStatus.Active"
+                      :disabled="
+                        claiming ||
+                        !isJoinedHere ||
+                        !!geoError ||
+                        (myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && !m.repeatable) ||
+                        (myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed &&
+                          m.repeatable &&
+                          isOnCooldown(myMissionsByMissionId.get(m.id)?.lockedUntil))
+                      "
+                      @click="onClaimLocationMission(m.id)"
+                      variant="primary"
+                      size="sm"
+                    >
+                      {{
+                        myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && !m.repeatable
+                          ? 'Finalizată'
+                          : myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Completed && m.repeatable
+                            ? 'Din nou'
+                            : 'Pornește'
+                      }}
+                    </UiButton>
+                  </div>
+                </div>
+
+                <div v-if="myMissionsByMissionId.get(m.id)?.status !== UserMissionStatus.Active" class="mt-2 text-[11px] text-white/35">
+                  <span v-if="!isJoinedHere">Intră în cameră ca să pornești misiunea.</span>
+                  <span v-else-if="geoError">Activează locația (GPS) ca să pornești misiunea.</span>
+                </div>
+
+                <div v-if="myMissionsByMissionId.get(m.id)?.status === UserMissionStatus.Active" class="mt-3">
+                  <div class="flex justify-between text-[10px] text-white/35 mb-1">
+                    <span>Progres</span>
+                    <span class="tabular-nums">
+                      {{ myMissionsByMissionId.get(m.id)?.progress }} / {{ m.targetProgress }}
+                    </span>
+                  </div>
+                  <div class="h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
+                    <div
+                      class="h-full bg-[var(--c-accent)]/80 transition-all"
+                      :style="{
+                        width: `${Math.min(100, ((myMissionsByMissionId.get(m.id)?.progress ?? 0) / m.targetProgress) * 100)}%`,
+                      }"
+                    ></div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="mt-4 grid grid-cols-1 gap-2">
-          <button v-if="me?.locationId !== activePOI.id"
-            class="w-full bg-lime-500/15 border border-lime-400/25 text-lime-200 py-2 rounded-xl hover:bg-lime-500/20 transition-colors"
-            @click="joinRoom(activePOI.id)"
-          >
-            Intră în cameră
-          </button>
-
-          <button
-            v-if="me?.locationId === activePOI.id"
-            class="w-full bg-red-500/10 border border-red-400/20 text-red-200 py-2 rounded-xl hover:bg-red-500/15 transition-colors"
-            @click="handleLeaveRoom"
-          >
-            Ieși din cameră
-          </button>
-
-          <button
-            class="w-full bg-white/5 border border-white/10 text-white py-2 rounded-xl hover:bg-white/10 transition-colors"
-            @click="openChat(activePOI.id)"
-          >
-            Deschide chat-ul
-          </button>
         </div>
 
       </aside>
@@ -857,6 +1011,17 @@ onUnmounted(() => {
     </div>
 
   </div>
+
+  <UiModal
+    :open="confirmComplete.open"
+    title="Finalizezi misiunea?"
+    :description="confirmComplete.title"
+    confirm-label="Da, finalizează"
+    cancel-label="Nu încă"
+    :busy="completing"
+    @close="confirmComplete.open = false"
+    @confirm="confirmCompleteNow"
+  />
 </template>
 
 <style scoped>

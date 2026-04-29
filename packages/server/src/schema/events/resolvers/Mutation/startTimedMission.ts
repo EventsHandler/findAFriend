@@ -2,16 +2,68 @@ import { prisma } from '../../../../prisma.js'
 import type { MutationResolvers } from './../../../types.generated.js'
 import { CLAIM_RADIUS_METERS, haversineMeters } from '../missionArea'
 import { missionError } from '../missionErrors'
+import { applyQuestRewards } from '../questRewards'
 
 const timerByKey = new Map<string, NodeJS.Timeout>()
 
-function parseDurationMsFromTitle(title: string): number | null {
-  // Accept: "Sprint 2 minute", "Stretch 5 minute", "Respirație 1 minut"
-  const m = title.match(/(\d+)\s*(minute|minut)/i)
-  if (!m) return null
-  const minutes = Number(m[1])
-  if (!Number.isFinite(minutes) || minutes <= 0) return null
-  return minutes * 60 * 1000
+async function scheduleTimedCompletion(args: {
+  userId: string
+  missionId: string
+  userMissionId: string
+  durationMs: number
+  startedAt: Date
+}) {
+  const { userId, missionId, userMissionId, durationMs, startedAt } = args
+  const key = `${userId}:${missionId}`
+
+  const elapsed = Date.now() - startedAt.getTime()
+  const remainingMs = Math.max(0, durationMs - elapsed)
+
+  if (timerByKey.has(key)) return
+
+  const timeout = setTimeout(async () => {
+    timerByKey.delete(key)
+
+    try {
+      const fresh = await prisma.userMission.findUnique({
+        where: { id: userMissionId },
+        include: { mission: true },
+      })
+      if (!fresh) return
+      if (fresh.status !== 'ACTIVE') return
+
+      const target = fresh.mission.targetProgress
+      const lockedUntil = fresh.mission.repeatable
+        ? new Date(Date.now() + fresh.mission.cooldownHours * 60 * 60 * 1000)
+        : null
+
+      await prisma.$transaction(async (tx) => {
+        await tx.questCompletion.create({
+          data: {
+            userId,
+            missionId: fresh.missionId,
+            title: fresh.mission.title,
+            rewardXp: fresh.mission.rewardXp,
+          },
+        })
+        await applyQuestRewards(tx as any, { userId, rewardXp: fresh.mission.rewardXp })
+        await tx.userMission.update({
+          where: { id: fresh.id },
+          data: {
+            progress: target,
+            status: 'COMPLETED',
+            completedAt: new Date(),
+            lockedUntil,
+            startedAt: null,
+          },
+        })
+      })
+    } catch {
+      // Best-effort timer completion; swallow to avoid crashing server.
+    }
+  }, remainingMs)
+
+  timerByKey.set(key, timeout)
 }
 
 export const startTimedMission: NonNullable<MutationResolvers['startTimedMission']> = async (
@@ -24,10 +76,11 @@ export const startTimedMission: NonNullable<MutationResolvers['startTimedMission
   const mission = await prisma.mission.findUnique({ where: { id: missionId } })
   if (!mission) missionError('NOT_FOUND', 'Mission not found', { missionId })
 
-  const durationMs = parseDurationMsFromTitle(mission.title)
-  if (!durationMs) {
+  if (mission.completionKind !== 'TIMED') {
     missionError('INVALID_MISSION_TYPE', 'This mission is not a timed start mission', { title: mission.title })
   }
+  const durationMs = (mission.timerSeconds ?? 0) * 1000
+  if (!durationMs) missionError('INVALID_MISSION_TYPE', 'Timed mission missing timerSeconds', { missionId })
 
   if (mission.locationId) {
     if (!user.locationId) missionError('LOCATION_REQUIRED', 'You must join the location first')
@@ -57,53 +110,37 @@ export const startTimedMission: NonNullable<MutationResolvers['startTimedMission
   if (um.status !== 'ACTIVE') missionError('NOT_ACTIVE', 'Mission is not active', { status: um.status })
 
   const key = `${user.id}:${missionId}`
-  if (timerByKey.has(key)) missionError('ALREADY_STARTED', 'Timed mission already started')
 
-  // Start timer (best-effort; in-memory for hackathon).
-  const timeout = setTimeout(async () => {
-    timerByKey.delete(key)
+  // Idempotent behavior:
+  // - If already started, (re)schedule completion (useful after server restart) and return current UM.
+  // - If timer already scheduled in-memory, just return.
+  const existingStartedAt = um.startedAt as Date | null | undefined
+  if (existingStartedAt) {
+    await scheduleTimedCompletion({
+      userId: user.id,
+      missionId,
+      userMissionId: um.id as string,
+      durationMs,
+      startedAt: existingStartedAt,
+    })
+    return um as any
+  }
+  if (timerByKey.has(key)) return um as any
 
-    try {
-      const fresh = await prisma.userMission.findUnique({
-        where: { userId_missionId: { userId: user.id, missionId } },
-        include: { mission: true },
-      })
-      if (!fresh) return
-      if (fresh.status !== 'ACTIVE') return
+  const startedAt = new Date()
+  const updated = await prisma.userMission.update({
+    where: { id: um.id as string },
+    data: { startedAt },
+    include: { mission: true },
+  })
 
-      const target = fresh.mission.targetProgress
-      const lockedUntil = fresh.mission.repeatable
-        ? new Date(Date.now() + fresh.mission.cooldownHours * 60 * 60 * 1000)
-        : null
+  await scheduleTimedCompletion({
+    userId: user.id,
+    missionId,
+    userMissionId: updated.id as string,
+    durationMs,
+    startedAt,
+  })
 
-      await prisma.$transaction(async (tx) => {
-        await tx.questCompletion.create({
-          data: {
-            userId: user.id,
-            missionId: fresh.missionId,
-            title: fresh.mission.title,
-            rewardXp: fresh.mission.rewardXp,
-          },
-        })
-        await tx.user.update({
-          where: { id: user.id },
-          data: { xp: { increment: fresh.mission.rewardXp } },
-        })
-        await tx.userMission.update({
-          where: { id: fresh.id },
-          data: {
-            progress: target,
-            status: 'COMPLETED',
-            completedAt: new Date(),
-            lockedUntil,
-          },
-        })
-      })
-    } catch {
-      // Best-effort timer completion; swallow to avoid crashing server.
-    }
-  }, durationMs)
-
-  timerByKey.set(key, timeout)
-  return um as any
+  return updated as any
 }

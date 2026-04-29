@@ -85,16 +85,22 @@ export type LocationTag = 'LANDMARK' | 'PARK' | 'RESTAURANT'
 
 export type Mission = {
   __typename?: 'Mission'
+  completionKind: MissionCompletionKind
   cooldownHours: Scalars['Int']['output']
   description?: Maybe<Scalars['String']['output']>
+  distanceMeters?: Maybe<Scalars['Int']['output']>
   id: Scalars['ID']['output']
   location?: Maybe<Location>
   locationId?: Maybe<Scalars['ID']['output']>
   repeatable: Scalars['Boolean']['output']
   rewardXp: Scalars['Int']['output']
+  staySeconds?: Maybe<Scalars['Int']['output']>
   targetProgress: Scalars['Int']['output']
+  timerSeconds?: Maybe<Scalars['Int']['output']>
   title: Scalars['String']['output']
 }
+
+export type MissionCompletionKind = 'CHAT_COUNT' | 'MANUAL_CONFIRM' | 'PHOTO' | 'STAY_TIME' | 'TIMED' | 'WALK_DISTANCE'
 
 export type Mutation = {
   __typename?: 'Mutation'
@@ -239,6 +245,7 @@ export type User = {
   crateInventories?: Maybe<Array<CrateInventory>>
   id: Scalars['ID']['output']
   inventories?: Maybe<Array<ItemInventory>>
+  level: Scalars['Int']['output']
   locationId?: Maybe<Scalars['ID']['output']>
   name: Scalars['String']['output']
   points: Scalars['Int']['output']
@@ -260,6 +267,7 @@ export type UserMission = {
   mission: Mission
   missionId: Scalars['ID']['output']
   progress: Scalars['Int']['output']
+  startedAt?: Maybe<Scalars['String']['output']>
   status: UserMissionStatus
   userId: Scalars['ID']['output']
 }
@@ -370,8 +378,16 @@ export type ResolversTypes = {
   >
   Location: ResolverTypeWrapper<Omit<Location, 'tag'> & { tag: ResolversTypes['LocationTag'] }>
   LocationTag: ResolverTypeWrapper<'PARK' | 'RESTAURANT' | 'LANDMARK'>
-  Mission: ResolverTypeWrapper<Omit<Mission, 'location'> & { location?: Maybe<ResolversTypes['Location']> }>
+  Mission: ResolverTypeWrapper<
+    Omit<Mission, 'completionKind' | 'location'> & {
+      completionKind: ResolversTypes['MissionCompletionKind']
+      location?: Maybe<ResolversTypes['Location']>
+    }
+  >
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>
+  MissionCompletionKind: ResolverTypeWrapper<
+    'MANUAL_CONFIRM' | 'WALK_DISTANCE' | 'STAY_TIME' | 'CHAT_COUNT' | 'PHOTO' | 'TIMED'
+  >
   Mutation: ResolverTypeWrapper<{}>
   Query: ResolverTypeWrapper<{}>
   QuestCompletion: ResolverTypeWrapper<
@@ -520,17 +536,26 @@ export type MissionResolvers<
   ContextType = UserContext,
   ParentType extends ResolversParentTypes['Mission'] = ResolversParentTypes['Mission'],
 > = {
+  completionKind?: Resolver<ResolversTypes['MissionCompletionKind'], ParentType, ContextType>
   cooldownHours?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>
+  distanceMeters?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   location?: Resolver<Maybe<ResolversTypes['Location']>, ParentType, ContextType>
   locationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>
   repeatable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>
   rewardXp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
+  staySeconds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>
   targetProgress?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
+  timerSeconds?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
+
+export type MissionCompletionKindResolvers = EnumResolverSignature<
+  { CHAT_COUNT?: any; MANUAL_CONFIRM?: any; PHOTO?: any; STAY_TIME?: any; TIMED?: any; WALK_DISTANCE?: any },
+  ResolversTypes['MissionCompletionKind']
+>
 
 export type MutationResolvers<
   ContextType = UserContext,
@@ -675,6 +700,7 @@ export type UserResolvers<
   crateInventories?: Resolver<Maybe<Array<ResolversTypes['CrateInventory']>>, ParentType, ContextType>
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   inventories?: Resolver<Maybe<Array<ResolversTypes['ItemInventory']>>, ParentType, ContextType>
+  level?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
   locationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>
   points?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
@@ -700,6 +726,7 @@ export type UserMissionResolvers<
   mission?: Resolver<ResolversTypes['Mission'], ParentType, ContextType>
   missionId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   progress?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
+  startedAt?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>
   status?: Resolver<ResolversTypes['UserMissionStatus'], ParentType, ContextType>
   userId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
@@ -720,6 +747,7 @@ export type Resolvers<ContextType = UserContext> = {
   Location?: LocationResolvers<ContextType>
   LocationTag?: LocationTagResolvers
   Mission?: MissionResolvers<ContextType>
+  MissionCompletionKind?: MissionCompletionKindResolvers
   Mutation?: MutationResolvers<ContextType>
   Query?: QueryResolvers<ContextType>
   QuestCompletion?: QuestCompletionResolvers<ContextType>

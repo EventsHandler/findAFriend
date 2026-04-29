@@ -14,6 +14,19 @@ export function useRoom() {
   const me = computed(() => meResult.value?.me ?? null)
   const currentRoomId = computed(() => me.value?.locationId ?? null)
 
+  // Keep quest progress feeling "live" without hammering the API.
+  let lastMeRefetchAt = 0
+  async function refetchMeThrottled(minIntervalMs = 2500) {
+    const now = Date.now()
+    if (now - lastMeRefetchAt < minIntervalMs) return
+    lastMeRefetchAt = now
+    try {
+      await refetchMe()
+    } catch {
+      // best-effort: ignore transient errors
+    }
+  }
+
   const { result: roomUsersResult, refetch: refetchRoomUsers } = useQuery(
     LocationUsersDocument,
     () => ({ locationId: currentRoomId.value! }),
@@ -52,6 +65,8 @@ export function useRoom() {
 
   async function updatePosition(locationId: string, lat: number, lng: number) {
     await updatePositionMutate({ locationId, lat, lng })
+    // Server may advance mission progress based on position; refresh the cached Me state periodically.
+    void refetchMeThrottled()
   }
 
   return {

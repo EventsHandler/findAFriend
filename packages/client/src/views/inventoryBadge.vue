@@ -2,6 +2,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import UiTopBar from '../ui/UiTopBar.vue'
+import UiCard from '../ui/UiCard.vue'
+import UiButton from '../ui/UiButton.vue'
+import UiContainer from '../ui/UiContainer.vue'
 
 const router = useRouter()
 
@@ -21,93 +25,45 @@ function rarityColor(type: string) {
 }
 
 function handleItemClick(item: any) {
-  console.log('Clicked item:', item.name)
+  // TODO: show badge details if needed
 }
 </script>
 
 <template>
-    <div class="h-full pb-20">
-        <div class="chooseSection flex items-center bg-[#101712]" >
-                <button @click="router.push('/inventoryChest')" class="chestsBtn border border-lime-400/30 hover:bg-lime-400" > Chests </button>
-                <button @click="router.push('/inventoryBadge')" class="badgesBtn border bg-lime-500 border-lime-400/30 hover:bg-lime-400"> Badges </button>
-        </div>
-        <div class="inventory flex items-center flex-wrap border border-lime-500/30 bg-[#101712] p-8 shadow-[0_0_30px_rgba(132,255,122,0.05)]">
-            <div class="item border border-lime-500/30 flex flex-col" 
-                v-for="item in items" 
-                :key="item.id" 
-                role="button"
-                tabindex="0"
-                @click="handleItemClick(item)"
-                @keydown.enter="handleItemClick(item)">
-                    <img :src="item.icon" :alt="item.name" />
-                    <span class="item-name flex items-center " :class="rarityColor(item.type)">{{ item.name }}</span>
-                    <div class="item-info flex items-center">
-                        <span class="item-type flex items-center " :class="rarityColor(item.type)">{{ item.type }}</span>
-                        <span class="item-qty flex items-center" :class="rarityColor(item.type)">x{{ item.quantity }}</span>
-                    </div>
+  <div class="app-screen pb-nav-safe">
+    <UiTopBar title="INVENTAR" subtitle="Badge-uri" />
+
+    <UiContainer class="py-4 space-y-4">
+      <div class="flex rounded-xl overflow-hidden border border-[var(--c-border-strong)]">
+        <UiButton class="w-1/2 rounded-none" variant="ghost" size="md" @click="router.push('/inventoryChest')">
+          Crate-uri
+        </UiButton>
+        <UiButton class="w-1/2 rounded-none" size="md" @click="router.push('/inventoryBadge')">
+          Badge-uri
+        </UiButton>
+      </div>
+
+      <UiCard>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <div
+            v-for="item in items"
+            :key="item.id"
+            role="button"
+            tabindex="0"
+            class="flex flex-col items-center justify-between p-3 rounded-2xl border border-[var(--c-border)] bg-[color:rgba(13,20,16,1)] hover:border-[var(--c-border-strong)] hover:bg-[color:rgba(22,33,26,1)] transition cursor-pointer aspect-square"
+            @click="handleItemClick(item)"
+            @keydown.enter="handleItemClick(item)"
+            @keydown.space.prevent="handleItemClick(item)"
+          >
+            <img :src="item.icon" :alt="item.name" class="w-10 h-10 object-contain" />
+            <span class="text-xs text-center truncate w-full" :class="rarityColor(item.type)">{{ item.name }}</span>
+            <div class="flex justify-between w-full text-[10px] mt-auto">
+              <span :class="rarityColor(item.type)">{{ item.type }}</span>
+              <span :class="rarityColor(item.type)">x{{ item.quantity }}</span>
             </div>
+          </div>
         </div>
-    </div>
+      </UiCard>
+    </UiContainer>
+  </div>
 </template>
-
-
-<style scoped>
-.chooseSection,
-.inventory,
-.item  {
-    color: white;
-    margin: 0;
-}
-.chestsBtn, .badgesBtn{
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 1em;
-}
-.chestsBtn {
-    border-radius: 5px 0 0 0;
-}
-.badgesBtn {
-    border-radius: 0 5px 0 0;
-    border-left: none;
-    color:black;
-}
-.chestsBtn:hover {
-    color:black;
-}
-.chooseSection {
-    margin: 2em 3em 0 3em;
-}
-.inventory {
-    padding: 1em;
-    border-top: none;
-    border-radius: 0 0 5px 5px;
-    margin: 0 3em;
-}
-.item {
-    margin: 1em;
-    width: 8em;
-    height: 8em;
-    overflow: hidden;
-    word-break: break-word;
-    display: flex;
-    flex-direction: column;
-    align-items: center;  /* centers image and name horizontally */
-    padding: 0.3em;
-    cursor: pointer;
-}
-.item-name {
-    width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    text-align: center;
-}
-.item-info {
-    display: flex;
-    justify-content: space-between;  /* rarity left, quantity right */
-    width: 100%;
-    margin-top: auto;                /* pushes it to the bottom */
-}
-
-</style>

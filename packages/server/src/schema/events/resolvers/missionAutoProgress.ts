@@ -1,5 +1,6 @@
 import { prisma } from '../../../prisma.js'
 import { canUpdateProgressNow } from './missionValidationState'
+import { applyQuestRewards } from './questRewards'
 
 type Pos = { lat: number; lng: number }
 
@@ -21,33 +22,6 @@ function haversineMeters(a: Pos, b: Pos) {
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2)
   return 2 * R * Math.asin(Math.sqrt(x))
-}
-
-function parseWalkMeters(title: string) {
-  const t = title.toLowerCase()
-  if (t.includes('1km') || t.includes('1 km')) return 1000
-  if (t.includes('500m') || t.includes('500 m')) return 500
-  return null
-}
-
-function parseStaySeconds(title: string) {
-  const t = title.toLowerCase()
-  if (t.includes('10 minute')) return 10 * 60
-  if (t.includes('5 minute')) return 5 * 60
-  if (t.includes('2 minute')) return 2 * 60
-  if (t.includes('1 minut')) return 1 * 60
-  return null
-}
-
-function isChatMission(title: string) {
-  const t = title.toLowerCase()
-  return (
-    t.includes('salut') ||
-    t.includes('bună') ||
-    t.includes('buna') ||
-    t.includes('conversa') ||
-    t.includes('recomand')
-  )
 }
 
 async function completeIfReady(userMissionId: string) {
@@ -74,10 +48,7 @@ async function completeIfReady(userMissionId: string) {
         rewardXp: um.mission.rewardXp,
       },
     })
-    await tx.user.update({
-      where: { id: um.userId },
-      data: { xp: { increment: um.mission.rewardXp } },
-    })
+    await applyQuestRewards(tx as any, { userId: um.userId, rewardXp: um.mission.rewardXp })
     await tx.userMission.update({
       where: { id: um.id },
       data: {
@@ -114,10 +85,9 @@ export async function autoProgressFromPositionEvent(args: {
 
   await Promise.all(
     active.map(async (um) => {
-      const title = um.mission.title
-
-      const walkMeters = parseWalkMeters(title)
-      if (walkMeters) {
+      if (um.mission.completionKind === 'WALK_DISTANCE') {
+        const walkMeters = um.mission.distanceMeters
+        if (!walkMeters || walkMeters <= 0) return
         const key = um.id
         const prev = walkByUserMissionId.get(key)
         const current: Pos = { lat, lng }
@@ -145,8 +115,9 @@ export async function autoProgressFromPositionEvent(args: {
         return
       }
 
-      const staySeconds = parseStaySeconds(title)
-      if (staySeconds) {
+      if (um.mission.completionKind === 'STAY_TIME') {
+        const staySeconds = um.mission.staySeconds
+        if (!staySeconds || staySeconds <= 0) return
         const key = um.id
         const now = Date.now()
         const prev = stayByUserMissionId.get(key)
@@ -186,7 +157,7 @@ export async function autoProgressFromChatEvent(args: {
 
   await Promise.all(
     active.map(async (um) => {
-      if (!isChatMission(um.mission.title)) return
+      if (um.mission.completionKind !== 'CHAT_COUNT') return
 
       const state = chatByUserMissionId.get(um.id) ?? { count: 0 }
       if (state.lastMessageId === messageId) return

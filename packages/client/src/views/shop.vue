@@ -5,6 +5,11 @@ import { computed, ref } from 'vue'
 import CommonCrateClosed from '../assets/crates/CommonChestClosed.svg'
 import EpicCrateClosed from '../assets/crates/EpicChestClosed.svg'
 import LegendaryCrateClosed from '../assets/crates/LegendaryChestClosed.svg'
+import UiTopBar from '../ui/UiTopBar.vue'
+import UiCard from '../ui/UiCard.vue'
+import UiButton from '../ui/UiButton.vue'
+import UiEmptyState from '../ui/UiEmptyState.vue'
+import UiContainer from '../ui/UiContainer.vue'
 
 type Rarity = 'COMMON' | 'EPIC' | 'LEGENDARY'
 
@@ -14,9 +19,8 @@ const user = computed(() => result.value?.me)
 const { result: cratesResult } = useQuery(CratesDocument)
 const crates = computed(() => cratesResult.value?.crates ?? [])
 
-const { mutate: addPoints, loading: addPointsLoading } = useMutation(AddPointsDocument)
-const { mutate: buyCrate, loading: buyCrateLoading } = useMutation(BuyCrateDocument)
-const isLoading = computed(() => addPointsLoading.value || buyCrateLoading.value)
+const { mutate: addPoints } = useMutation(AddPointsDocument)
+const { mutate: buyCrate } = useMutation(BuyCrateDocument)
 
 const shopCrates = computed(() => {
   const grouped: Record<Rarity, any | null> = {
@@ -62,7 +66,6 @@ async function buyCrateHandler(crate: any) {
     }, 1500)
     await refetch()
   } catch (err) {
-    console.log(err)
     errorMessage.value = 'Nu aveti suficiente puncte'
     setTimeout(() => {
       errorMessage.value = ''
@@ -75,37 +78,30 @@ async function addPointsHandler() {
   try {
     await addPoints({
       userId: user?.value?.id,
-      amount: 1000,
+      amount: 100,
     })
     await refetch()
   } catch (err) {
-    console.error(err)
+    // ignore for demo flow
   }
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#0b0f0c] text-white font-sans pb-24">
-    <header class="sticky top-0 z-20 p-4 border-b border-lime-500/10 bg-[#0b0f0c]/90 backdrop-blur-md">
-      <div class="flex items-center justify-between">
-        <div>
-          <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase cursor-default">Sistem recompense</div>
-          <h1 class="text-xl font-bold text-lime-300 tracking-widest uppercase cursor-default">Magazin crate-uri</h1>
-        </div>
+  <div class="app-screen pb-nav-safe">
+    <UiTopBar title="MAGAZIN" subtitle="Sistem recompense">
+      <template #right>
+        <UiCard variant="surface2" :padded="false" class="px-4 py-2">
+          <div class="text-[10px] text-white/45 uppercase tracking-widest">Puncte</div>
+          <div class="text-lg font-bold text-[var(--c-accent)]">{{ user?.points ?? 0 }}</div>
+        </UiCard>
+      </template>
+    </UiTopBar>
 
-        <div
-          class="px-4 py-2 rounded-xl bg-[#101712] border border-lime-500/20 shadow-[0_0_20px_rgba(132,255,122,0.05)]"
-        >
-          <div class="text-[10px] text-gray-400 uppercase tracking-widest cursor-default">Puncte</div>
-          <div class="text-lg font-bold text-lime-400 cursor-default">{{ user?.points ?? 0 }}</div>
-        </div>
-      </div>
-    </header>
-
-    <main class="p-4 space-y-6">
+    <UiContainer as="main" class="py-4 space-y-6">
       <div
         v-if="succes"
-        class="p-4 rounded-xl border border-lime-400/20 bg-lime-500/5 text-lime-300 text-sm tracking-widest uppercase"
+        class="p-4 rounded-xl border border-[var(--c-border-strong)] bg-white/5 text-[var(--c-accent)] text-sm tracking-widest uppercase"
       >
         Cutia a fost cumpărată și adăugată în inventar
       </div>
@@ -115,9 +111,7 @@ async function addPointsHandler() {
       >
         {{ errorMessage }}
       </div>
-      <section
-        class="relative p-6 rounded-2xl bg-linear-to-br from-[#101712] to-[#050705] border border-lime-500/20 overflow-hidden"
-      >
+      <section class="relative p-6 rounded-2xl bg-linear-to-br from-[var(--c-surface)] to-[#050705] border border-[var(--c-border-strong)] overflow-hidden">
         <div
           class="absolute inset-0 opacity-10"
           style="
@@ -128,28 +122,39 @@ async function addPointsHandler() {
         />
 
         <div class="relative">
-          <div class="text-sm text-white font-semibold cursor-default">Alege cutia dorită</div>
-          <div class="text-[10px] text-gray-400 mt-1 tracking-widest uppercase cursor-default">
+          <div class="text-sm text-white font-semibold">Alege cutia dorită</div>
+          <div class="text-[10px] text-white/45 mt-1 tracking-widest uppercase">
             Deblochează badge-uri și iteme rare
           </div>
         </div>
       </section>
 
-      <section class="px-4 space-y-4">
-        <div
+      <section class="space-y-4">
+        <div class="text-[11px] text-white/45">
+          Tip: crate-urile îți pot debloca badge-uri. După cumpărare, le găsești în Inventar.
+        </div>
+
+        <UiEmptyState
+          v-if="shopCrates.length === 0"
+          title="Magazin gol"
+          description="Nu sunt crate-uri disponibile momentan."
+          tone="neutral"
+        />
+        <UiCard
           v-for="crate in shopCrates"
           :key="crate.id"
-          class="group relative p-5 rounded-2xl bg-[#101712] border border-lime-500/10 flex items-center justify-between overflow-hidden hover:border-lime-400/30 transition"
+          :padded="false"
+          class="group relative p-5 flex items-center justify-between overflow-hidden hover:border-[var(--c-border-strong)] transition"
         >
           <div class="absolute right-4 opacity-10 group-hover:opacity-20 transition">
             <img :src="getImage(crate.rarity)" class="w-20 h-20" />
           </div>
 
           <div class="relative z-10">
-            <div class="text-xs tracking-widest uppercase text-gray-400 cursor-default">Crate</div>
+            <div class="text-xs tracking-widest uppercase text-white/45">Crate</div>
 
             <div
-              class="text-sm font-bold uppercase tracking-widest cursor-default"
+              class="text-sm font-bold uppercase tracking-widest"
               :class="{
                 'text-gray-300': crate.rarity === 'COMMON',
                 'text-blue-400': crate.rarity === 'EPIC',
@@ -159,27 +164,19 @@ async function addPointsHandler() {
               {{ crate.rarity }}
             </div>
 
-            <div class="text-xs text-gray-400 mt-1 cursor-default">Preț: {{ crate.price }} P</div>
+            <div class="text-xs text-white/45 mt-1">Preț: {{ crate.price }} P</div>
           </div>
 
           <!-- RIGHT BUTTON -->
-          <button
-            @click="buyCrateHandler(crate)"
-            :disabled="isLoading"
-            class="relative z-10 text-[10px] px-4 py-2 rounded-full border border-lime-400/20 bg-lime-500/10 text-lime-300 uppercase tracking-widest hover:bg-lime-500 hover:text-black transition cursor-pointer"
-          >
-            {{ isLoading ? 'Loading...' : 'Cumpără' }}
-          </button>
-        </div>
+          <UiButton variant="ghost" size="sm" class="relative z-10" @click="buyCrateHandler(crate)">
+            Cumpără
+          </UiButton>
+        </UiCard>
       </section>
 
-      <button
-        @click="addPointsHandler"
-        :disabled="isLoading"
-        class="w-full py-3 rounded-xl border border-lime-500/20 text-lime-300 tracking-widest uppercase hover:bg-lime-500 hover:text-black transition cursor-pointer"
-      >
-        {{ isLoading ? 'Loading...' : '+1000 PUNCTE' }}
-      </button>
-    </main>
+      <UiButton variant="ghost" block @click="addPointsHandler">
+        +100 puncte
+      </UiButton>
+    </UiContainer>
   </div>
 </template>

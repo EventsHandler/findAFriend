@@ -493,6 +493,19 @@ export const typeDefs = {
       ],
     },
     {
+      kind: 'EnumTypeDefinition',
+      name: { kind: 'Name', value: 'MissionCompletionKind' },
+      directives: [],
+      values: [
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'MANUAL_CONFIRM' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'WALK_DISTANCE' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'STAY_TIME' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'CHAT_COUNT' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'PHOTO' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'TIMED' }, directives: [] },
+      ],
+    },
+    {
       kind: 'ObjectTypeDefinition',
       name: { kind: 'Name', value: 'Mission' },
       interfaces: [],
@@ -531,6 +544,37 @@ export const typeDefs = {
           name: { kind: 'Name', value: 'targetProgress' },
           arguments: [],
           type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'completionKind' },
+          arguments: [],
+          type: {
+            kind: 'NonNullType',
+            type: { kind: 'NamedType', name: { kind: 'Name', value: 'MissionCompletionKind' } },
+          },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'distanceMeters' },
+          arguments: [],
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'staySeconds' },
+          arguments: [],
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'timerSeconds' },
+          arguments: [],
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
           directives: [],
         },
         {
@@ -610,6 +654,13 @@ export const typeDefs = {
         {
           kind: 'FieldDefinition',
           name: { kind: 'Name', value: 'lockedUntil' },
+          arguments: [],
+          type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'startedAt' },
           arguments: [],
           type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
           directives: [],
@@ -703,6 +754,13 @@ export const typeDefs = {
         {
           kind: 'FieldDefinition',
           name: { kind: 'Name', value: 'xp' },
+          arguments: [],
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'level' },
           arguments: [],
           type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } } },
           directives: [],
