@@ -126,9 +126,9 @@ const stats = computed(() => {
       class="p-4 flex items-center justify-between border-b border-lime-500/10 bg-[#0b0f0c]/80 backdrop-blur sticky top-0 z-20"
     >
       <div class="flex items-center gap-2">
-        <span class="text-sm tracking-widest text-lime-300">MISIUNI</span>
+        <span class="text-sm tracking-widest text-lime-300 cursor-default">MISIUNI</span>
       </div>
-      <div class="text-[10px] text-gray-500 tracking-widest uppercase">
+      <div class="text-[10px] text-gray-500 tracking-widest uppercase cursor-default">
         <span v-if="meLoading || missionsLoading">se încarcă…</span>
         <span v-else-if="me">ca {{ me.name }}</span>
       </div>
@@ -136,23 +136,23 @@ const stats = computed(() => {
 
     <main class="p-4 space-y-6">
       <section class="rounded-2xl bg-[#101712] border border-lime-500/10 p-4">
-        <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Statistici</div>
+        <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase cursor-default cur">Statistici</div>
         <div class="mt-3 grid grid-cols-2 gap-3">
           <div class="rounded-xl bg-[#0a0e0b] border border-white/5 p-3">
-            <div class="text-[10px] text-gray-500 uppercase tracking-widest">Active</div>
-            <div class="mt-1 text-lg font-bold text-lime-300 tabular-nums">{{ stats.active }}</div>
+            <div class="text-[10px] text-gray-500 uppercase tracking-widest cursor-default">Active</div>
+            <div class="mt-1 text-lg font-bold text-lime-300 tabular-nums cursor-default">{{ stats.active }}</div>
           </div>
           <div class="rounded-xl bg-[#0a0e0b] border border-white/5 p-3">
-            <div class="text-[10px] text-gray-500 uppercase tracking-widest">XP câștigat</div>
-            <div class="mt-1 text-lg font-bold text-orange-300 tabular-nums">{{ stats.earnedXp }}</div>
+            <div class="text-[10px] text-gray-500 uppercase tracking-widest cursor-default">XP câștigat</div>
+            <div class="mt-1 text-lg font-bold text-orange-300 tabular-nums cursor-default">{{ stats.earnedXp }}</div>
           </div>
           <div class="rounded-xl bg-[#0a0e0b] border border-white/5 p-3">
-            <div class="text-[10px] text-gray-500 uppercase tracking-widest">Finalizate</div>
-            <div class="mt-1 text-lg font-bold text-gray-200 tabular-nums">{{ stats.completedTotal }}</div>
+            <div class="text-[10px] text-gray-500 uppercase tracking-widest cursor-default">Finalizate</div>
+            <div class="mt-1 text-lg font-bold text-gray-200 tabular-nums cursor-default">{{ stats.completedTotal }}</div>
           </div>
           <div class="rounded-xl bg-[#0a0e0b] border border-white/5 p-3">
-            <div class="text-[10px] text-gray-500 uppercase tracking-widest">Astăzi</div>
-            <div class="mt-1 text-lg font-bold text-cyan-200 tabular-nums">{{ stats.completedToday }}</div>
+            <div class="text-[10px] text-gray-500 uppercase tracking-widest cursor-default">Astăzi</div>
+            <div class="mt-1 text-lg font-bold text-cyan-200 tabular-nums cursor-default">{{ stats.completedToday }}</div>
           </div>
         </div>
       </section>
@@ -160,22 +160,22 @@ const stats = computed(() => {
       <section>
         <div class="flex items-end justify-between gap-3 px-1">
           <div>
-            <h2 class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Misiuni din apropiere</h2>
-            <p class="text-[11px] text-gray-500 mt-1">
+            <h2 class="text-[10px] text-gray-400 tracking-[0.25em] uppercase cursor-default">Misiuni din apropiere</h2>
+            <p class="text-[11px] text-gray-500 mt-1 cursor-default">
               Sortate după distanță (necesită poziția GPS).
             </p>
           </div>
         <div class="flex items-center gap-2">
           <router-link
             to="/MapPage"
-            class="text-[10px] px-3 py-2 rounded-lg bg-lime-500/10 text-lime-300 border border-lime-400/20 uppercase tracking-widest"
+            class="text-[10px] px-3 py-2 rounded-lg bg-lime-500/10 hover:bg-lime-500 hover:text-black text-lime-300 border border-lime-400/20 uppercase tracking-widest"
           >
             Deschide harta
           </router-link>
         </div>
         </div>
 
-        <div v-if="nearbyQuests.length === 0" class="text-xs text-gray-500 px-1 mt-3">
+        <div v-if="nearbyQuests.length === 0" class="text-xs text-gray-500 px-1 mt-3 cursor-default">
           Nu s-au găsit misiuni.
         </div>
 

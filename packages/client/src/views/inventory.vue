@@ -123,7 +123,7 @@ onMounted(() => {
     <div class="flex justify-end">
       <router-link
         to="/shop"
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-lime-500/30 bg-[#101712] hover:bg-[#16211a] text-lime-300 text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lime-500/10"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-lime-500/30 bg-[#101712] hover:bg-[#16211a] text-lime-300 text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lime-100/10"
       >
         <img
           :src="ShopUnactive"
@@ -135,7 +135,7 @@ onMounted(() => {
     <!-- CRATES SECTION -->
     <section>
       <div
-        class="w-full sm:w-fit px-4 py-3 rounded-t-xl border border-lime-500/30 bg-lime-500 text-black text-sm sm:text-base font-semibold"
+        class="w-full sm:w-fit px-4 py-3 rounded-t-xl border border-lime-500/30 bg-lime-500 text-black text-sm sm:text-base font-semibold cursor-default"
       >
         Crate-uri
       </div>
@@ -180,7 +180,7 @@ onMounted(() => {
     <!-- BADGES SECTION -->
     <section>
       <div
-        class="w-full sm:w-fit px-4 py-3 rounded-t-xl border border-lime-500/30 bg-lime-500 text-black text-sm sm:text-base font-semibold"
+        class="w-full sm:w-fit px-4 py-3 rounded-t-xl border border-lime-500/30 bg-lime-500 text-black text-sm sm:text-base font-semibold cursor-default"
       >
         Badge-uri
       </div>
@@ -205,16 +205,16 @@ onMounted(() => {
               class="w-15 h-15 sm:w-30 sm:h-30 object-contain transition-all duration-300"
               :class="badge.unlocked ? 'opacity-100' : 'opacity-30 grayscale'"
             />
-            <div v-if="!badge.unlocked" class="absolute inset-0 flex items-center justify-center text-2xl">🔒</div>
+            <div v-if="!badge.unlocked" class="absolute inset-0 flex items-center justify-center text-2xl cursor-default">🔒</div>
           </div>
           <div class="space-y-2 mt-3">
             <p
-              class="text-xs sm:text-sm text-center truncate"
+              class="text-xs sm:text-sm text-center truncate cursor-default"
               :class="badge.unlocked ? rarityColor(badge.rarity) : 'text-gray-500'"
             >
               {{ badge.name }}
             </p>
-            <div class="flex justify-between text-[12px] sm:text-[16px]">
+            <div class="flex justify-between text-[12px] sm:text-[16px] cursor-default">
               <span :class="badge.unlocked ? rarityColor(badge.rarity) : 'text-gray-500'">
                 {{ badge.unlocked ? badge.rarity : 'LOCKED' }}
               </span>

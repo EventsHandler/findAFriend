@@ -128,8 +128,8 @@ async function addPointsHandler() {
         />
 
         <div class="relative">
-          <div class="text-sm text-white font-semibold">Alege cutia dorită</div>
-          <div class="text-[10px] text-gray-400 mt-1 tracking-widest uppercase">
+          <div class="text-sm text-white font-semibold cursor-default">Alege cutia dorită</div>
+          <div class="text-[10px] text-gray-400 mt-1 tracking-widest uppercase cursor-default">
             Deblochează badge-uri și iteme rare
           </div>
         </div>
@@ -146,10 +146,10 @@ async function addPointsHandler() {
           </div>
 
           <div class="relative z-10">
-            <div class="text-xs tracking-widest uppercase text-gray-400">Crate</div>
+            <div class="text-xs tracking-widest uppercase text-gray-400 cursor-default">Crate</div>
 
             <div
-              class="text-sm font-bold uppercase tracking-widest"
+              class="text-sm font-bold uppercase tracking-widest cursor-default"
               :class="{
                 'text-gray-300': crate.rarity === 'COMMON',
                 'text-blue-400': crate.rarity === 'EPIC',
@@ -159,7 +159,7 @@ async function addPointsHandler() {
               {{ crate.rarity }}
             </div>
 
-            <div class="text-xs text-gray-400 mt-1">Preț: {{ crate.price }} P</div>
+            <div class="text-xs text-gray-400 mt-1 cursor-default">Preț: {{ crate.price }} P</div>
           </div>
 
           <!-- RIGHT BUTTON -->

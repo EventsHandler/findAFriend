@@ -93,7 +93,7 @@ const goToChat = () => {
         >
           <div
             class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-all"
-            :class="isQuest ? 'bg-lime-400/10 border border-lime-400/20' : ''"
+            :class="isQuest ? 'bg-lime-400/10  border border-lime-400/20' : ''"
           >
             <img
               :src="isQuest ? QuestActive : QuestUnactive"
