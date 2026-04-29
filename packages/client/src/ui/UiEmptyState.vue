@@ -32,8 +32,8 @@ function toneCls(tone: 'neutral' | 'info' | 'warning' | 'danger') {
 
 <template>
   <UiCard variant="surface2" class="text-center" :class="toneCls(tone)">
-    <div class="text-[10px] text-white/55 tracking-[0.25em] uppercase">{{ title }}</div>
-    <div v-if="description" class="mt-2 text-[12px] leading-relaxed text-white/55">
+    <div class="text-[10px] text-white/55 tracking-[0.25em] uppercase cursor-default">{{ title }}</div>
+    <div v-if="description" class="mt-2 text-[12px] leading-relaxed text-white/55 cursor-default">
       {{ description }}
     </div>
     <div v-if="actionLabel" class="mt-4 flex justify-center">

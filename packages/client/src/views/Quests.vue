@@ -143,7 +143,7 @@ const stats = computed(() => {
 
     <UiContainer as="main" class="py-4 space-y-6">
       <div class="flex items-center justify-between gap-3">
-        <div class="text-[10px] text-white/55 tracking-[0.25em] uppercase">
+        <div class="text-[10px] text-white/55 tracking-[0.25em] uppercase cursor-default">
           Ultima actualizare: <span class="tabular-nums">{{ missionsLastRefreshedLabel }}</span>
         </div>
         <div class="flex items-center gap-2">
@@ -157,23 +157,23 @@ const stats = computed(() => {
       </div>
 
       <UiCard>
-        <div class="text-[10px] text-white/55 tracking-[0.25em] uppercase">Statistici</div>
+        <div class="text-[10px] text-white/55 tracking-[0.25em] uppercase cursor-default">Statistici</div>
         <div class="mt-3 grid grid-cols-2 gap-3">
           <UiCard variant="surface2" class="p-3" :padded="false">
-            <div class="text-[10px] text-white/40 uppercase tracking-widest">Active</div>
-            <div class="mt-1 text-lg font-bold text-[var(--c-accent)] tabular-nums">{{ stats.active }}</div>
+            <div class="text-[10px] text-white/40 uppercase tracking-widest cursor-default">Active</div>
+            <div class="mt-1 text-lg font-bold text-[var(--c-accent)] tabular-nums cursor-default">{{ stats.active }}</div>
           </UiCard>
           <UiCard variant="surface2" class="p-3" :padded="false">
-            <div class="text-[10px] text-white/40 uppercase tracking-widest">XP câștigat</div>
-            <div class="mt-1 text-lg font-bold text-orange-300 tabular-nums">{{ stats.earnedXp }}</div>
+            <div class="text-[10px] text-white/40 uppercase tracking-widest cursor-default">XP câștigat</div>
+            <div class="mt-1 text-lg font-bold text-orange-300 tabular-nums cursor-default">{{ stats.earnedXp }}</div>
           </UiCard>
           <UiCard variant="surface2" class="p-3" :padded="false">
-            <div class="text-[10px] text-white/40 uppercase tracking-widest">Finalizate</div>
-            <div class="mt-1 text-lg font-bold text-white/80 tabular-nums">{{ stats.completedTotal }}</div>
+            <div class="text-[10px] text-white/40 uppercase tracking-widest cursor-default">Finalizate</div>
+            <div class="mt-1 text-lg font-bold text-white/80 tabular-nums cursor-default">{{ stats.completedTotal }}</div>
           </UiCard>
           <UiCard variant="surface2" class="p-3" :padded="false">
-            <div class="text-[10px] text-white/40 uppercase tracking-widest">Astăzi</div>
-            <div class="mt-1 text-lg font-bold text-cyan-200 tabular-nums">{{ stats.completedToday }}</div>
+            <div class="text-[10px] text-white/40 uppercase tracking-widest cursor-default">Astăzi</div>
+            <div class="mt-1 text-lg font-bold text-cyan-200 tabular-nums cursor-default">{{ stats.completedToday }}</div>
           </UiCard>
         </div>
       </UiCard>
@@ -181,8 +181,8 @@ const stats = computed(() => {
       <section>
         <div class="flex items-end justify-between gap-3 px-1">
           <div>
-            <h2 class="text-[10px] text-white/55 tracking-[0.25em] uppercase">Misiuni din apropiere</h2>
-            <p class="text-[11px] text-white/40 mt-1">
+            <h2 class="text-[10px] text-white/55 tracking-[0.25em] uppercase cursor-default">Misiuni din apropiere</h2>
+            <p class="text-[11px] text-white/40 mt-1 cursor-default">
               Sortate după distanță. Dacă nu vezi distanțe, activează locația și mergi pe Hartă.
             </p>
           </div>
@@ -205,17 +205,17 @@ const stats = computed(() => {
           >
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <div class="text-sm font-semibold text-white truncate">{{ row.quest.title }}</div>
-                <div v-if="row.quest.description" class="text-[11px] text-white/45 mt-1 leading-snug">
+                <div class="text-sm font-semibold text-white truncate cursor-default">{{ row.quest.title }}</div>
+                <div v-if="row.quest.description" class="text-[11px] text-white/45 mt-1 leading-snug cursor-default">
                   {{ row.quest.description }}
                 </div>
-                <div class="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-widest">
+                <div class="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-widest cursor-default">
                   <span class="text-lime-300/90">+{{ row.quest.rewardXp }} XP</span>
                   <span class="text-cyan-200/90">+{{ Math.max(1, Math.round((row.quest.rewardXp ?? 0) * 0.5)) }} PTS</span>
                   <span class="text-gray-500" v-if="row.location">
                     {{ row.location.name }} · {{ fmtDistance(row.distanceM) }}
                   </span>
-                  <span class="text-white/40" v-else>Misiune globală</span>
+                  <span class="text-white/40 cursor-default" v-else>Misiune globală</span>
                 </div>
               </div>
               <div class="shrink-0">
