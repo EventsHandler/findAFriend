@@ -18,6 +18,19 @@ enum MissionCompletionKind {
   TIMED
 }
 
+enum InterestTag {
+  NATURE
+  FOOD
+  CULTURE
+  ENTERTAINMENT
+  SPORTS
+  RELAXATION
+  ADVENTURE
+  SHOPPING
+  HISTORY
+  ART
+}
+
 type Mission {
   id: ID!
   title: String!
@@ -67,8 +80,11 @@ type User {
   points: Int!
   inventories: [ItemInventory!]
   crateInventories: [CrateInventory!]
-  userMissions: [UserMission!]!
-  questHistory(limit: Int = 40): [QuestCompletion!]!
+  userMissions: [UserMission!]
+  questHistory(limit: Int = 40): [QuestCompletion!]
+
+  profileDescription: String!
+  profileTags: [InterestTag!]!
 }
 
 type Location {
@@ -170,4 +186,5 @@ extend type Mutation {
   completePhotoMission(missionId: ID!, lat: Float!, lng: Float!): UserMission!
   completeMission(missionId: ID!, lat: Float!, lng: Float!): UserMission!
   startTimedMission(missionId: ID!, lat: Float!, lng: Float!): UserMission!
+  generateUserProfile(description: String!): User!
 }
