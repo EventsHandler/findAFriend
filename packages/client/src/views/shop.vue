@@ -19,8 +19,10 @@ const user = computed(() => result.value?.me)
 const { result: cratesResult } = useQuery(CratesDocument)
 const crates = computed(() => cratesResult.value?.crates ?? [])
 
-const { mutate: addPoints } = useMutation(AddPointsDocument)
-const { mutate: buyCrate } = useMutation(BuyCrateDocument)
+const { mutate: addPoints, loading: addPointsLoading } = useMutation(AddPointsDocument)
+const { mutate: buyCrate, loading: buyCrateLoading } = useMutation(BuyCrateDocument)
+const isLoading = computed(() => addPointsLoading.value || buyCrateLoading.value)
+
 
 const shopCrates = computed(() => {
   const grouped: Record<Rarity, any | null> = {
@@ -122,15 +124,15 @@ async function addPointsHandler() {
         />
 
         <div class="relative">
-          <div class="text-sm text-white font-semibold">Alege cutia dorită</div>
-          <div class="text-[10px] text-white/45 mt-1 tracking-widest uppercase">
+          <div class="text-sm text-white font-semibold cursor-default">Alege cutia dorită</div>
+          <div class="text-[10px] text-white/45 mt-1 tracking-widest uppercase cursor-default">
             Deblochează badge-uri și iteme rare
           </div>
         </div>
       </section>
 
       <section class="space-y-4">
-        <div class="text-[11px] text-white/45">
+        <div class="text-[11px] text-white/45 cursor-default">
           Tip: crate-urile îți pot debloca badge-uri. După cumpărare, le găsești în Inventar.
         </div>
 
@@ -151,10 +153,10 @@ async function addPointsHandler() {
           </div>
 
           <div class="relative z-10">
-            <div class="text-xs tracking-widest uppercase text-white/45">Crate</div>
+            <div class="text-xs tracking-widest uppercase text-white/45 cursor-default">Crate</div>
 
             <div
-              class="text-sm font-bold uppercase tracking-widest"
+              class="text-sm font-bold uppercase tracking-widest cursor-default"
               :class="{
                 'text-gray-300': crate.rarity === 'COMMON',
                 'text-blue-400': crate.rarity === 'EPIC',
@@ -164,18 +166,18 @@ async function addPointsHandler() {
               {{ crate.rarity }}
             </div>
 
-            <div class="text-xs text-white/45 mt-1">Preț: {{ crate.price }} P</div>
+            <div class="text-xs text-white/45 mt-1 cursor-default">Preț: {{ crate.price }} P</div>
           </div>
 
           <!-- RIGHT BUTTON -->
           <UiButton variant="ghost" size="sm" class="relative z-10" @click="buyCrateHandler(crate)">
-            Cumpără
+            {{ isLoading ? 'Loading...' : 'Cumpără' }}
           </UiButton>
         </UiCard>
       </section>
 
-      <UiButton variant="ghost" block @click="addPointsHandler">
-        +100 puncte
+      <UiButton variant="ghost" block @click="addPointsHandler" class="hover:bg-lime-500">
+        {{ isLoading ? 'Loading...' : '+1000 PUNCTE' }}
       </UiButton>
     </UiContainer>
   </div>
