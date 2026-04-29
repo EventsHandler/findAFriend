@@ -106,7 +106,7 @@ const getToneForTag = (tag: InterestTag): 'neutral' | 'success' | 'warning' | 'i
             class="w-full"
             @click="showInput = true"
           >
-            Regenerează Profil
+            Regenerare Profil
           </UiButton>
         </div>
 
@@ -132,7 +132,7 @@ const getToneForTag = (tag: InterestTag): 'neutral' | 'success' | 'warning' | 'i
               :disabled="!descriptionInput.trim() || isGenerating"
               @click="handleGenerateProfile"
             >
-              {{ hasProfile ? 'Regenerează' : 'Creează Profil' }}
+              {{ isGenerating ? 'Se generează...' : hasProfile ? 'Regenerează' : 'Creează Profil' }}
             </UiButton>
             <UiButton
               v-if="hasProfile"
