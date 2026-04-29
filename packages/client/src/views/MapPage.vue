@@ -566,69 +566,57 @@ watch([roomUsers, currentRoomId], () => {
   syncRoomUsers(roomUsers.value, me.value?.id ?? null)
 })
 
-const updateLocation = () => {
-  if (!navigator.geolocation) return
+const updateLocation = (position: GeolocationPosition) => {
+  geoError.value = null
+  const { latitude, longitude } = position.coords
 
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      geoError.value = null
-      const { latitude, longitude } = position.coords
+  lastUpdate.value = new Date().toLocaleTimeString()
 
-      lastUpdate.value = new Date().toLocaleTimeString()
+  if (!map.value) return
 
-      if (!map.value) return
+  if (!hasCenteredOnce.value) {
+    map.value.setView([latitude, longitude], 14)
+    hasCenteredOnce.value = true
+  }
 
-      if (!hasCenteredOnce.value) {
-        map.value.setView([latitude, longitude], 14)
-        hasCenteredOnce.value = true
-      }
+  if (!playerMarker) {
+    playerMarker = L.marker([latitude, longitude], {
+      icon: playerIcon,
+    }).addTo(map.value as L.Map)
+  } else {
+    playerMarker.setLatLng([latitude, longitude])
+  }
 
-      if (!playerMarker) {
-        playerMarker = L.marker([latitude, longitude], {
-          icon: playerIcon,
-        }).addTo(map.value as L.Map)
-      } else {
-        playerMarker.setLatLng([latitude, longitude])
-      }
+  playerLatLng.value = new L.LatLng(latitude, longitude)
+  if (activePOI.value && routeDrawnFor.value !== activePOI.value.id) {
+    drawPathAnimated()
+  }
 
-      playerLatLng.value = new L.LatLng(latitude, longitude)
-      if (activePOI.value && routeDrawnFor.value !== activePOI.value.id) {
-        drawPathAnimated()
-      }
-
-      if (currentRoomId.value) {
-        updatePosition(currentRoomId.value, latitude, longitude).catch(() => {
-          // ignore update errors while transitioning between rooms
-        })
-      }
-    },
-    (err) => {
-      // Most common: user denied (code 1). Don't crash UI; just show status and stop spamming.
-      const msg = err?.message || 'Geolocation unavailable'
-      geoError.value = msg
-      if (intervalId) {
-        clearInterval(intervalId)
-        intervalId = null
-      }
-      // Don't spam the console for expected "denied" errors.
-      if ((err as GeolocationPositionError | undefined)?.code !== 1) {
-        console.warn('GeolocationPositionError:', err)
-      }
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 300000, // Use cached position for up to 5 minutes
-    },
-  )
+  if (currentRoomId.value) {
+    updatePosition(currentRoomId.value, latitude, longitude).catch(() => {
+      // ignore update errors while transitioning between rooms
+    })
+  }
 }
 
-let intervalId: number | null = null
+const handleGeoError = (err: GeolocationPositionError) => {
+  // Most common: user denied (code 1). Don't crash UI; just show status and stop spamming.
+  const msg = err?.message || 'Geolocation unavailable'
+  geoError.value = msg
+  if (watchId) {
+    navigator.geolocation.clearWatch(watchId)
+    watchId = null
+  }
+  // Don't spam the console for expected "denied" errors.
+  if (err.code !== 1) {
+    console.warn('GeolocationPositionError:', err)
+  }
+}
+
+let watchId: number | null = null
 
 function retryGeolocation() {
   geoError.value = null
-  updateLocation()
-  if (!intervalId) intervalId = setInterval(updateLocation, 5000)
 }
 
 async function onClaimLocationMission(missionId: string) {
@@ -670,13 +658,22 @@ async function onClaimLocationMission(missionId: string) {
 
 onMounted(() => {
   ensureMapMounted()
-  updateLocation()
 
   nowInterval = window.setInterval(() => {
     nowMs.value = Date.now()
   }, 1000)
 
-  intervalId = setInterval(updateLocation, 5000)
+  if (navigator.geolocation) {
+    watchId = navigator.geolocation.watchPosition(
+      updateLocation,
+      handleGeoError,
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0, // Don't use cached positions for live updates
+      }
+    )
+  }
 })
 
 // If this view is wrapped in <keep-alive>, browser "Back" may reactivate without remounting.
@@ -691,8 +688,8 @@ watch(selectedLocationId, () => {
 })
 
 onUnmounted(() => {
-  if (intervalId) clearInterval(intervalId)
   if (nowInterval) window.clearInterval(nowInterval)
+  if (watchId) navigator.geolocation.clearWatch(watchId)
   if (map.value) {
     map.value.remove()
     map.value = null
