@@ -50,6 +50,9 @@ jobs:
         env:
           DATABASE_URL: 'postgresql://user:pass@localhost:5432/db'
 
+      - name: Run codegen
+        run: pnpm codegen
+
       - name: Build client
         run: pnpm build:client
         env:
