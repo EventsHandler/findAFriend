@@ -469,6 +469,20 @@ export const typeDefs = {
           type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'UserMission' } } },
           directives: [],
         },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'generateUserProfile' },
+          arguments: [
+            {
+              kind: 'InputValueDefinition',
+              name: { kind: 'Name', value: 'description' },
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } } },
+              directives: [],
+            },
+          ],
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } } },
+          directives: [],
+        },
       ],
       directives: [],
       interfaces: [],
@@ -503,6 +517,23 @@ export const typeDefs = {
         { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'CHAT_COUNT' }, directives: [] },
         { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'PHOTO' }, directives: [] },
         { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'TIMED' }, directives: [] },
+      ],
+    },
+    {
+      kind: 'EnumTypeDefinition',
+      name: { kind: 'Name', value: 'InterestTag' },
+      directives: [],
+      values: [
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'NATURE' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'FOOD' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'CULTURE' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'ENTERTAINMENT' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'SPORTS' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'RELAXATION' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'ADVENTURE' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'SHOPPING' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'HISTORY' }, directives: [] },
+        { kind: 'EnumValueDefinition', name: { kind: 'Name', value: 'ART' }, directives: [] },
       ],
     },
     {
@@ -818,11 +849,8 @@ export const typeDefs = {
           name: { kind: 'Name', value: 'userMissions' },
           arguments: [],
           type: {
-            kind: 'NonNullType',
-            type: {
-              kind: 'ListType',
-              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'UserMission' } } },
-            },
+            kind: 'ListType',
+            type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'UserMission' } } },
           },
           directives: [],
         },
@@ -839,13 +867,30 @@ export const typeDefs = {
             },
           ],
           type: {
+            kind: 'ListType',
+            type: {
+              kind: 'NonNullType',
+              type: { kind: 'NamedType', name: { kind: 'Name', value: 'QuestCompletion' } },
+            },
+          },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'profileDescription' },
+          arguments: [],
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } } },
+          directives: [],
+        },
+        {
+          kind: 'FieldDefinition',
+          name: { kind: 'Name', value: 'profileTags' },
+          arguments: [],
+          type: {
             kind: 'NonNullType',
             type: {
               kind: 'ListType',
-              type: {
-                kind: 'NonNullType',
-                type: { kind: 'NamedType', name: { kind: 'Name', value: 'QuestCompletion' } },
-              },
+              type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'InterestTag' } } },
             },
           },
           directives: [],

@@ -20,11 +20,11 @@ model Event {
 }
 
 model User {
-  id               String           @id @default(cuid(2))
-  name             String           @unique
+  id               String            @id @default(cuid(2))
+  name             String            @unique
   password         String
-  xp               Int              @default(0)
-  level            Int              @default(1)
+  xp               Int               @default(0)
+  level            Int               @default(1)
   inventories      ItemInventory[]
   crateInventories CrateInventory[]
   userMissions     UserMission[]
@@ -35,11 +35,14 @@ model User {
   location   Location? @relation(fields: [locationId], references: [id])
   posx       Float?
   posy       Float?
-  points Int @default(0)
+  points     Int       @default(0)
+
+  profileDescription String        @default("")
+  profileTags        InterestTag[]
 }
 
 model Location {
-  id   String @id @default(cuid(2))
+  id   String      @id @default(cuid(2))
   name String
   posx Float
   posy Float
@@ -50,7 +53,7 @@ model Location {
 }
 
 model ChatMessage {
-  id           String   @id @default(cuid(2))
+  id           String @id @default(cuid(2))
   locationName String
 
   userId String
@@ -69,6 +72,19 @@ enum LocationTag {
   LANDMARK
 }
 
+enum InterestTag {
+  NATURE
+  FOOD
+  CULTURE
+  ENTERTAINMENT
+  SPORTS
+  RELAXATION
+  ADVENTURE
+  SHOPPING
+  HISTORY
+  ART
+}
+
 enum MissionCompletionKind {
   /// User confirms completion by pressing a button.
   MANUAL_CONFIRM
@@ -85,11 +101,11 @@ enum MissionCompletionKind {
 }
 
 model Mission {
-  id             String @id @default(cuid(2))
+  id             String                @id @default(cuid(2))
   title          String
   description    String?
   rewardXp       Int
-  targetProgress Int    @default(100)
+  targetProgress Int                   @default(100)
   completionKind MissionCompletionKind @default(MANUAL_CONFIRM)
   /// For WALK_DISTANCE missions.
   distanceMeters Int?
@@ -98,9 +114,9 @@ model Mission {
   /// For TIMED missions (timer duration).
   timerSeconds   Int?
   /// If true, completing the quest records history and starts a cooldown before it can be claimed again.
-  repeatable     Boolean @default(false)
+  repeatable     Boolean               @default(false)
   /// Hours after completion until a repeatable quest can be claimed again (e.g. 24 = daily refresh).
-  cooldownHours  Int     @default(24)
+  cooldownHours  Int                   @default(24)
 
   locationId String?
   location   Location? @relation(fields: [locationId], references: [id])
@@ -151,11 +167,11 @@ enum UserMissionStatus {
 }
 
 model Crate {
-  id     String @id @default(cuid(2))
-  name   String @unique
-  rarity RarityType
-  chance Float
-  price Int @default(0)
+  id          String            @id @default(cuid(2))
+  name        String            @unique
+  rarity      RarityType
+  chance      Float
+  price       Int               @default(0)
   rarityDrops CrateRarityDrop[]
 
   inventories CrateInventory[]
@@ -175,10 +191,10 @@ model CrateRarityDrop {
 }
 
 model Item {
-  id     String @id @default(cuid(2))
-  name   String @unique   
-  rarity RarityType
-  svgId String @default("")
+  id          String          @id @default(cuid(2))
+  name        String          @unique
+  rarity      RarityType
+  svgId       String          @default("")
   inventories ItemInventory[]
 }
 

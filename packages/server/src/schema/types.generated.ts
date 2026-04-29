@@ -54,6 +54,18 @@ export type CrateRarityDrop = {
   rarity: RarityType
 }
 
+export type InterestTag =
+  | 'ADVENTURE'
+  | 'ART'
+  | 'CULTURE'
+  | 'ENTERTAINMENT'
+  | 'FOOD'
+  | 'HISTORY'
+  | 'NATURE'
+  | 'RELAXATION'
+  | 'SHOPPING'
+  | 'SPORTS'
+
 export type Item = {
   __typename?: 'Item'
   id: Scalars['ID']['output']
@@ -109,6 +121,7 @@ export type Mutation = {
   claimMission: UserMission
   completeMission: UserMission
   completePhotoMission: UserMission
+  generateUserProfile: User
   joinRoom: User
   leaveRoom: User
   locations?: Maybe<Array<Location>>
@@ -145,6 +158,10 @@ export type MutationcompletePhotoMissionArgs = {
   lat: Scalars['Float']['input']
   lng: Scalars['Float']['input']
   missionId: Scalars['ID']['input']
+}
+
+export type MutationgenerateUserProfileArgs = {
+  description: Scalars['String']['input']
 }
 
 export type MutationjoinRoomArgs = {
@@ -251,8 +268,10 @@ export type User = {
   points: Scalars['Int']['output']
   posx?: Maybe<Scalars['Float']['output']>
   posy?: Maybe<Scalars['Float']['output']>
-  questHistory: Array<QuestCompletion>
-  userMissions: Array<UserMission>
+  profileDescription: Scalars['String']['output']
+  profileTags: Array<InterestTag>
+  questHistory?: Maybe<Array<QuestCompletion>>
+  userMissions?: Maybe<Array<UserMission>>
   xp: Scalars['Int']['output']
 }
 
@@ -369,6 +388,18 @@ export type ResolversTypes = {
       rarity: ResolversTypes['RarityType']
     }
   >
+  InterestTag: ResolverTypeWrapper<
+    | 'NATURE'
+    | 'FOOD'
+    | 'CULTURE'
+    | 'ENTERTAINMENT'
+    | 'SPORTS'
+    | 'RELAXATION'
+    | 'ADVENTURE'
+    | 'SHOPPING'
+    | 'HISTORY'
+    | 'ART'
+  >
   Item: ResolverTypeWrapper<Omit<Item, 'rarity'> & { rarity: ResolversTypes['RarityType'] }>
   ItemInventory: ResolverTypeWrapper<
     Omit<ItemInventory, 'item' | 'user'> & {
@@ -395,11 +426,12 @@ export type ResolversTypes = {
   >
   RarityType: ResolverTypeWrapper<'COMMON' | 'EPIC' | 'LEGENDARY'>
   User: ResolverTypeWrapper<
-    Omit<User, 'crateInventories' | 'inventories' | 'questHistory' | 'userMissions'> & {
+    Omit<User, 'crateInventories' | 'inventories' | 'profileTags' | 'questHistory' | 'userMissions'> & {
       crateInventories?: Maybe<Array<ResolversTypes['CrateInventory']>>
       inventories?: Maybe<Array<ResolversTypes['ItemInventory']>>
-      questHistory: Array<ResolversTypes['QuestCompletion']>
-      userMissions: Array<ResolversTypes['UserMission']>
+      profileTags: Array<ResolversTypes['InterestTag']>
+      questHistory?: Maybe<Array<ResolversTypes['QuestCompletion']>>
+      userMissions?: Maybe<Array<ResolversTypes['UserMission']>>
     }
   >
   UserMission: ResolverTypeWrapper<
@@ -438,8 +470,8 @@ export type ResolversParentTypes = {
   User: Omit<User, 'crateInventories' | 'inventories' | 'questHistory' | 'userMissions'> & {
     crateInventories?: Maybe<Array<ResolversParentTypes['CrateInventory']>>
     inventories?: Maybe<Array<ResolversParentTypes['ItemInventory']>>
-    questHistory: Array<ResolversParentTypes['QuestCompletion']>
-    userMissions: Array<ResolversParentTypes['UserMission']>
+    questHistory?: Maybe<Array<ResolversParentTypes['QuestCompletion']>>
+    userMissions?: Maybe<Array<ResolversParentTypes['UserMission']>>
   }
   UserMission: Omit<UserMission, 'mission'> & { mission: ResolversParentTypes['Mission'] }
 }
@@ -490,6 +522,22 @@ export type CrateRarityDropResolvers<
   rarity?: Resolver<ResolversTypes['RarityType'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
+
+export type InterestTagResolvers = EnumResolverSignature<
+  {
+    ADVENTURE?: any
+    ART?: any
+    CULTURE?: any
+    ENTERTAINMENT?: any
+    FOOD?: any
+    HISTORY?: any
+    NATURE?: any
+    RELAXATION?: any
+    SHOPPING?: any
+    SPORTS?: any
+  },
+  ResolversTypes['InterestTag']
+>
 
 export type ItemResolvers<
   ContextType = UserContext,
@@ -590,6 +638,12 @@ export type MutationResolvers<
     ParentType,
     ContextType,
     RequireFields<MutationcompletePhotoMissionArgs, 'lat' | 'lng' | 'missionId'>
+  >
+  generateUserProfile?: Resolver<
+    ResolversTypes['User'],
+    ParentType,
+    ContextType,
+    RequireFields<MutationgenerateUserProfileArgs, 'description'>
   >
   joinRoom?: Resolver<
     ResolversTypes['User'],
@@ -706,13 +760,15 @@ export type UserResolvers<
   points?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
   posx?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>
   posy?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>
+  profileDescription?: Resolver<ResolversTypes['String'], ParentType, ContextType>
+  profileTags?: Resolver<Array<ResolversTypes['InterestTag']>, ParentType, ContextType>
   questHistory?: Resolver<
-    Array<ResolversTypes['QuestCompletion']>,
+    Maybe<Array<ResolversTypes['QuestCompletion']>>,
     ParentType,
     ContextType,
     RequireFields<UserquestHistoryArgs, 'limit'>
   >
-  userMissions?: Resolver<Array<ResolversTypes['UserMission']>, ParentType, ContextType>
+  userMissions?: Resolver<Maybe<Array<ResolversTypes['UserMission']>>, ParentType, ContextType>
   xp?: Resolver<ResolversTypes['Int'], ParentType, ContextType>
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }
@@ -742,6 +798,7 @@ export type Resolvers<ContextType = UserContext> = {
   Crate?: CrateResolvers<ContextType>
   CrateInventory?: CrateInventoryResolvers<ContextType>
   CrateRarityDrop?: CrateRarityDropResolvers<ContextType>
+  InterestTag?: InterestTagResolvers
   Item?: ItemResolvers<ContextType>
   ItemInventory?: ItemInventoryResolvers<ContextType>
   Location?: LocationResolvers<ContextType>

@@ -16,6 +16,7 @@ import { buyCrate as Mutation_buyCrate } from './events/resolvers/Mutation/buyCr
 import { claimMission as Mutation_claimMission } from './events/resolvers/Mutation/claimMission.js'
 import { completeMission as Mutation_completeMission } from './events/resolvers/Mutation/completeMission.js'
 import { completePhotoMission as Mutation_completePhotoMission } from './events/resolvers/Mutation/completePhotoMission.js'
+import { generateUserProfile as Mutation_generateUserProfile } from './events/resolvers/Mutation/generateUserProfile.js'
 import { joinRoom as Mutation_joinRoom } from './events/resolvers/Mutation/joinRoom.js'
 import { leaveRoom as Mutation_leaveRoom } from './events/resolvers/Mutation/leaveRoom.js'
 import { locations as Mutation_locations } from './events/resolvers/Mutation/locations.js'
@@ -56,6 +57,7 @@ export const resolvers: Resolvers = {
     claimMission: Mutation_claimMission,
     completeMission: Mutation_completeMission,
     completePhotoMission: Mutation_completePhotoMission,
+    generateUserProfile: Mutation_generateUserProfile,
     joinRoom: Mutation_joinRoom,
     leaveRoom: Mutation_leaveRoom,
     locations: Mutation_locations,

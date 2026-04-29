@@ -51,6 +51,20 @@ export type CrateRarityDrop = {
   rarity: RarityType
 }
 
+export const InterestTag = {
+  Adventure: 'ADVENTURE',
+  Art: 'ART',
+  Culture: 'CULTURE',
+  Entertainment: 'ENTERTAINMENT',
+  Food: 'FOOD',
+  History: 'HISTORY',
+  Nature: 'NATURE',
+  Relaxation: 'RELAXATION',
+  Shopping: 'SHOPPING',
+  Sports: 'SPORTS',
+} as const
+
+export type InterestTag = (typeof InterestTag)[keyof typeof InterestTag]
 export type Item = {
   __typename?: 'Item'
   id: Scalars['ID']['output']
@@ -119,6 +133,7 @@ export type Mutation = {
   claimMission: UserMission
   completeMission: UserMission
   completePhotoMission: UserMission
+  generateUserProfile: User
   joinRoom: User
   leaveRoom: User
   locations?: Maybe<Array<Location>>
@@ -155,6 +170,10 @@ export type MutationCompletePhotoMissionArgs = {
   lat: Scalars['Float']['input']
   lng: Scalars['Float']['input']
   missionId: Scalars['ID']['input']
+}
+
+export type MutationGenerateUserProfileArgs = {
+  description: Scalars['String']['input']
 }
 
 export type MutationJoinRoomArgs = {
@@ -266,8 +285,10 @@ export type User = {
   points: Scalars['Int']['output']
   posx?: Maybe<Scalars['Float']['output']>
   posy?: Maybe<Scalars['Float']['output']>
-  questHistory: Array<QuestCompletion>
-  userMissions: Array<UserMission>
+  profileDescription: Scalars['String']['output']
+  profileTags: Array<InterestTag>
+  questHistory?: Maybe<Array<QuestCompletion>>
+  userMissions?: Maybe<Array<UserMission>>
   xp: Scalars['Int']['output']
 }
 
@@ -534,6 +555,15 @@ export type StartTimedMissionMutation = {
   }
 }
 
+export type GenerateUserProfileMutationVariables = Exact<{
+  description: Scalars['String']['input']
+}>
+
+export type GenerateUserProfileMutation = {
+  __typename?: 'Mutation'
+  generateUserProfile: { __typename?: 'User'; profileDescription: string; profileTags: Array<InterestTag> }
+}
+
 export type LocationsQueryVariables = Exact<{ [key: string]: never }>
 
 export type LocationsQuery = {
@@ -555,7 +585,7 @@ export type MeQuery = {
     posx?: number | null
     posy?: number | null
     points: number
-    userMissions: Array<{
+    userMissions?: Array<{
       __typename?: 'UserMission'
       id: string
       progress: number
@@ -576,15 +606,15 @@ export type MeQuery = {
         repeatable: boolean
         cooldownHours: number
       }
-    }>
-    questHistory: Array<{
+    }> | null
+    questHistory?: Array<{
       __typename?: 'QuestCompletion'
       id: string
       missionId: string
       title: string
       rewardXp: number
       completedAt: string
-    }>
+    }> | null
   } | null
 }
 
@@ -1448,6 +1478,46 @@ export const StartTimedMissionDocument = {
     },
   ],
 } as unknown as DocumentNode<StartTimedMissionMutation, StartTimedMissionMutationVariables>
+export const GenerateUserProfileDocument = {
+  kind: 'Document',
+  definitions: [
+    {
+      kind: 'OperationDefinition',
+      operation: 'mutation',
+      name: { kind: 'Name', value: 'GenerateUserProfile' },
+      variableDefinitions: [
+        {
+          kind: 'VariableDefinition',
+          variable: { kind: 'Variable', name: { kind: 'Name', value: 'description' } },
+          type: { kind: 'NonNullType', type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } } },
+        },
+      ],
+      selectionSet: {
+        kind: 'SelectionSet',
+        selections: [
+          {
+            kind: 'Field',
+            name: { kind: 'Name', value: 'generateUserProfile' },
+            arguments: [
+              {
+                kind: 'Argument',
+                name: { kind: 'Name', value: 'description' },
+                value: { kind: 'Variable', name: { kind: 'Name', value: 'description' } },
+              },
+            ],
+            selectionSet: {
+              kind: 'SelectionSet',
+              selections: [
+                { kind: 'Field', name: { kind: 'Name', value: 'profileDescription' } },
+                { kind: 'Field', name: { kind: 'Name', value: 'profileTags' } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<GenerateUserProfileMutation, GenerateUserProfileMutationVariables>
 export const LocationsDocument = {
   kind: 'Document',
   definitions: [

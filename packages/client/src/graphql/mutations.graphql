@@ -170,3 +170,10 @@ mutation StartTimedMission($missionId: ID!, $lat: Float!, $lng: Float!) {
     }
   }
 }
+
+mutation GenerateUserProfile($description: String!) {
+  generateUserProfile(description: $description) {
+    profileDescription
+    profileTags
+  }
+}

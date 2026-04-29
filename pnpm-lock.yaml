@@ -120,6 +120,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
+      openai:
+        specifier: ^6.35.0
+        version: 6.35.0(ws@8.18.2)
       pkgroll:
         specifier: ^2.27.0
         version: 2.27.0(typescript@5.8.3)(vite@6.3.4(@types/node@22.15.3)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.19.4)(yaml@2.8.3))
@@ -2805,6 +2808,18 @@ packages:
   open@10.1.2:
     resolution: {integrity: sha512-cxN6aIDPz6rm8hbebcP7vrQNhvRcveZoJU72Y7vskh4oIm+BZwBECnx5nTmrlres1Qapvx27Qo1Auukpf8PKXw==}
     engines: {node: '>=18'}
+
+  openai@6.35.0:
+    resolution: {integrity: sha512-L/skwIGnt5xQZHb0UfTu9uAUKbis3ehKypOuJKi20QvG7UStV6C8IC3myGYHcdiF4kms/bAvOJ9UqqNWqi8x/Q==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
 
   optimism@0.18.1:
     resolution: {integrity: sha512-mLXNwWPa9dgFyDqkNi54sjDyNJ9/fTI6WGBLgnXku1vdKY/jovHfZT5r+aiVeFFLOz+foPNOm5YJ4mqgld2GBQ==}
@@ -6288,6 +6303,10 @@ snapshots:
       define-lazy-prop: 3.0.0
       is-inside-container: 1.0.0
       is-wsl: 3.1.0
+
+  openai@6.35.0(ws@8.18.2):
+    optionalDependencies:
+      ws: 8.18.2
 
   optimism@0.18.1:
     dependencies:

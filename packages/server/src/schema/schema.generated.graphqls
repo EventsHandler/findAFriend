@@ -29,6 +29,19 @@ type CrateRarityDrop {
   rarity: RarityType!
 }
 
+enum InterestTag {
+  ADVENTURE
+  ART
+  CULTURE
+  ENTERTAINMENT
+  FOOD
+  HISTORY
+  NATURE
+  RELAXATION
+  SHOPPING
+  SPORTS
+}
+
 type Item {
   id: ID!
   name: String!
@@ -90,6 +103,7 @@ type Mutation {
   claimMission(missionId: ID!): UserMission!
   completeMission(lat: Float!, lng: Float!, missionId: ID!): UserMission!
   completePhotoMission(lat: Float!, lng: Float!, missionId: ID!): UserMission!
+  generateUserProfile(description: String!): User!
   joinRoom(locationId: ID!): User!
   leaveRoom: User!
   locations: [Location!]
@@ -141,8 +155,10 @@ type User {
   points: Int!
   posx: Float
   posy: Float
-  questHistory(limit: Int = 40): [QuestCompletion!]!
-  userMissions: [UserMission!]!
+  profileDescription: String!
+  profileTags: [InterestTag!]!
+  questHistory(limit: Int = 40): [QuestCompletion!]
+  userMissions: [UserMission!]
   xp: Int!
 }
 
