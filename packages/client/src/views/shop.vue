@@ -80,7 +80,7 @@ async function addPointsHandler() {
   try {
     await addPoints({
       userId: user?.value?.id,
-      amount: 100,
+      amount: 1000,
     })
     await refetch()
   } catch (err) {
