@@ -127,8 +127,8 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
             </svg>
           </div>
           <div>
-            <h2 class="text-xl font-bold text-white tracking-wide">{{ user.name }}</h2>
-            <div class="text-xs text-[var(--c-accent)]/70 tracking-widest uppercase">Operator ID: {{ user.id.slice(-6) }}</div>
+            <h2 class="text-xl font-bold text-white tracking-wide cursor-default">{{ user.name }}</h2>
+            <div class="text-xs text-[var(--c-accent)]/70 tracking-widest uppercase cursor-default">Operator ID: {{ user.id.slice(-6) }}</div>
           </div>
         </div>
       </section>
@@ -143,7 +143,7 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
 
       <!-- XP BAR -->
       <div v-if="user" class="px-2">
-        <div class="flex justify-between text-[10px] text-white/55 mb-2 uppercase tracking-widest">
+        <div class="flex justify-between text-[10px] text-white/55 mb-2 uppercase tracking-widest cursor-default">
           <span>XP (level {{ levelInfo.level }})</span>
           <span class="text-[var(--c-accent)]">{{ levelInfo.xpInLevel }} / {{ levelInfo.span }} · {{ levelInfo.xp }} total</span>
         </div>
@@ -167,8 +167,8 @@ const questHistory = computed(() => user.value?.questHistory ?? [])
 
       <!-- MISSIONS -->
       <section v-if="user">
-        <h2 class="text-[10px] text-white/55 mb-3 tracking-[0.2em] uppercase px-2">Misiuni în desfășurare</h2>
-        <div v-if="ongoingMissions.length === 0" class="text-xs text-white/40 px-2">
+        <h2 class="text-[10px] text-white/55 mb-3 tracking-[0.2em] uppercase px-2 cursor-default">Misiuni în desfășurare</h2>
+        <div v-if="ongoingMissions.length === 0" class="text-xs text-white/40 px-2 cursor-default">
           Nu ai misiuni active. Pornește una de pe hartă.
         </div>
         <div class="space-y-3">

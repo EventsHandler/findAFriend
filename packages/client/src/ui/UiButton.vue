@@ -48,7 +48,7 @@ const variantCls = computed(() => {
     case 'danger':
       return 'bg-red-400/10 text-red-200 border border-red-400/25 hover:bg-red-400/15 cursor-pointer'
     default:
-      return 'bg-[var(--c-accent)] text-black shadow-[var(--shadow-accent)] hover:opacity-90'
+      return 'bg-[var(--c-accent)] text-black shadow-[var(--shadow-accent)] hover:opacity-90 cursor-pointer'
   }
 })
 
