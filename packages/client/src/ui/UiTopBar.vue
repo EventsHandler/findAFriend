@@ -19,15 +19,15 @@ withDefaults(
   >
     <div class="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between gap-4">
       <div class="min-w-0">
-        <div v-if="subtitle" class="text-[10px] text-white/55 tracking-[0.25em] uppercase">
+        <div v-if="subtitle" class="text-[10px] text-white/55 tracking-[0.25em] uppercase cursor-default">
           {{ subtitle }}
         </div>
-        <div v-if="title" class="text-sm font-semibold text-[var(--c-accent)] tracking-widest uppercase truncate">
+        <div v-if="title" class="text-sm font-semibold text-[var(--c-accent)] tracking-widest uppercase truncate cursor-default">
           {{ title }}
         </div>
         <slot name="left" />
       </div>
-      <div class="text-[10px] text-white/45 tracking-widest uppercase">
+      <div class="text-[10px] text-white/45 tracking-widest uppercase cursor-default">
         <slot name="right">
           {{ rightText }}
         </slot>

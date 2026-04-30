@@ -29,7 +29,7 @@ import ShopUnactive from '@/assets/navigationIcons/ShopUnactive.svg'
 
 const router = useRouter()
 
-const { result, refetch } = useQuery(CurrentUserDocument)
+const { result, refetch, loading : userLoading } = useQuery(CurrentUserDocument)
 const user = computed(() => result.value?.me)
 
 const crateItems = computed(
@@ -42,8 +42,10 @@ const crateItems = computed(
     })) ?? [],
 )
 
-const { result: badges } = useQuery(GetBadgesDocument)
+const { result: badges, loading : badgesLoading } = useQuery(GetBadgesDocument)
 const allBadges = computed(() => badges.value?.items)
+
+const isLoading = computed(() => userLoading.value && badgesLoading.value) 
 
 const userBadges = computed(() =>
   user.value?.inventories?.map(badge => ({
@@ -135,22 +137,25 @@ onMounted(() => {
     </UiTopBar>
 
     <UiContainer class="py-4 space-y-6">
-      <div class="text-[11px] text-white/45">
+      <div class="text-[11px] text-white/45 cursor-default">
         Tip: apasă pe un crate ca să îl deschizi. Badge-urile blocate se deblochează din crate-uri.
       </div>
 
     <!-- CRATES SECTION -->
     <section>
       <div
-        class="w-full sm:w-fit px-4 py-3 rounded-t-xl border border-[var(--c-border-strong)] bg-[var(--c-accent)] text-black text-sm sm:text-base font-semibold"
+        class="w-full sm:w-fit px-4 py-3 rounded-t-xl border border-[var(--c-border-strong)] bg-[var(--c-accent)] text-black text-sm sm:text-base font-semibold cursor-default"
       >
         Crate-uri
       </div>
       <div
         class="p-4 sm:p-6 bg-[var(--c-surface)] border border-t-0 border-[var(--c-border-strong)] rounded-b-xl shadow-[var(--shadow-soft)]"
       >
+        <div v-if="isLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base col-span-full">
+          Loading...
+        </div>
         <UiEmptyState
-          v-if="crateItems.length === 0"
+          v-if="crateItems.length === 0 && !isLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base"
           title="Niciun crate"
           description="Cumpără un crate din Shop și revino aici ca să îl deschizi."
           action-label="Deschide Shop"
@@ -176,8 +181,8 @@ onMounted(() => {
               />
             </div>
             <div class="space-y-2 mt-3">
-              <p class="text-xs sm:text-sm text-center truncate" :class="rarityColor(item.rarity)">{{ item.name }}</p>
-              <div class="flex justify-between text-[12px] sm:text-[16px]">
+              <p class="text-xs sm:text-sm text-center truncate cursor-default" :class="rarityColor(item.rarity)">{{ item.name }}</p>
+              <div class="flex justify-between text-[12px] sm:text-[16px] cursor-default">
                 <span :class="rarityColor(item.rarity)"> {{ item.rarity }} </span>
                 <span :class="rarityColor(item.rarity)"> x{{ item.quantity }} </span>
               </div>
@@ -190,12 +195,15 @@ onMounted(() => {
     <!-- BADGES SECTION -->
     <section>
       <div
-        class="w-full sm:w-fit px-4 py-3 rounded-t-xl border border-[var(--c-border-strong)] bg-[var(--c-accent)] text-black text-sm sm:text-base font-semibold"
+        class="w-full sm:w-fit px-4 py-3 rounded-t-xl border border-[var(--c-border-strong)] bg-[var(--c-accent)] text-black text-sm sm:text-base font-semibold cursor-default"
       >
         Badge-uri
       </div>
       <div class="p-4 sm:p-6 bg-[var(--c-surface)] border border-t-0 border-[var(--c-border-strong)] rounded-b-xl shadow-[var(--shadow-soft)]">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+        <div v-if="isLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base col-span-full">
+          Loading...
+        </div>
         <div
           v-for="badge in badgeItems"
           :key="badge.id"
@@ -212,22 +220,22 @@ onMounted(() => {
             />
             <div
               v-if="!badge.unlocked"
-              class="absolute inset-0 flex items-center justify-center text-xs tracking-widest uppercase text-white/60"
+              class="absolute inset-0 flex items-center justify-center text-xs tracking-widest uppercase text-white/60 cursor-default"
             >
               locked
             </div>
           </div>
-          <div v-if="!badge.unlocked" class="mt-2 text-[10px] text-white/35 tracking-widest uppercase text-center">
+          <div v-if="!badge.unlocked" class="mt-2 text-[10px] text-white/35 tracking-widest uppercase text-center cursor-default">
             Deblochează din crate-uri
           </div>
           <div class="space-y-2 mt-3">
             <p
-              class="text-xs sm:text-sm text-center truncate"
+              class="text-xs sm:text-sm text-center truncate cursor-default"
               :class="badge.unlocked ? rarityColor(badge.rarity) : 'text-gray-500'"
             >
               {{ badge.name }}
             </p>
-            <div class="flex justify-between text-[12px] sm:text-[16px]">
+            <div class="flex justify-between text-[12px] sm:text-[16px] cursor-default">
               <span :class="badge.unlocked ? rarityColor(badge.rarity) : 'text-gray-500'">
                 {{ badge.unlocked ? badge.rarity : 'LOCKED' }}
               </span>

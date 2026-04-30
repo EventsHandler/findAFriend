@@ -81,7 +81,7 @@ const getToneForTag = (tag: InterestTag): 'neutral' | 'success' | 'warning' | 'i
 <template>
   <section class="space-y-3">
     <div class="px-2">
-      <h2 class="text-[10px] text-white/55 mb-3 tracking-[0.2em] uppercase">Profilul Tău</h2>
+      <h2 class="text-[10px] text-white/55 mb-3 tracking-[0.2em] uppercase cursor-default">Profilul Tău</h2>
     </div>
     <UiCard variant="surface">
       <div class="space-y-4">

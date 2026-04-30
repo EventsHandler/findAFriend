@@ -729,8 +729,8 @@ onUnmounted(() => {
       >
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
-            <div class="text-[10px] text-gray-500 uppercase tracking-[0.25em]">Locație</div>
-            <div class="text-lime-300 font-semibold text-sm mt-1 truncate">
+            <div class="text-[10px] text-gray-500 uppercase tracking-[0.25em] cursor-default">Locație</div>
+            <div class="text-lime-300 font-semibold text-sm mt-1 truncate cursor-default">
               {{ activePOI.name }}
             </div>
           </div>
@@ -739,11 +739,11 @@ onUnmounted(() => {
 
         <div class="mt-4 flex items-center justify-between gap-3 text-xs">
           <div class="text-slate-400">
-            <span v-if="me?.locationId === activePOI.id" class="text-lime-300/90">Ești în cameră</span>
-            <span v-else-if="me?.locationId" class="text-amber-200/90">Ești în altă cameră</span>
-            <span v-else class="text-slate-400">Nu ești conectat</span>
+            <span v-if="me?.locationId === activePOI.id" class="text-lime-300/90 cursor-default">Ești în cameră</span>
+            <span v-else-if="me?.locationId" class="text-amber-200/90 cursor-default">Ești în altă cameră</span>
+            <span v-else class="text-slate-400 cursor-default">Nu ești conectat</span>
           </div>
-          <div class="text-[10px] text-gray-500 tracking-widest uppercase tabular-nums">
+          <div class="text-[10px] text-gray-500 tracking-widest uppercase tabular-nums cursor-default">
             {{ selectedLocationUsers.length }} aici
           </div>
         </div>
@@ -773,7 +773,7 @@ onUnmounted(() => {
 
         <div class="mt-5">
           <div class="flex items-center justify-between">
-            <div class="text-[10px] text-white/55 uppercase tracking-[0.25em]">
+            <div class="text-[10px] text-white/55 uppercase tracking-[0.25em] cursor-default">
               Participanți <span class="text-white/35">({{ selectedLocationUsers.length }})</span>
             </div>
             <UiButton
@@ -794,8 +794,8 @@ onUnmounted(() => {
                 class="px-3 py-2 flex items-center justify-between"
               >
                 <div class="min-w-0 flex items-center gap-2">
-                  <span class="text-xs text-white/80 truncate">{{ user.name }}</span>
-                  <span v-if="me?.id === user.id" class="text-[10px] text-[var(--c-accent)] tracking-widest uppercase"
+                  <span class="text-xs text-white/80 truncate cursor-default">{{ user.name }}</span>
+                  <span v-if="me?.id === user.id" class="text-[10px] text-[var(--c-accent)] tracking-widest uppercase cursor-default"
                     >tu</span
                   >
                 </div>
@@ -806,7 +806,7 @@ onUnmounted(() => {
                 />
               </div>
 
-              <div v-if="selectedLocationUsers.length === 0" class="px-3 py-3 text-xs text-white/35">
+              <div v-if="selectedLocationUsers.length === 0" class="px-3 py-3 text-xs text-white/35 cursor-default">
                 Niciun participant încă.
               </div>
             </div>
@@ -815,8 +815,8 @@ onUnmounted(() => {
 
         <div class="mt-5">
           <div class="flex items-center justify-between gap-3">
-            <div class="text-[10px] text-white/55 uppercase tracking-[0.25em]">
-              Misiuni <span class="text-white/35">({{ missionsForLocation.length }})</span>
+            <div class="text-[10px] text-white/55 uppercase tracking-[0.25em] cursor-default">
+              Misiuni <span class="text-white/35 cursor-default">({{ missionsForLocation.length }})</span>
             </div>
           </div>
 
@@ -846,8 +846,8 @@ onUnmounted(() => {
               >
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
-                    <div class="text-sm font-semibold text-white truncate">{{ m.title }}</div>
-                    <div v-if="m.description" class="mt-1 text-[12px] leading-snug text-white/45">
+                    <div class="text-sm font-semibold text-white truncate cursor-default">{{ m.title }}</div>
+                    <div v-if="m.description" class="mt-1 text-[12px] leading-snug text-white/45 cursor-default">
                       {{ m.description }}
                     </div>
                   </div>
@@ -875,7 +875,7 @@ onUnmounted(() => {
                 </div>
 
                 <div class="mt-3 flex items-center justify-between gap-3">
-                  <div class="text-[11px] text-[var(--c-accent)] tabular-nums">+{{ m.rewardXp }} XP</div>
+                  <div class="text-[11px] text-[var(--c-accent)] tabular-nums cursor-default">+{{ m.rewardXp }} XP</div>
 
                   <div class="flex items-center gap-2">
                     <div

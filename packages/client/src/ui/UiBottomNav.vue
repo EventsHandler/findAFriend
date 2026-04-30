@@ -101,7 +101,12 @@ function goToChat() {
           class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-colors"
           :class="isChat ? 'bg-white/5 border border-[var(--c-border-strong)]' : 'border border-transparent'"
         >
-          <img :src="isChat ? ChatActive : ChatUnactive" class="w-6 h-6 sm:w-7 sm:h-7" alt="" aria-hidden="true" />
+          <img 
+            :src="isChat ? ChatActive : ChatUnactive" 
+            :class="['w-6 h-6 sm:w-7 sm:h-7', { 'cursor-pointer': isChat }]" 
+            alt="" 
+            aria-hidden="true" 
+          />
         </div>
         <span
           class="hidden sm:block text-[10px] mt-1 tracking-widest"

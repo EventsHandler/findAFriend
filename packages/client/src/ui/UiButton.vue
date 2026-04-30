@@ -44,11 +44,11 @@ const sizeCls = computed(() => {
 const variantCls = computed(() => {
   switch (props.variant) {
     case 'ghost':
-      return 'bg-white/0 text-white/90 border border-white/10 hover:bg-white/5'
+      return 'bg-white/0 text-white/90 border border-white/10 hover:bg-white/5 focus:bg-white/5 cursor-pointer'
     case 'danger':
-      return 'bg-red-400/10 text-red-200 border border-red-400/25 hover:bg-red-400/15'
+      return 'bg-red-400/10 text-red-200 border border-red-400/25 hover:bg-red-400/15 cursor-pointer'
     default:
-      return 'bg-[var(--c-accent)] text-black shadow-[var(--shadow-accent)] hover:opacity-90'
+      return 'bg-[var(--c-accent)] text-black shadow-[var(--shadow-accent)] hover:opacity-90 cursor-pointer'
   }
 })
 

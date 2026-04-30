@@ -288,11 +288,11 @@ onBeforeUnmount(() => {
       <div class="flex items-center gap-3">
         <UiButton variant="ghost" size="sm" @click="router.push('/MapPage')">Înapoi</UiButton>
         <div>
-          <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase">Chat locație</div>
+          <div class="text-[10px] text-gray-400 tracking-[0.25em] uppercase cursor-default">Chat locație</div>
         </div>
       </div>
 
-      <div class="text-[10px] text-white/45 tracking-widest uppercase">
+      <div class="text-[10px] text-white/45 tracking-widest uppercase cursor-default">
         <span v-if="meLoading">Se conectează…</span>
         <span v-else-if="me">ca {{ me.name }}</span>
         <span v-else>neautentificat</span>
@@ -305,7 +305,7 @@ onBeforeUnmount(() => {
         :style="{ paddingBottom: 'calc(var(--chat-h) + var(--nav-h) + var(--safe-bottom))' }"
       >
       <div class="mb-3 flex items-center justify-between gap-3">
-        <div class="text-[10px] text-white/35 tracking-widest uppercase">
+        <div class="text-[10px] text-white/35 tracking-widest uppercase cursor-default">
           <span v-if="connectionStatus === 'connecting'">se conectează…</span>
           <span v-else-if="connectionStatus === 'connected'">conectat</span>
           <span v-else>deconectat</span>
@@ -331,13 +331,13 @@ onBeforeUnmount(() => {
       />
 
       <UiCard v-if="errorText" variant="surface2" class="mb-4" :padded="true">
-        <div class="text-red-200 text-xs tracking-widest uppercase">Eroare</div>
-        <div class="mt-1 text-[11px] text-white/65">{{ errorText }}</div>
+        <div class="text-red-200 text-xs tracking-widest uppercase cursor-default">Eroare</div>
+        <div class="mt-1 text-[11px] text-white/65 cursor-default">{{ errorText }}</div>
       </UiCard>
 
       <UiCard v-if="sendError" variant="surface2" class="mb-4" :padded="true">
-        <div class="text-red-200 text-xs tracking-widest uppercase">Mesaj netrimis</div>
-        <div class="mt-1 text-[11px] text-white/65">{{ sendError }}</div>
+        <div class="text-red-200 text-xs tracking-widest uppercase cursor-default">Mesaj netrimis</div>
+        <div class="mt-1 text-[11px] text-white/65 cursor-default">{{ sendError }}</div>
         <div class="mt-3 flex justify-end">
           <UiButton variant="ghost" size="sm" :disabled="sending || !draft.trim() || !me" @click="sendMessage">
             Reîncearcă
@@ -366,7 +366,7 @@ onBeforeUnmount(() => {
         Începutul conversației
       </div>
 
-      <div v-if="messages.length === 0" class="text-center py-10 text-[var(--c-accent)]/70 text-xs tracking-widest">
+      <div v-if="messages.length === 0" class="text-center py-10 text-[var(--c-accent)]/70 text-xs tracking-widest cursor-default">
         NICIUN MESAJ ÎNCĂ
       </div>
 

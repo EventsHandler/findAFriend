@@ -26,7 +26,7 @@ function clsForTone(t: Tone) {
 
 <template>
   <span
-    class="inline-flex items-center rounded px-2 py-0.5 text-[9px] uppercase tracking-wider border"
+    class="inline-flex items-center rounded px-2 py-0.5 text-[9px] uppercase tracking-wider border cursor-default"
     :class="clsForTone(tone)"
   >
     <slot />
