@@ -32,7 +32,7 @@ export const claimMission: NonNullable<MutationResolvers['claimMission']> = asyn
 
     const dist = haversineMeters({ lat: user.posx, lng: user.posy }, { lat: loc.posx, lng: loc.posy })
     if (dist > CLAIM_RADIUS_METERS) {
-      missionError('OUTSIDE_AREA', 'You must be inside the mission area to claim it', {
+      missionError('OUTSIDE_AREA', 'Trebuie să fii în area misiunii pentru a o completa!', {
         distanceMeters: Math.round(dist),
         requiredMeters: CLAIM_RADIUS_METERS,
       })
