@@ -29,7 +29,7 @@ import ShopUnactive from '@/assets/navigationIcons/ShopUnactive.svg'
 
 const router = useRouter()
 
-const { result, refetch, loading : userLoading } = useQuery(CurrentUserDocument)
+const { result, refetch, loading : isUserLoading } = useQuery(CurrentUserDocument)
 const user = computed(() => result.value?.me)
 
 const crateItems = computed(
@@ -42,10 +42,10 @@ const crateItems = computed(
     })) ?? [],
 )
 
-const { result: badges, loading : badgesLoading } = useQuery(GetBadgesDocument)
+const { result: badges, loading : isBadgesLoading } = useQuery(GetBadgesDocument)
 const allBadges = computed(() => badges.value?.items)
 
-const isLoading = computed(() => userLoading.value && badgesLoading.value) 
+// const isLoading = computed(() => userLoading.value && badgesLoading.value) 
 
 const userBadges = computed(() =>
   user.value?.inventories?.map(badge => ({
@@ -151,11 +151,11 @@ onMounted(() => {
       <div
         class="p-4 sm:p-6 bg-[var(--c-surface)] border border-t-0 border-[var(--c-border-strong)] rounded-b-xl shadow-[var(--shadow-soft)]"
       >
-        <div v-if="isLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base col-span-full">
+        <div v-if="isUserLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base col-span-full">
           Loading...
         </div>
         <UiEmptyState
-          v-if="crateItems.length === 0 && !isLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base"
+          v-if="crateItems.length === 0 && !isUserLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base"
           title="Niciun crate"
           description="Cumpără un crate din Shop și revino aici ca să îl deschizi."
           action-label="Deschide Shop"
@@ -201,7 +201,7 @@ onMounted(() => {
       </div>
       <div class="p-4 sm:p-6 bg-[var(--c-surface)] border border-t-0 border-[var(--c-border-strong)] rounded-b-xl shadow-[var(--shadow-soft)]">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-        <div v-if="isLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base col-span-full">
+        <div v-if="isBadgesLoading" class="text-gray-400 text-center py-8 text-sm sm:text-base col-span-full">
           Loading...
         </div>
         <div

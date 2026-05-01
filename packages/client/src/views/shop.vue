@@ -19,9 +19,9 @@ const user = computed(() => result.value?.me)
 const { result: cratesResult } = useQuery(CratesDocument)
 const crates = computed(() => cratesResult.value?.crates ?? [])
 
-const { mutate: addPoints, loading: addPointsLoading } = useMutation(AddPointsDocument)
-const { mutate: buyCrate, loading: buyCrateLoading } = useMutation(BuyCrateDocument)
-const isLoading = computed(() => addPointsLoading.value || buyCrateLoading.value)
+const { mutate: addPoints, loading: isAddPointsLoading } = useMutation(AddPointsDocument)
+const { mutate: buyCrate, loading: isBuyCrateLoading } = useMutation(BuyCrateDocument)
+// const isLoading = computed(() => addPointsLoading.value || buyCrateLoading.value)
 
 
 const shopCrates = computed(() => {
@@ -171,13 +171,13 @@ async function addPointsHandler() {
 
           <!-- RIGHT BUTTON -->
           <UiButton variant="ghost" size="sm" class="relative z-10" @click="buyCrateHandler(crate)">
-            {{ isLoading ? 'Loading...' : 'Cumpără' }}
+            {{ isBuyCrateLoading ? 'Loading...' : 'Cumpără' }}
           </UiButton>
         </UiCard>
       </section>
 
       <UiButton variant="ghost" block @click="addPointsHandler" class="hover:bg-lime-500">
-        {{ isLoading ? 'Loading...' : '+1000 PUNCTE' }}
+        {{ isAddPointsLoading ? 'Loading...' : '+1000 PUNCTE' }}
       </UiButton>
     </UiContainer>
   </div>
