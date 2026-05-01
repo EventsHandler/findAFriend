@@ -95,7 +95,7 @@ export const startTimedMission: NonNullable<MutationResolvers['startTimedMission
 
     const dist = haversineMeters({ lat, lng }, { lat: loc.posx, lng: loc.posy })
     if (dist > CLAIM_RADIUS_METERS) {
-      missionError('OUTSIDE_AREA', 'You must be inside the mission area', {
+      missionError('OUTSIDE_AREA', 'Trebuie sa fii in zona misiunii!', {
         distanceMeters: Math.round(dist),
         requiredMeters: CLAIM_RADIUS_METERS,
       })
