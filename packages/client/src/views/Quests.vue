@@ -143,13 +143,7 @@ const stats = computed(() => {
 
     <UiContainer as="main" class="py-4 space-y-6">
       <div class="flex items-center justify-between gap-3">
-        <div class="text-[10px] text-white/55 tracking-[0.25em] uppercase cursor-default">
-          Ultima actualizare: <span class="tabular-nums">{{ missionsLastRefreshedLabel }}</span>
-        </div>
         <div class="flex items-center gap-2">
-          <UiButton variant="ghost" size="sm" :disabled="missionsLoading" @click="refreshMissions">
-            Reîmprospătează
-          </UiButton>
           <router-link to="/MapPage">
             <UiButton variant="ghost" size="sm">Hartă</UiButton>
           </router-link>
