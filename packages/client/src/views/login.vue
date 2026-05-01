@@ -67,7 +67,7 @@ const handleSubmit = async () => {
         <circle cx="12" cy="12" r="6" stroke="currentColor" opacity="0.6"/>
         <path d="M12 12 L20 6" stroke="currentColor"/>
       </svg>
-      <span class="text-sm tracking-widest text-lime-300">SISTEM {{ isLogin ? 'AUTENTIFICARE' : 'ÎNREGISTRARE' }}</span>
+      <span class="text-sm tracking-widest text-lime-300">FIND A FRIEND</span>
     </div>
 
     <UiCard class="w-full max-w-md relative overflow-hidden" :padded="false">
