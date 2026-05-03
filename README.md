@@ -3,7 +3,7 @@ Technologies are supposed to help us meet new people, this webapp is perfectly d
 Choose interests, join groups, open locations and meet real people.
 Get bonuses for interacting with the outer world and form new groups to get more people involved.
 
-## Tech Stack ##
+## Tech Stack
 - **Frontend:** Vue, TypeScript, Vite
 - **Backend:** Node.js, TypeScript, GraphQL
 - **Database:** PostgreSQL (via Docker), Prisma ORM
@@ -20,6 +20,7 @@ Get bonuses for interacting with the outer world and form new groups to get more
 ### Setup and Running the Application
 
 1.  **Start the database:**
+   
     Windows:
     ensure to have installed Docker Desktop
     Run in powershell or cmd line
@@ -41,42 +42,44 @@ Get bonuses for interacting with the outer world and form new groups to get more
     ```
 
 3. **Initiate DataBase**
-    ```
+    ```bash
     cd packages/server
     pnpm prisma migrate dev
     ```
     then
-    ```
+    ```bash
     pnpm prisma generate
     ```
 
    >**Note:** Everytime graphql is changed re-run "pnpm codegen"
-    ```
+    ```bash
     pnpm codegen
     ```
 
 4. **Load crates/badges, missions, locations**
-    while in packages/server run
-    ```
+   
+    While in packages/server run
+    ```bash
     npx ts-node src/seed.ts
     npx ts-node src/seedLocations.ts
     npx ts-node src/seedMissions.ts
     ```
 
-5.  **.env file**
-    Before changin the directory
-    Rename `.env_example` file into `.env` and replace the text between quotes with your API key 
-    generated from https://console.groq.com/docs/api-reference#chat.
-    DataBase credentials are already filled in.
+5.  **Set up .env file**
 
-    Afeter renaming it move to client directory in packets
+    **Server** -  before changing the directory rename `.env_example` file into `.env` and replace the text between quotes with
+    your API key generated from https://console.groq.com/docs/api-reference#chat.
+    >DataBase credentials are already filled in.
+
+    After renaming it move to client directory in packages
     ```
     cd ../client
     ```
-    As previous, rename `.env_example` file into `.env` and fill the API_KEYS as needed 
+     **Client** - As previous, rename `.env_example` file into `.env` and fill the API_KEYS as needed 
     from https://pusher.com/
 
-6.  **Start the development servers:**
+7.  **Start the development servers:**
+    
     return to root directory
     ```
     cd ../..
@@ -87,10 +90,10 @@ Get bonuses for interacting with the outer world and form new groups to get more
     pnpm dev
     ```
 
-    After starting, run "u" in terminal would be printed the local URL port where the WebApp will run
+    After starting, type `u` and press Enter in the terminal to print the local URL where the app is running.
     ```
     u
     ```
 
-The application should now be running.
+The application should now be running :)
 
