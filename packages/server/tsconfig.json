@@ -15,7 +15,9 @@
     "noEmit": false,
     "outDir": "dist",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": false,
+    // "esModuleInterop": false,
+    //The deprecation warning occurs because TypeScript 6.0 makes esModuleInterop default to true and deprecates setting it to false. 
+    //This option will be hard-removed in TypeScript 7.0.
     "noUncheckedSideEffectImports": true
   },
   "include": ["src", "env.d.ts"]
