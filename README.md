@@ -1,4 +1,14 @@
 # Events Handler
+Technologies are supposed to help us meet new people, this webapp is perfectly designed for it. 
+Choose interests, join groups, open locations and meet real people.
+Get bonuses for interacting with the outer world and form new groups to get more people involved.
+
+## Tech Stack
+- **Frontend:** Vue, TypeScript, Vite
+- **Backend:** Node.js, TypeScript, GraphQL
+- **Database:** PostgreSQL (via Docker), Prisma ORM
+- **Package Manager:** pnpm
+- **AI:** Groq API
 
 ## Getting Started
 
@@ -10,10 +20,18 @@
 ### Setup and Running the Application
 
 1.  **Start the database:**
-    Open a terminal and run the following command from the project root directory:
-
-    ```bash
+   
+    Windows:
+    ensure to have installed Docker Desktop
+    Run in powershell or cmd line
+    ```
     docker compose -f docker-compose.dev.yaml up -d
+    ```
+
+    Linux:
+    Open a terminal and run the following command from the project root directory:
+    ```bash
+    sudo docker compose -f docker-compose.dev.yaml up -d
     ```
 
 2.  **Install dependencies:**
@@ -23,11 +41,59 @@
     pnpm install
     ```
 
-3.  **Start the development servers:**
+3. **Initiate DataBase**
+    ```bash
+    cd packages/server
+    pnpm prisma migrate dev
+    ```
+    then
+    ```bash
+    pnpm prisma generate
+    ```
+
+   >**Note:** Everytime graphql is changed re-run "pnpm codegen"
+    ```bash
+    pnpm codegen
+    ```
+
+4. **Load crates/badges, missions, locations**
+   
+    While in packages/server run
+    ```bash
+    npx ts-node src/seed.ts
+    npx ts-node src/seedLocations.ts
+    npx ts-node src/seedMissions.ts
+    ```
+
+5.  **Set up .env file**
+
+    **Server** -  before changing the directory rename `.env_example` file into `.env` and replace the text between quotes with
+    your API key generated from https://console.groq.com/docs/api-reference#chat.
+    >DataBase credentials are already filled in.
+
+    After renaming it move to client directory in packages
+    ```
+    cd ../client
+    ```
+     **Client** - As previous, rename `.env_example` file into `.env` and fill the API_KEYS as needed 
+    from https://pusher.com/
+
+7.  **Start the development servers:**
+    
+    return to root directory
+    ```
+    cd ../..
+    ```
+
     This command will start the backend server, the frontend client, and the GraphQL code generator in watch mode.
     ```bash
     pnpm dev
     ```
 
-The application should now be running.
-gemini --resume 35f7ecba-133c-4b67-b2a6-d89e040af322 
+    After starting, type `u` and press Enter in the terminal to print the local URL where the app is running.
+    ```
+    u
+    ```
+
+The application should now be running :)
+
